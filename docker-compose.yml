@@ -1,0 +1,38 @@
+services:
+  frontend-dev:
+    image: node:22-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-kampala-nonstop-frontend}-dev
+    working_dir: /app
+    entrypoint: ["/bin/sh", "/app/docker/entrypoint.dev.sh"]
+    env_file:
+      - .env.docker
+    ports:
+      - "${FRONTEND_DEV_PORT:-4200}:4200"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    networks:
+      - frontend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ${COMPOSE_PROJECT_NAME:-kampala-nonstop-frontend}
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    networks:
+      - frontend
+    profiles:
+      - prod
+
+volumes:
+  node_modules:
+
+networks:
+  frontend:
+    driver: bridge

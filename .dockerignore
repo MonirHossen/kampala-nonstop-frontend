@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env.docker
+.env.docker.example
+node_modules
+dist
+.angular
+.vscode
+README.md
+docker-compose*.yml
+Makefile
+.cursor

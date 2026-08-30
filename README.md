@@ -14,7 +14,131 @@ Same design system, same Supabase backend, same public site and admin panel.
 | Forms     | Typed reactive forms (`FormBuilder.nonNullable`)                       |
 | Data      | `@supabase/supabase-js` called from injectable services               |
 
-## Getting started
+## Docker setup (recommended)
+
+Use Docker when setting up the project for the first time. All Docker config lives inside this repository.
+
+### Prerequisites
+
+- [Docker Engine](https://docs.docker.com/engine/install/) 24+
+- [Docker Compose](https://docs.docker.com/compose/) v2
+- `make` (optional but recommended)
+
+### First-time setup
+
+```bash
+cd kampala-nonstop-frontend
+
+# 1. Create Docker env file
+make init
+
+# 2. Start development server (hot reload)
+make up
+```
+
+The dev container installs npm dependencies on first run, then starts `ng serve` with live reload.
+
+Open **http://localhost:4200** (or the port set in `.env.docker`).
+
+### Services and URLs
+
+| Mode        | URL                         | Command        |
+| ----------- | --------------------------- | -------------- |
+| Development | http://localhost:4200       | `make up`      |
+| Production  | http://localhost:8080       | `make prod-up` |
+
+### Environment file
+
+| File                  | Purpose                          |
+| --------------------- | -------------------------------- |
+| `.env.docker`         | Docker ports and project name    |
+| `.env.docker.example` | Template for new setups          |
+
+Copy the template:
+
+```bash
+cp .env.docker.example .env.docker
+```
+
+Default ports in `.env.docker`:
+
+```dotenv
+FRONTEND_DEV_PORT=4200   # ng serve (development)
+FRONTEND_PORT=8080       # nginx (production build)
+```
+
+Change these if a port is already in use on your machine, then restart:
+
+```bash
+make down && make up
+```
+
+Supabase credentials are **not** in `.env.docker`. They live in:
+
+- `src/environments/environment.ts` (development)
+- `src/environments/environment.production.ts` (production build)
+
+Update both when the project rotates keys.
+
+### Make commands
+
+Run `make help` to list all targets.
+
+| Command | Description |
+| ------- | ----------- |
+| `make init` | Create `.env.docker` from template |
+| `make up` | Start dev server with hot reload |
+| `make down` | Stop containers |
+| `make logs` | Tail dev server logs |
+| `make ps` | Show container status |
+| `make shell` | Shell into the dev container |
+| `make npm cmd="run build"` | Run npm inside the container |
+| `make clean` | Stop containers and remove volumes |
+| `make prod-build` | Build production nginx image |
+| `make prod-up` | Serve production build on nginx |
+| `make prod-down` | Stop production container |
+
+### Plain Docker Compose (without Make)
+
+Development:
+
+```bash
+docker compose --env-file .env.docker -f docker-compose.yml up -d frontend-dev
+docker compose --env-file .env.docker -f docker-compose.yml logs -f frontend-dev
+docker compose --env-file .env.docker -f docker-compose.yml down
+```
+
+Production:
+
+```bash
+docker compose --env-file .env.docker --profile prod -f docker-compose.yml build frontend
+docker compose --env-file .env.docker --profile prod -f docker-compose.yml up -d frontend
+```
+
+### Troubleshooting
+
+**Port already in use.** A local `ng serve` or another app may be using 4200 or 8080. Set a different port in `.env.docker`:
+
+```dotenv
+FRONTEND_DEV_PORT=4201
+FRONTEND_PORT=8081
+```
+
+Then run `make down && make up`.
+
+**Slow first start.** The first `make up` runs `npm ci` inside the container. Later starts reuse the `node_modules` volume and are much faster.
+
+**Reset everything:**
+
+```bash
+make clean
+make init
+make up
+```
+
+---
+
+## Local setup (without Docker)
 
 ```bash
 npm install
