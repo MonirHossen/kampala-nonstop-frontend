@@ -13,7 +13,7 @@ export class SettingsStore {
 
   readonly settings = this.state.asReadonly();
   readonly launchNote = computed(
-    () => this.state()?.marketing_message ?? 'Launching soon in Kampala',
+    () => this.state()?.marketing_message ?? 'Launching soon in Uganda',
   );
   readonly contactEmail = computed(
     () => this.state()?.contact_email ?? 'hello@kampalanonstop.com',

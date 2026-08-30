@@ -26,20 +26,19 @@ import { scrollToId } from '../shared/scroll-to';
         <div knReveal class="max-w-4xl">
           <div class="flex items-center gap-3">
             <span class="h-px w-10 bg-primary"></span>
-            <p class="eyebrow text-ink-foreground/85">Kampala, Uganda</p>
+            <p class="eyebrow text-ink-foreground/85">Uganda . Culture . Travel . Concierge</p>
           </div>
 
-          <h1 class="display-xl mt-5 text-ink-foreground">
-            Kampala,
+          <h1
+            class="mt-5 text-[42px] leading-[1.05] font-bold text-ink-foreground [font-family:'Noto_Sans_KR',sans-serif] md:text-[52px] lg:text-[64px]"
+          >
+            Join our waiting list and 
             <br />
-            without the <em class="text-primary not-italic">ordinary.</em>
+            win a <em class="text-primary not-italic">return flight to Uganda</em>
           </h1>
 
-          <p
-            class="mt-6 max-w-xl text-[1.05rem] leading-relaxed text-ink-foreground/75 sm:text-[1.15rem]"
-          >
-            Discover the food, culture, nightlife, nature, people and hidden experiences that make
-            Kampala impossible to experience just once.
+          <p class="mt-6 max-w-xl text-[1.05rem] leading-relaxed text-ink-foreground/75 sm:text-[1.15rem]">
+            Be the first to experience personalised trip planning, local insights and unforgettable experiences in Uganda.
           </p>
 
           <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -55,7 +54,7 @@ import { scrollToId } from '../shared/scroll-to';
               (click)="goTo('experiences')"
               class="eyebrow border border-ink-foreground/30 px-8 py-4 text-ink-foreground transition-colors duration-300 hover:border-primary hover:text-primary"
             >
-              Explore Kampala
+              Experiences
             </button>
           </div>
 
@@ -70,9 +69,6 @@ import { scrollToId } from '../shared/scroll-to';
                 <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary"></span>
               </span>
               {{ launchNote() }}
-            </p>
-            <p class="text-sm text-ink-foreground/45">
-              Your next Kampala experience starts here.
             </p>
           </div>
         </div>

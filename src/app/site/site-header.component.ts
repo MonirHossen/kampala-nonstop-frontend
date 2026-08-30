@@ -20,21 +20,21 @@ import { scrollToId } from '../shared/scroll-to';
       >
         <a
           routerLink="/"
-          class="font-display text-[1.05rem] leading-none tracking-tight transition-colors sm:text-[1.2rem]"
-          [class]="scrolled() ? 'text-foreground' : 'text-ink-foreground'"
+          class="inline-flex items-center"
+          aria-label="Kampala Nonstop home"
         >
-          Kampala<span class="text-primary">Nonstop</span>
+          <img
+            [src]="
+              scrolled()
+                ? '/img/kampala_nonstop_logo.png'
+                : '/img/kampala_nonstop_logo_white.png'
+            "
+            alt="Kampala Nonstop logo"
+            class="h-8 w-auto transition-all sm:h-9"
+          />
         </a>
 
         <nav class="flex items-center gap-6 sm:gap-8">
-          <button
-            type="button"
-            (click)="goTo('experiences')"
-            class="eyebrow hidden transition-opacity hover:opacity-60 sm:block"
-            [class]="scrolled() ? 'text-muted-foreground' : 'text-ink-foreground/80'"
-          >
-            Experiences
-          </button>
           <button
             type="button"
             (click)="goTo('waitlist')"

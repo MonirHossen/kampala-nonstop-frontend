@@ -67,28 +67,6 @@ type Tile = {
             </li>
           }
 
-          <li
-            [knReveal]="440"
-            class="relative flex flex-col justify-between border border-clay/35 bg-background p-6 sm:col-span-8 lg:col-span-5 lg:h-[22rem]"
-          >
-            <div>
-              <p class="eyebrow text-primary">Other</p>
-              <h3 class="font-display mt-3 text-2xl leading-tight text-foreground sm:text-[2rem]">
-                Something we haven't listed yet?
-              </h3>
-              <p class="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                Weddings, film locations, business trips, family visits — tell us on the waitlist
-                and it shapes what we build first.
-              </p>
-            </div>
-            <button
-              type="button"
-              (click)="goToWaitlist()"
-              class="eyebrow mt-6 self-start border-b border-primary pb-1 text-primary transition-opacity hover:opacity-70"
-            >
-              Add your interest &rarr;
-            </button>
-          </li>
         </ul>
       </div>
     </section>
