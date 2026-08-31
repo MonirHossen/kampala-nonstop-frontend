@@ -224,7 +224,8 @@ src/app/
                                   email, social URLs
 
   pages/
-    home.page.ts                  hero → waitlist → categories
+    home.page.ts                  hero → categories
+    waitlist-join.page.ts         hero → waitlist form
     about.page.ts, contact.page.ts, privacy.page.ts, terms.page.ts
     not-found.page.ts             404
 ```
@@ -233,7 +234,9 @@ src/app/
 
 | Path                   | Component            | Notes                                  |
 | ---------------------- | -------------------- | -------------------------------------- |
-| `/`                    | `HomePage`           | hero, waitlist form, category tiles    |
+| `/`                    | `HomePage`           | hero, category tiles; `/#waitlist` redirects to the join page |
+| `/waitlist/join`       | `WaitlistJoinPage`   | hero + waitlist form; `?source=` defaults to `unaa_denver_2026` |
+| `/waitlist/invite`     | `WaitlistInvitePage` | post-signup invite a friend            |
 | `/about`               | `AboutPage`          |                                        |
 | `/contact`             | `ContactPage`        | email comes from site settings         |
 | `/privacy`             | `PrivacyPage`        |                                        |

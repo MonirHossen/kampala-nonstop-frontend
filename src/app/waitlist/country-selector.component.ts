@@ -15,7 +15,7 @@ import {
   LucideChevronsUpDown,
   LucideSearch,
 } from '@lucide/angular';
-import { COUNTRIES, countryFlag, type Country } from '../core/lib/countries';
+import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
 
 @Component({
   selector: 'kn-country-selector',
@@ -32,9 +32,13 @@ import { COUNTRIES, countryFlag, type Country } from '../core/lib/countries';
       [class]="triggerClass()"
     >
       <span class="flex min-w-0 items-center gap-2 truncate">
-        <span class="shrink-0 text-[1.05rem] leading-none" aria-hidden="true">{{
-          flag(value().code)
-        }}</span>
+        <img
+          [src]="flag(value().code)"
+          alt=""
+          width="20"
+          height="15"
+          class="h-[0.95rem] w-5 shrink-0 rounded-[2px] object-cover"
+        />
         <span class="truncate" [class]="variant() === 'boxed' ? 'text-[0.92rem]' : ''">{{
           value().name
         }}</span>
@@ -79,9 +83,14 @@ import { COUNTRIES, countryFlag, type Country } from '../core/lib/countries';
                   [class]="optionClass(selected)"
                 >
                   <span class="flex min-w-0 items-center gap-2.5 truncate">
-                    <span class="shrink-0 text-[1.05rem] leading-none" aria-hidden="true">{{
-                      flag(country.code)
-                    }}</span>
+                    <img
+                      [src]="flag(country.code)"
+                      alt=""
+                      loading="lazy"
+                      width="20"
+                      height="15"
+                      class="h-[0.95rem] w-5 shrink-0 rounded-[2px] object-cover"
+                    />
                     <span class="truncate">{{ country.name }}</span>
                   </span>
                   @if (selected) {
@@ -131,7 +140,7 @@ export class CountrySelectorComponent {
   }
 
   protected flag(code: string): string {
-    return countryFlag(code);
+    return countryFlagUrl(code);
   }
 
   protected triggerClass(): string {

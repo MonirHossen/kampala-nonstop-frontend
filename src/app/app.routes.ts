@@ -1,12 +1,5 @@
-import { inject } from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  RedirectCommand,
-  Router,
-  Routes,
-} from '@angular/router';
+import { Routes } from '@angular/router';
 import { adminGuard, adminLoginGuard } from './admin/admin.guard';
-import { DEFAULT_WAITLIST_SOURCE } from './core/lib/tracking';
 
 export const routes: Routes = [
   {
@@ -16,18 +9,8 @@ export const routes: Routes = [
   },
   {
     path: 'waitlist/join',
-    canActivate: [
-      (route: ActivatedRouteSnapshot) =>
-        new RedirectCommand(
-          inject(Router).createUrlTree(['/'], {
-            queryParams: {
-              source: route.queryParamMap.get('source')?.trim() || DEFAULT_WAITLIST_SOURCE,
-            },
-            fragment: 'waitlist',
-          }),
-        ),
-    ],
-    children: [],
+    title: 'Join the Waitlist — Kampala Nonstop',
+    loadComponent: () => import('./pages/waitlist-join.page').then((m) => m.WaitlistJoinPage),
   },
   {
     path: 'waitlist/invite',

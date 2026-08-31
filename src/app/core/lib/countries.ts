@@ -1,12 +1,13 @@
 export type Country = { name: string; code: string; dial: string };
 
-/** Regional-indicator emoji flag from an ISO 3166-1 alpha-2 code. */
-export function countryFlag(code: string): string {
-  const normalized = code.trim().toUpperCase();
-  if (!/^[A-Z]{2}$/.test(normalized)) return '';
-  return String.fromCodePoint(
-    ...[...normalized].map((char) => 0x1f1e6 - 65 + char.charCodeAt(0)),
-  );
+/**
+ * Flag image URL for an ISO 3166-1 alpha-2 code. Windows has no flag glyphs in
+ * its emoji font, so regional-indicator emoji degrade to bare letters there.
+ */
+export function countryFlagUrl(code: string): string {
+  const normalized = code.trim().toLowerCase();
+  if (!/^[a-z]{2}$/.test(normalized)) return '';
+  return `https://flagcdn.com/${normalized}.svg`;
 }
 
 // ISO country list with dialing codes. Uganda first as the default market.

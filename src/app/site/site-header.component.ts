@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { resolveWaitlistSource } from '../core/lib/tracking';
 import { scrollToId } from '../shared/scroll-to';
 
 @Component({
@@ -37,7 +38,7 @@ import { scrollToId } from '../shared/scroll-to';
         <nav class="flex items-center gap-6 sm:gap-8">
           <button
             type="button"
-            (click)="goTo('waitlist')"
+            (click)="goToJoin()"
             class="eyebrow bg-primary text-primary-foreground px-4 py-2.5 transition-transform duration-300 hover:-translate-y-0.5 sm:px-5"
           >
             Join the Waitlist
@@ -57,13 +58,15 @@ export class SiteHeaderComponent {
     this.scrolled.set(window.scrollY > 40);
   }
 
-  /** On the homepage this scrolls; anywhere else it navigates home to the form. */
-  protected goTo(id: string): void {
-    if (this.router.url.split('?')[0].split('#')[0] === '/') {
-      scrollToId(id);
+  /** On the join page this scrolls to the form; anywhere else it navigates there. */
+  protected goToJoin(): void {
+    if (this.router.url.split('?')[0].split('#')[0] === '/waitlist/join') {
+      scrollToId('waitlist');
       return;
     }
 
-    void this.router.navigate(['/'], { fragment: id, queryParamsHandling: 'preserve' });
+    void this.router.navigate(['/waitlist/join'], {
+      queryParams: { source: resolveWaitlistSource() },
+    });
   }
 }

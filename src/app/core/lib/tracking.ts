@@ -48,6 +48,11 @@ export function readRememberedSource(): string | null {
   return sessionStorage.getItem(SOURCE_KEY)?.trim() || null;
 }
 
+/** Source to carry into `/waitlist/join`: current URL, then session, then default. */
+export function resolveWaitlistSource(): string {
+  return querySourceParam() || readRememberedSource() || DEFAULT_WAITLIST_SOURCE;
+}
+
 /** Normalise a campaign/source slug for the API acquisition_source_code field. */
 export function normaliseSourceCode(raw: string): string {
   return (

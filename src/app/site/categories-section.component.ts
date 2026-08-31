@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RevealDirective } from '../shared/reveal.directive';
-import { scrollToId } from '../shared/scroll-to';
-
 type Tile = {
   label: string;
   copy: string;
@@ -144,8 +142,4 @@ export class CategoriesSectionComponent {
       height: 'h-[40vw] sm:h-[22vw] lg:h-[14rem]',
     },
   ];
-
-  protected goToWaitlist(): void {
-    scrollToId('waitlist');
-  }
 }

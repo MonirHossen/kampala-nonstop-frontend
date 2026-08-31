@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { resolveWaitlistSource } from '../core/lib/tracking';
 import { RevealDirective } from '../shared/reveal.directive';
 import { scrollToId } from '../shared/scroll-to';
 
 @Component({
   selector: 'kn-hero',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective],
+  imports: [RevealDirective, RouterLink],
   template: `
     <section class="relative min-h-[100svh] overflow-hidden bg-ink">
       <div class="absolute inset-0">
@@ -42,13 +44,13 @@ import { scrollToId } from '../shared/scroll-to';
           </p>
 
           <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              (click)="goTo('waitlist')"
-              class="eyebrow bg-primary text-primary-foreground px-8 py-4 transition-transform duration-300 hover:-translate-y-0.5"
+            <a
+              routerLink="/waitlist/join"
+              [queryParams]="{ source: joinSource() }"
+              class="eyebrow bg-primary text-primary-foreground px-8 py-4 text-center transition-transform duration-300 hover:-translate-y-0.5"
             >
               Join the Waitlist
-            </button>
+            </a>
             <button
               type="button"
               (click)="goTo('experiences')"
@@ -78,6 +80,10 @@ import { scrollToId } from '../shared/scroll-to';
 })
 export class HeroComponent {
   readonly launchNote = input.required<string>();
+
+  protected joinSource(): string {
+    return resolveWaitlistSource();
+  }
 
   protected goTo(id: string): void {
     scrollToId(id);
