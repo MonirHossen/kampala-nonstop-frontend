@@ -26,7 +26,7 @@ import { scrollToId } from '../shared/scroll-to';
         <div knReveal class="max-w-4xl">
           <div class="flex items-center gap-3">
             <span class="h-px w-10 bg-primary"></span>
-            <p class="eyebrow text-ink-foreground/85">Uganda . Culture . Travel . Concierge</p>
+            <p class="eyebrow text-ink-foreground/85">Uganda . Travel . Culture . Concierge</p>
           </div>
 
           <h1
