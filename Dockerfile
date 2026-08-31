@@ -4,7 +4,7 @@
 FROM node:22-alpine AS builder
 
 # Baked into the Angular bundle at build time (override in deploy/.env)
-ARG API_URL=http://194.164.19.178:8000/api/v1
+ARG API_URL=https://api.kampalanonstop.com/api/v1
 
 WORKDIR /app
 
