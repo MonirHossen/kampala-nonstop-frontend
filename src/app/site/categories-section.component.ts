@@ -7,6 +7,9 @@ type Tile = {
   copy: string;
   image?: string;
   alt?: string;
+  /** Intrinsic size of `image`, so the browser reserves the right ratio. */
+  width?: number;
+  height_px?: number;
   span: string;
   height: string;
 };
@@ -38,8 +41,8 @@ type Tile = {
                   [src]="tile.image"
                   [alt]="tile.alt ?? tile.label"
                   loading="lazy"
-                  width="1024"
-                  height="1280"
+                  [width]="tile.width ?? 1024"
+                  [height]="tile.height_px ?? 1280"
                   class="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
                 />
                 <div
@@ -125,12 +128,18 @@ export class CategoriesSectionComponent {
     {
       label: 'Sports & Recreation',
       copy: 'Match days, five-a-side, padel, boxing gyms and rugby afternoons.',
+      image: '/img/cat-sports.jpg',
+      alt: 'A five-a-side football match on a red-earth pitch in Kampala at golden hour',
       span: 'sm:col-span-4 lg:col-span-4',
       height: 'h-[40vw] sm:h-[40vw] lg:h-[22rem]',
     },
     {
       label: 'Other',
       copy: 'Something else entirely — tell us on the waitlist and we will shape it with you.',
+      image: '/img/cat-other.jpg',
+      alt: 'A rooftop lounge above the Kampala skyline at blue hour, lit by string lights',
+      width: 1600,
+      height_px: 1067,
       span: 'sm:col-span-8 lg:col-span-12',
       height: 'h-[40vw] sm:h-[22vw] lg:h-[14rem]',
     },
