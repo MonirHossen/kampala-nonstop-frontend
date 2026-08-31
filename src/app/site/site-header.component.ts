@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostListener, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DEFAULT_WAITLIST_SOURCE } from '../core/lib/tracking';
+import { scrollToId } from '../shared/scroll-to';
 
 @Component({
   selector: 'kn-site-header',
@@ -35,24 +35,27 @@ import { DEFAULT_WAITLIST_SOURCE } from '../core/lib/tracking';
         </a>
 
         <nav class="flex items-center gap-6 sm:gap-8">
-          <a
-            routerLink="/waitlist/join"
-            [queryParams]="{ source: defaultSource }"
+          <button
+            type="button"
+            (click)="goTo('waitlist')"
             class="eyebrow bg-primary text-primary-foreground px-4 py-2.5 transition-transform duration-300 hover:-translate-y-0.5 sm:px-5"
           >
             Join the Waitlist
-          </a>
+          </button>
         </nav>
       </div>
     </header>
   `,
 })
 export class SiteHeaderComponent {
-  protected readonly defaultSource = DEFAULT_WAITLIST_SOURCE;
   protected readonly scrolled = signal(false);
 
   @HostListener('window:scroll')
   protected onScroll(): void {
     this.scrolled.set(window.scrollY > 40);
+  }
+
+  protected goTo(id: string): void {
+    scrollToId(id);
   }
 }
