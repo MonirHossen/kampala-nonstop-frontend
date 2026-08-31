@@ -18,20 +18,12 @@ type Tile = {
   template: `
     <section id="experiences" class="bg-sand/45">
       <div class="mx-auto max-w-[1400px] px-5 py-20 sm:px-8 sm:py-28">
-        <div knReveal class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <div>
-            <div class="flex items-center gap-3">
-              <span class="h-px w-10 bg-primary"></span>
-              <p class="eyebrow text-clay">What you'll discover</p>
-            </div>
-            <h2 class="display-lg mt-5 max-w-xl text-foreground">
-              Nine ways to fall for the city.
-            </h2>
+        <div knReveal>
+          <div class="flex items-center gap-3">
+            <span class="h-px w-10 bg-primary"></span>
+            <p class="eyebrow text-clay">What you'll discover</p>
           </div>
-          <p class="max-w-sm text-[0.98rem] leading-relaxed text-muted-foreground">
-            Tell us what moves you and Kampala Nonstop builds around it — from the first plate to
-            the last song of the night.
-          </p>
+          <h2 class="display-lg mt-5 max-w-xl text-foreground">Nine ways to fall for the city.</h2>
         </div>
 
         <ul class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-8 sm:gap-5 lg:grid-cols-12">
@@ -119,7 +111,7 @@ export class CategoriesSectionComponent {
       copy: 'Concerts, street festivals and the nights the city plans around.',
       image: '/img/cat-events.jpg',
       alt: 'Hands raised in a crowd at a Kampala music festival at dusk',
-      span: 'sm:col-span-4 lg:col-span-5',
+      span: 'sm:col-span-4 lg:col-span-4',
       height: 'h-[58vw] sm:h-[40vw] lg:h-[22rem]',
     },
     {
@@ -133,8 +125,14 @@ export class CategoriesSectionComponent {
     {
       label: 'Sports & Recreation',
       copy: 'Match days, five-a-side, padel, boxing gyms and rugby afternoons.',
-      span: 'sm:col-span-4 lg:col-span-3',
+      span: 'sm:col-span-4 lg:col-span-4',
       height: 'h-[40vw] sm:h-[40vw] lg:h-[22rem]',
+    },
+    {
+      label: 'Other',
+      copy: 'Something else entirely — tell us on the waitlist and we will shape it with you.',
+      span: 'sm:col-span-8 lg:col-span-12',
+      height: 'h-[40vw] sm:h-[22vw] lg:h-[14rem]',
     },
   ];
 

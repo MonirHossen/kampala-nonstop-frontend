@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, HostListener, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { scrollToId } from '../shared/scroll-to';
 
 @Component({
@@ -48,6 +48,8 @@ import { scrollToId } from '../shared/scroll-to';
   `,
 })
 export class SiteHeaderComponent {
+  private readonly router = inject(Router);
+
   protected readonly scrolled = signal(false);
 
   @HostListener('window:scroll')
@@ -55,7 +57,13 @@ export class SiteHeaderComponent {
     this.scrolled.set(window.scrollY > 40);
   }
 
+  /** On the homepage this scrolls; anywhere else it navigates home to the form. */
   protected goTo(id: string): void {
-    scrollToId(id);
+    if (this.router.url.split('?')[0].split('#')[0] === '/') {
+      scrollToId(id);
+      return;
+    }
+
+    void this.router.navigate(['/'], { fragment: id, queryParamsHandling: 'preserve' });
   }
 }
