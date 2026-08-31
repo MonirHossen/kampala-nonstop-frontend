@@ -3,13 +3,17 @@
 # --- Build stage ---
 FROM node:22-alpine AS builder
 
+# Baked into the Angular bundle at build time (override in deploy/.env)
+ARG API_URL=http://194.164.19.178:8000/api/v1
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN sed -i "s|apiUrl:.*|apiUrl: '${API_URL}',|" src/environments/environment.production.ts \
+    && npm run build
 
 # --- Production stage ---
 FROM nginx:1.27-alpine AS production
