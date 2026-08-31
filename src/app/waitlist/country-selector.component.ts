@@ -9,41 +9,49 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { LucideCheck, LucideChevronsUpDown, LucideSearch } from '@lucide/angular';
-import { COUNTRIES, type Country } from '../core/lib/countries';
+import { LucideCheck, LucideChevronDown, LucideSearch } from '@lucide/angular';
+import { COUNTRIES, countryFlag, type Country } from '../core/lib/countries';
 
 @Component({
   selector: 'kn-country-selector',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideCheck, LucideChevronsUpDown, LucideSearch],
+  imports: [LucideCheck, LucideChevronDown, LucideSearch],
   host: { class: 'relative block' },
   template: `
     <button
       type="button"
       role="combobox"
-      aria-label="Country"
+      [attr.aria-label]="label()"
       [attr.aria-expanded]="open()"
       (click)="toggleOpen()"
-      class="flex h-13 w-full items-center justify-between border-b bg-transparent px-0 py-3 text-left text-[1rem] transition-colors"
-      [class]="invalid() ? 'border-destructive' : 'border-input hover:border-foreground'"
+      [class]="triggerClass()"
     >
-      <span class="truncate">
-        {{ value().name }} <span class="text-muted-foreground">({{ value().dial }})</span>
+      <span class="flex min-w-0 items-center gap-2 truncate">
+        <span class="shrink-0 text-[1.05rem] leading-none" aria-hidden="true">{{
+          flag(value().code)
+        }}</span>
+        <span class="truncate text-[0.92rem]">
+          @if (variant() === 'boxed') {
+            {{ value().name }} ({{ value().dial }})
+          } @else {
+            {{ value().name }}
+          }
+        </span>
       </span>
-      <svg lucideChevronsUpDown class="ml-2 h-4 w-4 shrink-0 text-muted-foreground"></svg>
+      <svg lucideChevronDown class="ml-2 h-4 w-4 shrink-0 text-muted-foreground"></svg>
     </button>
 
     @if (open()) {
       <div
-        class="absolute left-0 top-[calc(100%+0.25rem)] z-50 w-[min(92vw,26rem)] border border-hairline bg-popover text-popover-foreground shadow-[0_24px_50px_-28px_oklch(0.2_0.02_47/0.55)]"
+        class="absolute left-0 top-[calc(100%+0.35rem)] z-50 w-[min(92vw,22rem)] overflow-hidden rounded-xl border border-[#e8e2da] bg-white shadow-[0_18px_40px_-24px_rgba(27,21,18,0.45)]"
       >
-        <div class="flex items-center gap-2 border-b border-hairline px-3">
+        <div class="flex items-center gap-2 border-b border-[#ece7df] px-3">
           <svg lucideSearch class="h-4 w-4 text-muted-foreground"></svg>
           <input
             #search
             [value]="query()"
             (input)="query.set(searchValue($event))"
-            placeholder="Search country or code"
+            placeholder="Search country"
             class="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
@@ -61,16 +69,18 @@ import { COUNTRIES, type Country } from '../core/lib/countries';
                   role="option"
                   [attr.aria-selected]="selected"
                   (click)="select(country)"
-                  class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-accent"
-                  [class.bg-accent]="selected"
+                  class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#faf7f2]"
+                  [class.bg-[#faf7f2]]="selected"
                 >
-                  <span class="truncate">{{ country.name }}</span>
-                  <span class="ml-3 flex items-center gap-2 text-muted-foreground">
-                    {{ country.dial }}
-                    @if (selected) {
-                      <svg lucideCheck class="h-3.5 w-3.5 text-primary"></svg>
-                    }
+                  <span class="flex min-w-0 items-center gap-2.5 truncate">
+                    <span class="shrink-0 text-[1.05rem] leading-none" aria-hidden="true">{{
+                      flag(country.code)
+                    }}</span>
+                    <span class="truncate">{{ country.name }} ({{ country.dial }})</span>
                   </span>
+                  @if (selected) {
+                    <svg lucideCheck class="ml-3 h-3.5 w-3.5 shrink-0 text-primary"></svg>
+                  }
                 </button>
               </li>
             }
@@ -83,6 +93,8 @@ import { COUNTRIES, type Country } from '../core/lib/countries';
 export class CountrySelectorComponent {
   readonly value = input.required<Country>();
   readonly invalid = input(false);
+  readonly variant = input<'default' | 'boxed'>('default');
+  readonly label = input('Country of residence');
   readonly changed = output<Country>();
 
   protected readonly open = signal(false);
@@ -94,7 +106,10 @@ export class CountrySelectorComponent {
     const q = this.query().trim().toLowerCase();
     if (!q) return COUNTRIES;
     return COUNTRIES.filter(
-      (c) => c.name.toLowerCase().includes(q) || c.dial.includes(q) || c.code.toLowerCase() === q,
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.dial.includes(q) ||
+        c.code.toLowerCase() === q,
     );
   });
 
@@ -107,6 +122,25 @@ export class CountrySelectorComponent {
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     if (this.open()) this.close();
+  }
+
+  protected flag(code: string): string {
+    return countryFlag(code);
+  }
+
+  protected triggerClass(): string {
+    const base =
+      this.variant() === 'boxed'
+        ? 'flex h-11 w-full items-center justify-between rounded-lg border bg-white px-3 text-left text-[0.86rem] transition-colors'
+        : 'flex h-13 w-full items-center justify-between border-b bg-transparent px-0 py-3 text-left text-[1rem] transition-colors';
+
+    if (this.invalid()) {
+      return `${base} border-destructive`;
+    }
+
+    return this.variant() === 'boxed'
+      ? `${base} border-[#e7e5e4] hover:border-[#d6d3d1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/20`
+      : `${base} border-input hover:border-foreground`;
   }
 
   protected toggleOpen(): void {

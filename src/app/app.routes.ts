@@ -8,6 +8,16 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home.page').then((m) => m.HomePage),
   },
   {
+    path: 'waitlist/join',
+    title: 'Join the Waitlist — Kampala Nonstop',
+    loadComponent: () => import('./pages/waitlist-join.page').then((m) => m.WaitlistJoinPage),
+  },
+  {
+    path: 'waitlist/invite',
+    title: 'Invite a Friend — Kampala Nonstop',
+    loadComponent: () => import('./pages/waitlist-invite.page').then((m) => m.WaitlistInvitePage),
+  },
+  {
     path: 'about',
     title: 'About — Kampala Nonstop',
     loadComponent: () => import('./pages/about.page').then((m) => m.AboutPage),

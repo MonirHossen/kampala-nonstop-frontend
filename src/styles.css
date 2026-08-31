@@ -6,8 +6,8 @@
 
 /*
  * Kampala Nonstop design system.
- * Editorial travel magazine: warm off-white paper, charcoal ink,
- * Kampala orange accent, muted matoke green, soft sand.
+ * Editorial travel: warm paper, charcoal ink, Kampala orange.
+ * Type: Plus Jakarta Sans everywhere (display + UI).
  */
 
 @theme inline {
@@ -16,8 +16,8 @@
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -130,16 +130,16 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv01";
+    font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.02em;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: -0.03em;
   }
 
   ::selection {
@@ -157,19 +157,19 @@
 }
 
 @utility display-xl {
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 0.94;
-  letter-spacing: -0.035em;
-  font-size: clamp(2.6rem, 8.4vw, 6.4rem);
+  font-family: var(--font-sans);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  font-size: clamp(2.6rem, 7.8vw, 5.8rem);
 }
 
 @utility display-lg {
-  font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
 }
 
 @utility rule-top {

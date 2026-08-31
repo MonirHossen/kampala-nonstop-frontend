@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -6,10 +6,13 @@ import {
   Validators,
   type AbstractControl,
 } from '@angular/forms';
-import { LucideArrowRight, LucideLoaderCircle } from '@lucide/angular';
+import { Router } from '@angular/router';
+import { LucideLoaderCircle, LucideSend, LucideUsers } from '@lucide/angular';
 import { DEFAULT_COUNTRY, type Country } from '../core/lib/countries';
-import { collectTracking } from '../core/lib/tracking';
-import { DuplicateEmailError, WaitlistService } from '../core/services/waitlist.service';
+import { interestName } from '../core/lib/interests';
+import { collectTracking, type TrackingPayload } from '../core/lib/tracking';
+import { DuplicateEmailError } from '../core/services/waitlist.service';
+import { WaitlistApiService } from '../core/services/waitlist-api.service';
 import { CountrySelectorComponent } from './country-selector.component';
 import { InterestSelectorComponent } from './interest-selector.component';
 
@@ -20,50 +23,179 @@ import { InterestSelectorComponent } from './interest-selector.component';
     ReactiveFormsModule,
     CountrySelectorComponent,
     InterestSelectorComponent,
-    LucideArrowRight,
+    LucideSend,
     LucideLoaderCircle,
+    LucideUsers,
   ],
   template: `
-    @if (status() === 'success') {
-      <div class="reveal reveal-in border border-primary/35 bg-paper p-8 sm:p-12">
-        <p class="eyebrow text-primary">Waitlist confirmed</p>
-        <h3 class="display-lg mt-4 text-foreground">You're on the list.</h3>
-        <p class="mt-4 max-w-md text-[1.02rem] leading-relaxed text-muted-foreground">
-          We'll be in touch when Kampala Nonstop is ready to welcome you.
-        </p>
-        <div class="mt-8 border-t border-hairline pt-6">
-          <p class="text-sm text-muted-foreground">
-            Registered as
-            <span class="text-foreground">{{ submitted().name }}</span>
-            &middot; {{ submitted().email }} &middot; {{ submitted().country }}
-          </p>
-          @if (submitted().interests.length > 0) {
-            <p class="mt-2 text-sm text-muted-foreground">
-              Interests: <span class="text-foreground">{{ submitted().interests.join(', ') }}</span>
-            </p>
-          }
-        </div>
-      </div>
-    } @else if (disabled()) {
-      <div class="border border-hairline bg-paper p-8 sm:p-12">
+    @if (disabled()) {
+      <div class="kn-join-card p-8 sm:p-12">
         <p class="eyebrow text-clay">Waitlist paused</p>
-        <h3 class="font-display mt-3 text-2xl text-foreground">We're at capacity right now.</h3>
+        <h3 class="mt-3 font-display text-2xl text-foreground">We&rsquo;re at capacity right now.</h3>
         <p class="mt-3 max-w-md text-muted-foreground">
           Registrations are temporarily closed. Follow us for the next opening.
         </p>
       </div>
-    } @else {
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="bg-paper p-6 sm:p-10 lg:p-12">
-        <div class="grid gap-6 sm:grid-cols-2 sm:gap-7">
-          <div>
-            <label for="firstName" class="eyebrow block text-muted-foreground">First name</label>
-            <div class="mt-2">
+    } @else if (variant() === 'join') {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="kn-join-card overflow-hidden">
+        <input type="hidden" name="source" [value]="sourceParam() ?? ''" />
+        <input type="hidden" name="countries_of_interest" value='["UG"]' />
+
+        <div class="border-b border-hairline px-5 py-5 sm:px-8 sm:py-6">
+          <div class="flex items-start gap-3">
+            <span
+              class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-primary/12 text-primary"
+            >
+              <svg lucideUsers class="h-[1.15rem] w-[1.15rem]"></svg>
+            </span>
+            <div>
+              <h2 class="font-display text-[1.25rem] leading-tight text-foreground sm:text-[1.4rem]">
+                Tell us a little about you
+              </h2>
+              <p class="mt-1 text-[0.9rem] leading-relaxed text-muted-foreground">
+                Your details and interests help us shape the experience around you.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6 px-5 py-6 sm:space-y-7 sm:px-8 sm:py-7">
+          <div class="grid gap-4 xl:grid-cols-4">
+            <div>
+              <label for="firstName" class="kn-join-label">First name</label>
               <input
                 id="firstName"
                 formControlName="firstName"
                 autocomplete="given-name"
                 maxlength="80"
-                placeholder="Aisha"
+                placeholder="Enter your first name"
+                [class]="boxedInputClass(form.controls.firstName)"
+              />
+              @if (errorFor(form.controls.firstName, 'first name'); as message) {
+                <p class="mt-1 text-xs text-destructive" role="alert">{{ message }}</p>
+              }
+            </div>
+
+            <div>
+              <label for="surname" class="kn-join-label">Surname</label>
+              <input
+                id="surname"
+                formControlName="surname"
+                autocomplete="family-name"
+                maxlength="80"
+                placeholder="Enter your surname"
+                [class]="boxedInputClass(form.controls.surname)"
+              />
+              @if (errorFor(form.controls.surname, 'surname'); as message) {
+                <p class="mt-1 text-xs text-destructive" role="alert">{{ message }}</p>
+              }
+            </div>
+
+            <div>
+              <label for="email" class="kn-join-label">Email address</label>
+              <input
+                id="email"
+                type="email"
+                inputmode="email"
+                formControlName="email"
+                autocomplete="email"
+                maxlength="255"
+                placeholder="Enter your email address"
+                [class]="boxedInputClass(form.controls.email)"
+              />
+              @if (errorFor(form.controls.email, 'email address'); as message) {
+                <p class="mt-1 text-xs text-destructive" role="alert">{{ message }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="kn-join-label">Country</label>
+              <kn-country-selector
+                variant="boxed"
+                label="Country"
+                [value]="country()"
+                (changed)="country.set($event)"
+              />
+            </div>
+          </div>
+
+          <kn-interest-selector
+            variant="join"
+            [selected]="interests()"
+            (toggle)="toggleInterest($event)"
+          />
+
+          <div
+            class="flex flex-col gap-5 border-t border-hairline pt-5 lg:flex-row lg:items-start lg:justify-between"
+          >
+            <button
+              type="button"
+              role="switch"
+              [attr.aria-checked]="optIn()"
+              (click)="optIn.set(!optIn())"
+              class="flex max-w-xl items-start gap-3 text-left"
+            >
+              <span
+                class="relative mt-0.5 inline-flex h-[1.65rem] w-[2.65rem] shrink-0 rounded-full transition-colors"
+                [class]="optIn() ? 'bg-primary' : 'bg-[#d6d3d1]'"
+              >
+                <span
+                  class="absolute top-[2px] h-[1.35rem] w-[1.35rem] rounded-full bg-white shadow transition-transform"
+                  [class]="optIn() ? 'translate-x-[1.15rem]' : 'translate-x-[2px]'"
+                ></span>
+              </span>
+              <span>
+                <span class="block text-[0.88rem] font-semibold text-foreground">
+                  Yes, keep me updated
+                </span>
+                <span class="mt-1 block text-[0.72rem] leading-relaxed text-muted-foreground">
+                  By selecting this, you agree to receive emails from Kampala Nonstop about new
+                  experiences, travel inspiration and offers. You can unsubscribe at any time.
+                </span>
+              </span>
+            </button>
+
+            <div class="w-full shrink-0 lg:w-[15.5rem]">
+              <button
+                type="submit"
+                [disabled]="status() === 'loading'"
+                class="eyebrow flex h-12 w-full items-center justify-center gap-2 bg-primary text-primary-foreground transition-colors hover:bg-clay disabled:opacity-70"
+              >
+                @if (status() === 'loading') {
+                  <svg lucideLoaderCircle class="h-4 w-4 animate-spin"></svg>
+                  Joining&hellip;
+                } @else {
+                  <svg lucideSend class="h-3.5 w-3.5"></svg>
+                  Join the Waitlist
+                }
+              </button>
+              <p class="mt-1.5 text-center text-[0.68rem] text-muted-foreground">
+                We respect your privacy. You can unsubscribe at any time.
+              </p>
+            </div>
+          </div>
+
+          @if (formError()) {
+            <p
+              role="alert"
+              class="border-l-2 border-destructive bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            >
+              {{ formError() }}
+            </p>
+          }
+        </div>
+      </form>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="bg-paper p-6 sm:p-10 lg:p-12">
+        <div class="grid gap-6 sm:grid-cols-2 sm:gap-7">
+          <div>
+            <label for="firstNameDefault" class="eyebrow block text-muted-foreground">First name</label>
+            <div class="mt-2">
+              <input
+                id="firstNameDefault"
+                formControlName="firstName"
+                autocomplete="given-name"
+                maxlength="80"
                 [class]="inputClass(form.controls.firstName)"
               />
             </div>
@@ -73,14 +205,13 @@ import { InterestSelectorComponent } from './interest-selector.component';
           </div>
 
           <div>
-            <label for="surname" class="eyebrow block text-muted-foreground">Surname</label>
+            <label for="surnameDefault" class="eyebrow block text-muted-foreground">Surname</label>
             <div class="mt-2">
               <input
-                id="surname"
+                id="surnameDefault"
                 formControlName="surname"
                 autocomplete="family-name"
                 maxlength="80"
-                placeholder="Nakato"
                 [class]="inputClass(form.controls.surname)"
               />
             </div>
@@ -90,10 +221,10 @@ import { InterestSelectorComponent } from './interest-selector.component';
           </div>
 
           <div class="sm:col-span-2">
-            <label for="email" class="eyebrow block text-muted-foreground">Email address</label>
+            <label for="emailDefault" class="eyebrow block text-muted-foreground">Email address</label>
             <div class="mt-2">
               <input
-                id="email"
+                id="emailDefault"
                 type="email"
                 inputmode="email"
                 formControlName="email"
@@ -109,7 +240,7 @@ import { InterestSelectorComponent } from './interest-selector.component';
           </div>
 
           <div class="sm:col-span-2">
-            <label class="eyebrow block text-muted-foreground">Country</label>
+            <label class="eyebrow block text-muted-foreground">Country of residence</label>
             <div class="mt-2">
               <kn-country-selector [value]="country()" (changed)="country.set($event)" />
             </div>
@@ -133,8 +264,8 @@ import { InterestSelectorComponent } from './interest-selector.component';
                 Yes, keep me updated
               </span>
               <span class="mt-1.5 block text-[0.8rem] leading-relaxed text-muted-foreground">
-                By selecting this, you agree to receive updates from Kampala Nonstop about new
-                experiences, travel inspiration and offers. You can unsubscribe at any time.
+                You will only receive updates about latest experiences, travel inspirations and
+                offers.
               </span>
             </span>
           </label>
@@ -159,21 +290,36 @@ import { InterestSelectorComponent } from './interest-selector.component';
             Joining&hellip;
           } @else {
             Join the Waitlist
-            <svg lucideArrowRight class="h-4 w-4"></svg>
           }
         </button>
-
-        <p class="mt-4 text-center text-xs text-muted-foreground">
-          No spam. Just Kampala, when we're ready.
-        </p>
       </form>
     }
   `,
-})
-export class WaitlistFormComponent {
-  readonly disabled = input(false);
+  styles: `
+    .kn-join-card {
+      border: 1px solid color-mix(in oklch, var(--hairline) 90%, transparent);
+      background: var(--paper);
+      box-shadow: 0 24px 48px -28px color-mix(in oklch, var(--ink) 35%, transparent);
+    }
 
-  private readonly waitlist = inject(WaitlistService);
+    .kn-join-label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+    }
+  `,
+})
+export class WaitlistFormComponent implements OnInit {
+  readonly disabled = input(false);
+  readonly variant = input<'default' | 'join'>('default');
+  readonly sourceParam = input<string | null>(null);
+
+  private readonly waitlistApi = inject(WaitlistApiService);
+  private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
   protected readonly form = this.fb.nonNullable.group({
@@ -185,23 +331,24 @@ export class WaitlistFormComponent {
   protected readonly country = signal<Country>(DEFAULT_COUNTRY);
   protected readonly interests = signal<string[]>([]);
   protected readonly optIn = signal(true);
-  protected readonly status = signal<'idle' | 'loading' | 'success'>('idle');
+  protected readonly status = signal<'idle' | 'loading'>('idle');
   protected readonly formError = signal<string | null>(null);
-  protected readonly submitted = signal<{
-    name: string;
-    email: string;
-    country: string;
-    interests: string[];
-  }>({ name: '', email: '', country: '', interests: [] });
+  protected readonly tracking = signal<TrackingPayload | null>(null);
 
-  protected toggleInterest(interest: string): void {
+  ngOnInit(): void {
+    if (this.variant() === 'join') {
+      this.tracking.set(collectTracking());
+    }
+  }
+
+  protected toggleInterest(code: string): void {
     this.interests.update((list) =>
-      list.includes(interest) ? list.filter((i) => i !== interest) : [...list, interest],
+      list.includes(code) ? list.filter((i) => i !== code) : [...list, code],
     );
   }
 
   protected async onSubmit(): Promise<void> {
-    if (this.status() === 'loading' || this.status() === 'success') return;
+    if (this.status() === 'loading') return;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -210,30 +357,43 @@ export class WaitlistFormComponent {
 
     const { firstName, surname, email } = this.form.getRawValue();
     const country = this.country();
-    const interests = this.interests();
+    const interestCodes = this.interests();
 
     this.formError.set(null);
     this.status.set('loading');
 
     try {
-      await this.waitlist.create({
+      const result = await this.waitlistApi.join({
         firstName: firstName.trim(),
         surname: surname.trim(),
         email: email.trim(),
-        countryName: country.name,
         countryCode: country.code,
-        dialCode: country.dial,
-        interests,
-        marketingOptIn: this.optIn(),
-        tracking: collectTracking(),
+        interestCodes,
+        marketingConsent: this.optIn(),
+        acquisitionSourceCode: this.sourceParam()?.trim() || undefined,
       });
-      this.submitted.set({
-        name: `${firstName.trim()} ${surname.trim()}`,
-        email: email.trim(),
-        country: country.name,
-        interests,
+
+      this.waitlistApi.rememberInviter({
+        id: result.id,
+        firstName: result.first_name,
+        surname: result.surname,
+        email: result.email,
       });
-      this.status.set('success');
+
+      await this.router.navigate(['/waitlist/invite'], {
+        state: {
+          inviter: {
+            id: result.id,
+            firstName: result.first_name,
+            surname: result.surname,
+            email: result.email,
+          },
+          interests: interestCodes.map((code) =>
+            interestName(code, this.waitlistApi.interestTypes()),
+          ),
+          country: country.name,
+        },
+      });
     } catch (error) {
       this.status.set('idle');
       this.formError.set(
@@ -242,6 +402,14 @@ export class WaitlistFormComponent {
           : "We couldn't save your details just now. Please try again in a moment.",
       );
     }
+  }
+
+  protected boxedInputClass(control: AbstractControl): string {
+    const base =
+      'h-11 w-full border bg-paper px-3 text-[0.9rem] outline-none transition-colors placeholder:text-muted-foreground/60';
+    return this.showError(control)
+      ? `${base} border-destructive ring-2 ring-destructive/15`
+      : `${base} border-input focus:border-primary focus:ring-2 focus:ring-primary/15`;
   }
 
   protected inputClass(control: AbstractControl): string {

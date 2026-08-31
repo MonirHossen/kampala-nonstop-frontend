@@ -1,5 +1,14 @@
 export type Country = { name: string; code: string; dial: string };
 
+/** Regional-indicator emoji flag from an ISO 3166-1 alpha-2 code. */
+export function countryFlag(code: string): string {
+  const normalized = code.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(normalized)) return '';
+  return String.fromCodePoint(
+    ...[...normalized].map((char) => 0x1f1e6 - 65 + char.charCodeAt(0)),
+  );
+}
+
 // ISO country list with dialing codes. Uganda first as the default market.
 export const COUNTRIES: Country[] = [
   { name: "Uganda", code: "UG", dial: "+256" },
