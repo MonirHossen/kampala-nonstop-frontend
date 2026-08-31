@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, HostListener, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { DEFAULT_WAITLIST_SOURCE } from '../core/lib/tracking';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { scrollToId } from '../shared/scroll-to';
 
 @Component({
   selector: 'kn-site-header',
@@ -35,24 +35,35 @@ import { DEFAULT_WAITLIST_SOURCE } from '../core/lib/tracking';
         </a>
 
         <nav class="flex items-center gap-6 sm:gap-8">
-          <a
-            routerLink="/waitlist/join"
-            [queryParams]="{ source: defaultSource }"
+          <button
+            type="button"
+            (click)="goTo('waitlist')"
             class="eyebrow bg-primary text-primary-foreground px-4 py-2.5 transition-transform duration-300 hover:-translate-y-0.5 sm:px-5"
           >
             Join the Waitlist
-          </a>
+          </button>
         </nav>
       </div>
     </header>
   `,
 })
 export class SiteHeaderComponent {
-  protected readonly defaultSource = DEFAULT_WAITLIST_SOURCE;
+  private readonly router = inject(Router);
+
   protected readonly scrolled = signal(false);
 
   @HostListener('window:scroll')
   protected onScroll(): void {
     this.scrolled.set(window.scrollY > 40);
+  }
+
+  /** On the homepage this scrolls; anywhere else it navigates home to the form. */
+  protected goTo(id: string): void {
+    if (this.router.url.split('?')[0].split('#')[0] === '/') {
+      scrollToId(id);
+      return;
+    }
+
+    void this.router.navigate(['/'], { fragment: id, queryParamsHandling: 'preserve' });
   }
 }

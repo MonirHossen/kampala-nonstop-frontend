@@ -30,6 +30,24 @@ export function querySourceParam(): string | null {
   return value?.trim() || null;
 }
 
+const SOURCE_KEY = 'kn_waitlist_source';
+
+/**
+ * Stores the first `?source=` a visitor arrived with, so attribution survives
+ * navigation that drops the query string. Later sources never overwrite it.
+ */
+export function rememberSource(raw: string): void {
+  if (typeof sessionStorage === 'undefined') return;
+  const value = raw.trim();
+  if (!value || sessionStorage.getItem(SOURCE_KEY)) return;
+  sessionStorage.setItem(SOURCE_KEY, value);
+}
+
+export function readRememberedSource(): string | null {
+  if (typeof sessionStorage === 'undefined') return null;
+  return sessionStorage.getItem(SOURCE_KEY)?.trim() || null;
+}
+
 /** Normalise a campaign/source slug for the API acquisition_source_code field. */
 export function normaliseSourceCode(raw: string): string {
   return (

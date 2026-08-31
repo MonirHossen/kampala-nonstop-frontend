@@ -7,7 +7,7 @@ import {
   type AbstractControl,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LucideLoaderCircle, LucideSend, LucideUsers } from '@lucide/angular';
+import { LucideArrowRight, LucideLoaderCircle, LucideSend, LucideUsers } from '@lucide/angular';
 import { DEFAULT_COUNTRY, type Country } from '../core/lib/countries';
 import { interestName } from '../core/lib/interests';
 import { collectTracking, type TrackingPayload } from '../core/lib/tracking';
@@ -23,13 +23,17 @@ import { InterestSelectorComponent } from './interest-selector.component';
     ReactiveFormsModule,
     CountrySelectorComponent,
     InterestSelectorComponent,
+    LucideArrowRight,
     LucideSend,
     LucideLoaderCircle,
     LucideUsers,
   ],
   template: `
     @if (disabled()) {
-      <div class="kn-join-card p-8 sm:p-12">
+      <div
+        class="p-8 sm:p-12"
+        [class]="variant() === 'join' ? 'kn-join-card' : 'border border-hairline bg-paper'"
+      >
         <p class="eyebrow text-clay">Waitlist paused</p>
         <h3 class="mt-3 font-display text-2xl text-foreground">We&rsquo;re at capacity right now.</h3>
         <p class="mt-3 max-w-md text-muted-foreground">
@@ -68,7 +72,6 @@ import { InterestSelectorComponent } from './interest-selector.component';
                 formControlName="firstName"
                 autocomplete="given-name"
                 maxlength="80"
-                placeholder="Enter your first name"
                 [class]="boxedInputClass(form.controls.firstName)"
               />
               @if (errorFor(form.controls.firstName, 'first name'); as message) {
@@ -83,7 +86,6 @@ import { InterestSelectorComponent } from './interest-selector.component';
                 formControlName="surname"
                 autocomplete="family-name"
                 maxlength="80"
-                placeholder="Enter your surname"
                 [class]="boxedInputClass(form.controls.surname)"
               />
               @if (errorFor(form.controls.surname, 'surname'); as message) {
@@ -109,10 +111,10 @@ import { InterestSelectorComponent } from './interest-selector.component';
             </div>
 
             <div>
-              <label class="kn-join-label">Country</label>
+              <label class="kn-join-label">Country of residence</label>
               <kn-country-selector
                 variant="boxed"
-                label="Country"
+                label="Country of residence"
                 [value]="country()"
                 (changed)="country.set($event)"
               />
@@ -149,8 +151,8 @@ import { InterestSelectorComponent } from './interest-selector.component';
                   Yes, keep me updated
                 </span>
                 <span class="mt-1 block text-[0.72rem] leading-relaxed text-muted-foreground">
-                  By selecting this, you agree to receive emails from Kampala Nonstop about new
-                  experiences, travel inspiration and offers. You can unsubscribe at any time.
+                  You will only receive updates about latest experiences, travel inspirations and
+                  offers.
                 </span>
               </span>
             </button>
@@ -242,7 +244,11 @@ import { InterestSelectorComponent } from './interest-selector.component';
           <div class="sm:col-span-2">
             <label class="eyebrow block text-muted-foreground">Country of residence</label>
             <div class="mt-2">
-              <kn-country-selector [value]="country()" (changed)="country.set($event)" />
+              <kn-country-selector
+                label="Country of residence"
+                [value]="country()"
+                (changed)="country.set($event)"
+              />
             </div>
           </div>
         </div>
@@ -290,6 +296,7 @@ import { InterestSelectorComponent } from './interest-selector.component';
             Joining&hellip;
           } @else {
             Join the Waitlist
+            <svg lucideArrowRight class="h-4 w-4"></svg>
           }
         </button>
       </form>

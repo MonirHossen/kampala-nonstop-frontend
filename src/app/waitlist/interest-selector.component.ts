@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
 import {
   LucideCalendarDays,
+  LucideCheck,
   LucideEllipsis,
   LucideLandmark,
   LucideMountain,
@@ -17,6 +18,7 @@ import { WaitlistApiService } from '../core/services/waitlist-api.service';
   selector: 'kn-interest-selector',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    LucideCheck,
     LucideUtensilsCrossed,
     LucideLandmark,
     LucideMusic,
@@ -110,6 +112,9 @@ import { WaitlistApiService } from '../core/services/waitlist-api.service';
                   : 'border-input text-foreground hover:border-foreground'
               "
             >
+              @if (active) {
+                <svg lucideCheck class="h-3.5 w-3.5"></svg>
+              }
               {{ interest.name }}
             </button>
           }

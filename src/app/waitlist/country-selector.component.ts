@@ -9,13 +9,18 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { LucideCheck, LucideChevronDown, LucideSearch } from '@lucide/angular';
+import {
+  LucideCheck,
+  LucideChevronDown,
+  LucideChevronsUpDown,
+  LucideSearch,
+} from '@lucide/angular';
 import { COUNTRIES, countryFlag, type Country } from '../core/lib/countries';
 
 @Component({
   selector: 'kn-country-selector',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideCheck, LucideChevronDown, LucideSearch],
+  imports: [LucideCheck, LucideChevronDown, LucideChevronsUpDown, LucideSearch],
   host: { class: 'relative block' },
   template: `
     <button
@@ -30,22 +35,23 @@ import { COUNTRIES, countryFlag, type Country } from '../core/lib/countries';
         <span class="shrink-0 text-[1.05rem] leading-none" aria-hidden="true">{{
           flag(value().code)
         }}</span>
-        <span class="truncate text-[0.92rem]">
-          @if (variant() === 'boxed') {
-            {{ value().name }} ({{ value().dial }})
-          } @else {
-            {{ value().name }}
-          }
-        </span>
+        <span class="truncate" [class]="variant() === 'boxed' ? 'text-[0.92rem]' : ''">{{
+          value().name
+        }}</span>
       </span>
-      <svg lucideChevronDown class="ml-2 h-4 w-4 shrink-0 text-muted-foreground"></svg>
+      @if (variant() === 'boxed') {
+        <svg lucideChevronDown class="ml-2 h-4 w-4 shrink-0 text-muted-foreground"></svg>
+      } @else {
+        <svg lucideChevronsUpDown class="ml-2 h-4 w-4 shrink-0 text-muted-foreground"></svg>
+      }
     </button>
 
     @if (open()) {
-      <div
-        class="absolute left-0 top-[calc(100%+0.35rem)] z-50 w-[min(92vw,22rem)] overflow-hidden rounded-xl border border-[#e8e2da] bg-white shadow-[0_18px_40px_-24px_rgba(27,21,18,0.45)]"
-      >
-        <div class="flex items-center gap-2 border-b border-[#ece7df] px-3">
+      <div [class]="panelClass()">
+        <div
+          class="flex items-center gap-2 border-b px-3"
+          [class]="variant() === 'boxed' ? 'border-[#ece7df]' : 'border-hairline'"
+        >
           <svg lucideSearch class="h-4 w-4 text-muted-foreground"></svg>
           <input
             #search
@@ -69,14 +75,14 @@ import { COUNTRIES, countryFlag, type Country } from '../core/lib/countries';
                   role="option"
                   [attr.aria-selected]="selected"
                   (click)="select(country)"
-                  class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-[#faf7f2]"
-                  [class.bg-[#faf7f2]]="selected"
+                  class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors"
+                  [class]="optionClass(selected)"
                 >
                   <span class="flex min-w-0 items-center gap-2.5 truncate">
                     <span class="shrink-0 text-[1.05rem] leading-none" aria-hidden="true">{{
                       flag(country.code)
                     }}</span>
-                    <span class="truncate">{{ country.name }} ({{ country.dial }})</span>
+                    <span class="truncate">{{ country.name }}</span>
                   </span>
                   @if (selected) {
                     <svg lucideCheck class="ml-3 h-3.5 w-3.5 shrink-0 text-primary"></svg>
@@ -94,7 +100,7 @@ export class CountrySelectorComponent {
   readonly value = input.required<Country>();
   readonly invalid = input(false);
   readonly variant = input<'default' | 'boxed'>('default');
-  readonly label = input('Country of residence');
+  readonly label = input('Country');
   readonly changed = output<Country>();
 
   protected readonly open = signal(false);
@@ -141,6 +147,19 @@ export class CountrySelectorComponent {
     return this.variant() === 'boxed'
       ? `${base} border-[#e7e5e4] hover:border-[#d6d3d1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/20`
       : `${base} border-input hover:border-foreground`;
+  }
+
+  protected panelClass(): string {
+    return this.variant() === 'boxed'
+      ? 'absolute left-0 top-[calc(100%+0.35rem)] z-50 w-[min(92vw,22rem)] overflow-hidden rounded-xl border border-[#e8e2da] bg-white shadow-[0_18px_40px_-24px_rgba(27,21,18,0.45)]'
+      : 'absolute left-0 top-[calc(100%+0.25rem)] z-50 w-[min(92vw,26rem)] border border-hairline bg-popover text-popover-foreground shadow-[0_24px_50px_-28px_oklch(0.2_0.02_47/0.55)]';
+  }
+
+  protected optionClass(selected: boolean): string {
+    if (this.variant() === 'boxed') {
+      return selected ? 'bg-[#faf7f2] hover:bg-[#faf7f2]' : 'hover:bg-[#faf7f2]';
+    }
+    return selected ? 'bg-accent hover:bg-accent' : 'hover:bg-accent';
   }
 
   protected toggleOpen(): void {

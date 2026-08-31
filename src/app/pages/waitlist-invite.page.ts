@@ -44,8 +44,9 @@ import { RevealDirective } from '../shared/reveal.directive';
                   Register yourself, then you can invite friends from this page.
                 </p>
                 <a
-                  routerLink="/waitlist/join"
+                  routerLink="/"
                   [queryParams]="{ source: defaultSource }"
+                  fragment="waitlist"
                   class="eyebrow mt-8 inline-flex items-center gap-2 bg-primary px-8 py-4 text-primary-foreground"
                 >
                   Join the Waitlist
@@ -126,7 +127,7 @@ import { RevealDirective } from '../shared/reveal.directive';
           </div>
         </section>
       </main>
-      <kn-site-footer [settings]="settings.settings()" />
+      <kn-site-footer />
     </div>
   `,
 })
