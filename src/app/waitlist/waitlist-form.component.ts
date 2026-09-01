@@ -253,7 +253,7 @@ import { InterestSelectorComponent } from './interest-selector.component';
           </div>
         </div>
 
-        <div class="mt-11 border-t border-hairline pt-9">
+        <div class="mt-11 pt-0">
           <kn-interest-selector [selected]="interests()" (toggle)="toggleInterest($event)" />
         </div>
 
