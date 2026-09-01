@@ -18,6 +18,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/waitlist-invite.page').then((m) => m.WaitlistInvitePage),
   },
   {
+    path: 'waitlist/unsubscribe',
+    title: 'Unsubscribe — Kampala Nonstop',
+    loadComponent: () =>
+      import('./pages/waitlist-unsubscribe.page').then((m) => m.WaitlistUnsubscribePage),
+  },
+  {
     path: 'about',
     title: 'About — Kampala Nonstop',
     loadComponent: () => import('./pages/about.page').then((m) => m.AboutPage),
