@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, inject, input, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { resolveWaitlistSource } from '../core/lib/tracking';
@@ -12,7 +12,7 @@ import { scrollToId } from '../shared/scroll-to';
     <header
       class="fixed inset-x-0 top-0 z-50 transition-colors duration-500"
       [class]="
-        scrolled()
+        headerSolid()
           ? 'bg-background/92 border-b border-hairline backdrop-blur-sm'
           : 'bg-transparent'
       "
@@ -27,7 +27,7 @@ import { scrollToId } from '../shared/scroll-to';
         >
           <img
             [src]="
-              scrolled()
+              headerSolid()
                 ? '/img/kampala_nonstop_logo.png'
                 : '/img/kampala_nonstop_logo_white.png'
             "
@@ -52,10 +52,14 @@ import { scrollToId } from '../shared/scroll-to';
   `,
 })
 export class SiteHeaderComponent {
+  /** Use on light-background pages so the dark logo and solid header show immediately. */
+  readonly lightBackground = input(false);
+
   private readonly router = inject(Router);
 
   protected readonly scrolled = signal(false);
   protected readonly showJoinCta = signal(!this.isJoinPath(this.router.url));
+  protected readonly headerSolid = computed(() => this.lightBackground() || this.scrolled());
 
   constructor() {
     this.router.events

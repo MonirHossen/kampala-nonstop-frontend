@@ -7,9 +7,9 @@ import { SiteFooterComponent } from './site-footer.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SiteHeaderComponent, SiteFooterComponent],
   template: `
-    <div class="min-h-screen bg-background">
-      <kn-site-header />
-      <main class="mx-auto max-w-3xl px-5 pb-24 pt-32 sm:px-8 sm:pt-40">
+    <div class="flex min-h-screen flex-col bg-background">
+      <kn-site-header [lightBackground]="true" />
+      <main class="mx-auto w-full max-w-3xl flex-1 px-5 pb-16 pt-32 sm:px-8 sm:pt-40">
         <div class="flex items-center gap-3">
           <span class="h-px w-10 bg-primary"></span>
           <p class="eyebrow text-clay">{{ eyebrow() }}</p>
@@ -19,7 +19,7 @@ import { SiteFooterComponent } from './site-footer.component';
           <ng-content />
         </div>
       </main>
-      <kn-site-footer />
+      <kn-site-footer class="mt-auto" />
     </div>
   `,
 })
