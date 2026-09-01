@@ -31,9 +31,7 @@ import { scrollToId } from '../shared/scroll-to';
             <p class="eyebrow text-ink-foreground/85">Uganda . Travel . Culture . Concierge</p>
           </div>
 
-          <h1
-            class="mt-5 text-[42px] leading-[1.05] font-bold text-ink-foreground [font-family:'Noto_Sans_KR',sans-serif] md:text-[52px] lg:text-[64px]"
-          >
+          <h1 class="hero-headline mt-5 text-ink-foreground">
             Join our waiting list and 
             <br />
             win a <em class="text-primary not-italic">return flight to Uganda</em>

@@ -156,6 +156,13 @@
   text-transform: uppercase;
 }
 
+@utility hero-headline {
+  font-family: "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.05;
+  font-size: clamp(2.625rem, 5vw, 4rem);
+}
+
 @utility display-xl {
   font-family: var(--font-display);
   font-weight: 500;

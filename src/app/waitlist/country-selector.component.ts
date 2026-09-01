@@ -31,7 +31,7 @@ import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
       (click)="toggleOpen()"
       [class]="triggerClass()"
     >
-      <span class="flex min-w-0 items-center gap-2 truncate">
+      <span class="flex min-w-0 items-center gap-2">
         <img
           [src]="flag(value().code)"
           alt=""
@@ -39,9 +39,11 @@ import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
           height="15"
           class="h-[0.95rem] w-5 shrink-0 rounded-[2px] object-cover"
         />
-        <span class="truncate" [class]="variant() === 'boxed' ? 'text-[0.92rem]' : ''">{{
-          value().name
-        }}</span>
+        <span
+          class="min-w-0 break-words whitespace-normal"
+          [class]="variant() === 'boxed' ? 'text-[0.92rem]' : ''"
+          >{{ value().name }}</span
+        >
       </span>
       @if (variant() === 'boxed') {
         <svg lucideChevronDown class="ml-2 h-4 w-4 shrink-0 text-muted-foreground"></svg>
@@ -82,7 +84,7 @@ import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
                   class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors"
                   [class]="optionClass(selected)"
                 >
-                  <span class="flex min-w-0 items-center gap-2.5 truncate">
+                  <span class="flex min-w-0 items-center gap-2.5">
                     <img
                       [src]="flag(country.code)"
                       alt=""
@@ -91,7 +93,7 @@ import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
                       height="15"
                       class="h-[0.95rem] w-5 shrink-0 rounded-[2px] object-cover"
                     />
-                    <span class="truncate">{{ country.name }}</span>
+                    <span class="min-w-0 break-words whitespace-normal">{{ country.name }}</span>
                   </span>
                   @if (selected) {
                     <svg lucideCheck class="ml-3 h-3.5 w-3.5 shrink-0 text-primary"></svg>
@@ -160,8 +162,8 @@ export class CountrySelectorComponent {
 
   protected panelClass(): string {
     return this.variant() === 'boxed'
-      ? 'absolute left-0 top-[calc(100%+0.35rem)] z-50 w-[min(92vw,22rem)] overflow-hidden rounded-xl border border-[#e8e2da] bg-white shadow-[0_18px_40px_-24px_rgba(27,21,18,0.45)]'
-      : 'absolute left-0 top-[calc(100%+0.25rem)] z-50 w-[min(92vw,26rem)] border border-hairline bg-popover text-popover-foreground shadow-[0_24px_50px_-28px_oklch(0.2_0.02_47/0.55)]';
+      ? 'absolute left-0 top-[calc(100%+0.35rem)] z-50 min-w-full w-[min(92vw,28rem)] overflow-hidden rounded-xl border border-[#e8e2da] bg-white shadow-[0_18px_40px_-24px_rgba(27,21,18,0.45)]'
+      : 'absolute left-0 top-[calc(100%+0.25rem)] z-50 min-w-full w-[min(92vw,28rem)] border border-hairline bg-popover text-popover-foreground shadow-[0_24px_50px_-28px_oklch(0.2_0.02_47/0.55)]';
   }
 
   protected optionClass(selected: boolean): string {

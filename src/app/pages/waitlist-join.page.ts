@@ -41,7 +41,7 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
               <p class="eyebrow text-ink-foreground/80">Early access waitlist</p>
             </div>
 
-            <h1 class="display-lg mt-5 text-ink-foreground">
+            <h1 class="hero-headline mt-5 text-ink-foreground">
               Join the list.
               <span class="mt-1 block text-primary">Win a return flight to Uganda.</span>
             </h1>
@@ -58,19 +58,11 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
 
       <main id="waitlist" class="bg-ink">
         <div class="mx-auto max-w-[1400px] px-5 pb-20 pt-12 sm:px-8 sm:pb-28 sm:pt-16">
-          <div knReveal class="mx-auto w-full max-w-[820px]">
-            <div class="flex items-center justify-center gap-3">
-              <span class="h-px w-10 bg-primary"></span>
-              <p class="eyebrow text-primary">Waitlist</p>
-              <span class="h-px w-10 bg-primary"></span>
-            </div>
-
-            <div class="mt-6">
-              <kn-waitlist-form
-                [disabled]="settings.waitlistDisabled()"
-                [sourceParam]="sourceParam()"
-              />
-            </div>
+          <div knReveal class="w-full">
+            <kn-waitlist-form
+              [disabled]="settings.waitlistDisabled()"
+              [sourceParam]="sourceParam()"
+            />
           </div>
         </div>
       </main>

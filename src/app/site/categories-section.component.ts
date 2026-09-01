@@ -24,7 +24,7 @@ type Tile = {
             <span class="h-px w-10 bg-primary"></span>
             <p class="eyebrow text-clay">What you'll discover</p>
           </div>
-          <h2 class="display-lg mt-5 max-w-xl text-foreground">Nine ways to fall for the city.</h2>
+          <h2 class="hero-headline mt-5 max-w-xl text-foreground">Nine ways to fall for the city.</h2>
         </div>
 
         <ul class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-8 sm:gap-5 lg:grid-cols-12">
