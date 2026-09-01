@@ -33,7 +33,7 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
         </div>
 
         <div
-          class="relative mx-auto flex min-h-[min(62svh,34rem)] max-w-[1400px] flex-col justify-end px-5 pb-16 pt-28 sm:px-8 sm:pb-20 sm:pt-32"
+          class="relative mx-auto flex min-h-[min(62svh,34rem)] max-w-[1400px] flex-col justify-end px-5 pb-8 pt-28 sm:px-8 sm:pb-10 sm:pt-32"
         >
           <div knReveal class="max-w-2xl">
             <div class="flex items-center gap-3">
@@ -43,7 +43,11 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
 
             <h1 class="hero-headline mt-5 text-ink-foreground">
               Join the list.
-              <span class="mt-1 block text-primary">Win a return flight to Uganda.</span>
+              <span class="mt-1 block text-primary">
+                Win a return flight to
+                <br />
+                Uganda.
+              </span>
             </h1>
 
             <p
@@ -57,7 +61,7 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
       </section>
 
       <main id="waitlist" class="bg-ink">
-        <div class="mx-auto max-w-[1400px] px-5 pb-20 pt-12 sm:px-8 sm:pb-28 sm:pt-16">
+        <div class="mx-auto max-w-[1400px] px-5 pb-20 pt-4 sm:px-8 sm:pb-28 sm:pt-6">
           <div knReveal class="w-full">
             <kn-waitlist-form
               [disabled]="settings.waitlistDisabled()"
