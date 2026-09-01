@@ -45,14 +45,14 @@ import { scrollToId } from '../shared/scroll-to';
             <a
               routerLink="/waitlist/join"
               [queryParams]="{ source: joinSource() }"
-              class="eyebrow bg-primary text-primary-foreground px-8 py-4 text-center transition-transform duration-300 hover:-translate-y-0.5"
+              class="eyebrow cursor-pointer bg-primary text-primary-foreground px-8 py-4 text-center transition-transform duration-300 hover:-translate-y-0.5"
             >
               Join the Waitlist
             </a>
             <button
               type="button"
               (click)="goTo('experiences')"
-              class="eyebrow border border-ink-foreground/30 px-8 py-4 text-ink-foreground transition-colors duration-300 hover:border-primary hover:text-primary"
+              class="eyebrow cursor-pointer border border-ink-foreground/30 px-8 py-4 text-ink-foreground transition-colors duration-300 hover:border-primary hover:text-primary"
             >
               Experiences
             </button>

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
 import { resolveWaitlistSource } from '../core/lib/tracking';
 import { scrollToId } from '../shared/scroll-to';
 
@@ -36,13 +37,15 @@ import { scrollToId } from '../shared/scroll-to';
         </a>
 
         <nav class="flex items-center gap-6 sm:gap-8">
-          <button
-            type="button"
-            (click)="goToJoin()"
-            class="eyebrow bg-primary text-primary-foreground px-4 py-2.5 transition-transform duration-300 hover:-translate-y-0.5 sm:px-5"
-          >
-            Join the Waitlist
-          </button>
+          @if (showJoinCta()) {
+            <button
+              type="button"
+              (click)="goToJoin()"
+              class="eyebrow cursor-pointer bg-primary text-primary-foreground px-4 py-2.5 transition-transform duration-300 hover:-translate-y-0.5 sm:px-5"
+            >
+              Join the Waitlist
+            </button>
+          }
         </nav>
       </div>
     </header>
@@ -52,6 +55,13 @@ export class SiteHeaderComponent {
   private readonly router = inject(Router);
 
   protected readonly scrolled = signal(false);
+  protected readonly showJoinCta = signal(!this.isJoinPath(this.router.url));
+
+  constructor() {
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => this.showJoinCta.set(!this.isJoinPath(event.urlAfterRedirects)));
+  }
 
   @HostListener('window:scroll')
   protected onScroll(): void {
@@ -60,7 +70,7 @@ export class SiteHeaderComponent {
 
   /** On the join page this scrolls to the form; anywhere else it navigates there. */
   protected goToJoin(): void {
-    if (this.router.url.split('?')[0].split('#')[0] === '/waitlist/join') {
+    if (this.isJoinPath(this.router.url)) {
       scrollToId('waitlist');
       return;
     }
@@ -68,5 +78,9 @@ export class SiteHeaderComponent {
     void this.router.navigate(['/waitlist/join'], {
       queryParams: { source: resolveWaitlistSource() },
     });
+  }
+
+  private isJoinPath(url: string): boolean {
+    return url.split('?')[0].split('#')[0] === '/waitlist/join';
   }
 }
