@@ -35,26 +35,20 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
         <div
           class="relative mx-auto flex min-h-[min(62svh,34rem)] max-w-[1400px] flex-col justify-end px-5 pb-8 pt-28 sm:px-8 sm:pb-10 sm:pt-32"
         >
-          <div knReveal class="max-w-2xl">
+          <div knReveal class="max-w-4xl">
             <div class="flex items-center gap-3">
               <span class="h-px w-10 bg-primary"></span>
-              <p class="eyebrow text-ink-foreground/80">Early access waitlist</p>
+              <p class="eyebrow text-ink-foreground/80">Early access</p>
             </div>
 
             <h1 class="hero-headline mt-5 text-ink-foreground">
-              Join the list.
-              <span class="mt-1 block text-primary">
-                Win a return flight to
-                <br />
-                Uganda.
-              </span>
+              Join our early access list and 
+              <br />
+              win a <em class="text-primary not-italic">return flight to Uganda</em>
             </h1>
 
-            <p
-              class="mt-5 max-w-lg text-[1.02rem] leading-relaxed text-ink-foreground/72 sm:text-[1.1rem]"
-            >
-              Be first for personalised trip planning, local insights, and experiences shaped around
-              how you want to feel Kampala.
+            <p class="mt-6 max-w-xl text-[1.05rem] leading-relaxed text-ink-foreground/65 sm:text-[1.15rem]">
+              Be the first to experience personalised trip planning, local insights and unforgettable experiences in Uganda.
             </p>
           </div>
         </div>
