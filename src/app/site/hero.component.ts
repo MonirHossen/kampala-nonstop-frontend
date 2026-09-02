@@ -59,7 +59,7 @@ const HERO_SLIDES: readonly HeroSlide[] = [
       <div class="absolute inset-0">
         @if (outgoingSlide(); as outgoing) {
           <picture
-            class="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
+            class="absolute inset-0 z-10 transition-opacity duration-[2000ms] ease-in-out"
             [class.opacity-100]="!isFading()"
             [class.opacity-0]="isFading()"
           >
@@ -67,13 +67,13 @@ const HERO_SLIDES: readonly HeroSlide[] = [
             <img
               [src]="outgoing.desktop"
               [alt]="outgoing.alt"
-              class="h-full w-full object-cover object-center opacity-[0.78]"
+              class="h-full w-full object-cover object-center opacity-100"
             />
           </picture>
         }
 
         <picture
-          class="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
+          class="absolute inset-0 transition-opacity duration-[2000ms] ease-in-out"
           [class.opacity-100]="outgoingSlide() === null || isFading()"
           [class.opacity-0]="outgoingSlide() !== null && !isFading()"
         >
@@ -82,10 +82,9 @@ const HERO_SLIDES: readonly HeroSlide[] = [
             [src]="activeSlide().desktop"
             [alt]="activeSlide().alt"
             [attr.fetchpriority]="activeSlideIndex() === 0 ? 'high' : null"
-            class="h-full w-full object-cover object-center opacity-[0.78]"
+            class="h-full w-full object-cover object-center opacity-100"
           />
         </picture>
-        <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/25"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-ink/70 via-transparent to-transparent"></div>
       </div>
 
@@ -114,13 +113,6 @@ const HERO_SLIDES: readonly HeroSlide[] = [
             >
               Join the Waitlist
             </a>
-            <button
-              type="button"
-              (click)="goTo('experiences')"
-              class="eyebrow cursor-pointer border border-ink-foreground/30 px-8 py-4 text-ink-foreground transition-colors duration-300 hover:border-primary hover:text-primary"
-            >
-              Experiences
-            </button>
           </div>
 
           <div
@@ -151,8 +143,9 @@ export class HeroComponent implements OnInit, OnDestroy {
 
   private slideStartTimer?: ReturnType<typeof setTimeout>;
   private slideInterval?: ReturnType<typeof setInterval>;
-  private fadeStartTimer?: ReturnType<typeof setTimeout>;
   private fadeEndTimer?: ReturnType<typeof setTimeout>;
+  private fadeStartFrame?: number;
+  private fadeStartFrameNested?: number;
 
   ngOnInit(): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -160,15 +153,16 @@ export class HeroComponent implements OnInit, OnDestroy {
     this.preloadSlide(1);
     this.slideStartTimer = window.setTimeout(() => {
       this.advanceSlide();
-      this.slideInterval = window.setInterval(() => this.advanceSlide(), 3500);
-    }, 2000);
+      this.slideInterval = window.setInterval(() => this.advanceSlide(), 2250);
+    }, 250);
   }
 
   ngOnDestroy(): void {
     if (this.slideStartTimer) clearTimeout(this.slideStartTimer);
     if (this.slideInterval) clearInterval(this.slideInterval);
-    if (this.fadeStartTimer) clearTimeout(this.fadeStartTimer);
     if (this.fadeEndTimer) clearTimeout(this.fadeEndTimer);
+    if (this.fadeStartFrame) cancelAnimationFrame(this.fadeStartFrame);
+    if (this.fadeStartFrameNested) cancelAnimationFrame(this.fadeStartFrameNested);
   }
 
   protected joinSource(): string {
@@ -185,11 +179,13 @@ export class HeroComponent implements OnInit, OnDestroy {
     this.activeSlideIndex.update((index) => (index + 1) % HERO_SLIDES.length);
     this.preloadSlide((this.activeSlideIndex() + 1) % HERO_SLIDES.length);
 
-    this.fadeStartTimer = window.setTimeout(() => this.isFading.set(true), 40);
+    this.fadeStartFrame = window.requestAnimationFrame(() => {
+      this.fadeStartFrameNested = window.requestAnimationFrame(() => this.isFading.set(true));
+    });
     this.fadeEndTimer = window.setTimeout(() => {
       this.outgoingSlide.set(null);
       this.isFading.set(false);
-    }, 1540);
+    }, 2040);
   }
 
   private preloadSlide(index: number): void {
