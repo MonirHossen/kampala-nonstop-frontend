@@ -6,7 +6,6 @@ import {
   rememberSource,
 } from '../core/lib/tracking';
 import { SettingsStore } from '../core/services/settings.store';
-import { CategoriesSectionComponent } from '../site/categories-section.component';
 import { HeroComponent } from '../site/hero.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { SiteHeaderComponent } from '../site/site-header.component';
@@ -14,18 +13,12 @@ import { SiteHeaderComponent } from '../site/site-header.component';
 @Component({
   selector: 'kn-home-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    SiteHeaderComponent,
-    SiteFooterComponent,
-    HeroComponent,
-    CategoriesSectionComponent,
-  ],
+  imports: [SiteHeaderComponent, SiteFooterComponent, HeroComponent],
   template: `
     <div class="bg-background">
       <kn-site-header />
       <main>
         <kn-hero [launchNote]="settings.launchNote()" />
-        <kn-categories-section />
       </main>
       <kn-site-footer />
     </div>
