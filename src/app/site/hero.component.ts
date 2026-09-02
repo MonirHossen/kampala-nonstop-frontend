@@ -88,7 +88,7 @@ const HERO_SLIDES: readonly HeroSlide[] = [
         <div class="absolute inset-0 bg-gradient-to-r from-ink/70 via-transparent to-transparent"></div>
       </div>
 
-      <div class="relative mx-auto flex min-h-[100svh] max-w-[1400px] flex-col justify-end px-5 pb-14 pt-28 sm:px-8 sm:pb-20">
+      <div class="relative z-20 mx-auto flex min-h-[100svh] max-w-[1400px] flex-col justify-end px-5 pb-14 pt-28 sm:px-8 sm:pb-20">
         <div knReveal class="max-w-4xl">
           <div class="flex items-center gap-3">
             <span class="h-px w-10 bg-primary"></span>
