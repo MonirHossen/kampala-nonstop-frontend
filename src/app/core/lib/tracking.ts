@@ -1,5 +1,5 @@
 /** Default `?source=` when Join CTAs have no campaign param. */
-export const DEFAULT_WAITLIST_SOURCE = 'unaa_denver_2026';
+export const DEFAULT_WAITLIST_SOURCE = 'direct';
 
 export type TrackingPayload = {
   source: string | null;
