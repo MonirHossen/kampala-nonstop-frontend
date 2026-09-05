@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard, adminLoginGuard } from './admin/admin.guard';
+import { travellerGuard, travellerGuestGuard } from './core/guards/traveller.guards';
 
 export const routes: Routes = [
   {
@@ -42,6 +43,57 @@ export const routes: Routes = [
     path: 'terms',
     title: 'Terms — Kampala Nonstop',
     loadComponent: () => import('./pages/terms.page').then((m) => m.TermsPage),
+  },
+  {
+    path: 'login',
+    title: 'Sign in — Kampala Nonstop',
+    canActivate: [travellerGuestGuard],
+    loadComponent: () => import('./auth/login.page').then((m) => m.LoginPage),
+  },
+  {
+    path: 'register',
+    title: 'Create account — Kampala Nonstop',
+    canActivate: [travellerGuestGuard],
+    loadComponent: () => import('./auth/register.page').then((m) => m.RegisterPage),
+  },
+  {
+    path: 'forgot-password',
+    title: 'Forgot password — Kampala Nonstop',
+    canActivate: [travellerGuestGuard],
+    loadComponent: () => import('./auth/forgot-password.page').then((m) => m.ForgotPasswordPage),
+  },
+  {
+    path: 'reset-password',
+    title: 'Reset password — Kampala Nonstop',
+    canActivate: [travellerGuestGuard],
+    loadComponent: () => import('./auth/reset-password.page').then((m) => m.ResetPasswordPage),
+  },
+  {
+    path: 'dashboard',
+    title: 'Dashboard — Kampala Nonstop',
+    canActivate: [travellerGuard],
+    loadComponent: () =>
+      import('./dashboard/dashboard-layout.component').then((m) => m.DashboardLayoutComponent),
+    children: [
+      {
+        path: '',
+        title: 'Dashboard — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/dashboard-overview.page').then((m) => m.DashboardOverviewPage),
+      },
+      {
+        path: 'profile',
+        title: 'My Profile — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/dashboard-profile.page').then((m) => m.DashboardProfilePage),
+      },
+      {
+        path: 'favourites',
+        title: 'Favourites — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/dashboard-favourites.page').then((m) => m.DashboardFavouritesPage),
+      },
+    ],
   },
   {
     path: 'admin/login',

@@ -1,7 +1,16 @@
-import { ChangeDetectionStrategy, Component, HostListener, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { resolveWaitlistSource } from '../core/lib/tracking';
+import { TravellerAuthService } from '../core/services/traveller-auth.service';
 import { scrollToId } from '../shared/scroll-to';
 
 @Component({
@@ -20,11 +29,7 @@ import { scrollToId } from '../shared/scroll-to';
       <div
         class="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:h-[76px] sm:px-8"
       >
-        <a
-          routerLink="/"
-          class="inline-flex items-center"
-          aria-label="Kampala Nonstop home"
-        >
+        <a routerLink="/" class="inline-flex items-center" aria-label="Kampala Nonstop home">
           <img
             [src]="
               headerSolid()
@@ -36,7 +41,33 @@ import { scrollToId } from '../shared/scroll-to';
           />
         </a>
 
-        <nav class="flex items-center gap-6 sm:gap-8">
+        <nav class="flex items-center gap-4 sm:gap-6">
+          @if (traveller.isAuthenticated()) {
+            <a
+              routerLink="/dashboard"
+              class="eyebrow transition-colors"
+              [class]="
+                headerSolid()
+                  ? 'text-foreground hover:text-primary'
+                  : 'text-ink-foreground/80 hover:text-ink-foreground'
+              "
+            >
+              Dashboard
+            </a>
+          } @else {
+            <a
+              routerLink="/login"
+              class="eyebrow transition-colors"
+              [class]="
+                headerSolid()
+                  ? 'text-foreground hover:text-primary'
+                  : 'text-ink-foreground/80 hover:text-ink-foreground'
+              "
+            >
+              Sign in
+            </a>
+          }
+
           @if (showJoinCta()) {
             <button
               type="button"
@@ -56,12 +87,15 @@ export class SiteHeaderComponent {
   readonly lightBackground = input(false);
 
   private readonly router = inject(Router);
+  protected readonly traveller = inject(TravellerAuthService);
 
   protected readonly scrolled = signal(false);
   protected readonly showJoinCta = signal(!this.isJoinPath(this.router.url));
   protected readonly headerSolid = computed(() => this.lightBackground() || this.scrolled());
 
   constructor() {
+    this.traveller.bootstrap().subscribe();
+
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => this.showJoinCta.set(!this.isJoinPath(event.urlAfterRedirects)));
