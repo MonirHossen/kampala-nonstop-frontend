@@ -167,10 +167,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
             }
           </button>
 
-          <kn-social-auth-buttons
-            [disabled]="loading()"
-            (succeeded)="onSocialSuccess()"
-          />
+          <kn-social-auth-buttons [disabled]="loading()" [returnUrl]="'/dashboard'" />
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-foreground/50">
@@ -208,10 +205,6 @@ export class RegisterPage {
   ): boolean {
     const field = this.form.controls[control];
     return field.invalid && field.touched;
-  }
-
-  protected onSocialSuccess(): void {
-    void this.router.navigateByUrl('/dashboard');
   }
 
   protected submit(): void {

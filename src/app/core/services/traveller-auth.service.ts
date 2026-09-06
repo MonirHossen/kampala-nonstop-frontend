@@ -66,6 +66,16 @@ export class TravellerAuthService {
       .pipe(tap((response) => this.persistSession(response)));
   }
 
+  /** Completes Laravel Socialite flow after API redirects back with a one-time code. */
+  exchangeSocialCode(code: string): Observable<AuthTokenResponse> {
+    return this.http
+      .post<AuthTokenResponse>(`${this.baseUrl}/social/exchange`, {
+        code,
+        device_name: 'web',
+      })
+      .pipe(tap((response) => this.persistSession(response)));
+  }
+
   logout(): Observable<ApiMessageResponse | null> {
     if (!this.tokenSignal()) {
       this.clearSession();

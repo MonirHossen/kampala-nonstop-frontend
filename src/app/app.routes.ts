@@ -57,10 +57,10 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/register.page').then((m) => m.RegisterPage),
   },
   {
-    path: 'auth/facebook/callback',
-    title: 'Facebook sign-in — Kampala Nonstop',
+    path: 'auth/social/callback',
+    title: 'Social sign-in — Kampala Nonstop',
     loadComponent: () =>
-      import('./auth/facebook-callback.page').then((m) => m.FacebookCallbackPage),
+      import('./auth/social-callback.page').then((m) => m.SocialCallbackPage),
   },
   {
     path: 'forgot-password',

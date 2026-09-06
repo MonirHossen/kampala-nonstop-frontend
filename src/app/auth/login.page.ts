@@ -95,11 +95,7 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
             }
           </button>
 
-          <kn-social-auth-buttons
-            [disabled]="loading()"
-            [returnUrl]="returnUrl"
-            (succeeded)="onSocialSuccess()"
-          />
+          <kn-social-auth-buttons [disabled]="loading()" [returnUrl]="returnUrl" />
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-foreground/50">
@@ -129,14 +125,16 @@ export class LoginPage {
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
+  constructor() {
+    const socialError = this.route.snapshot.queryParamMap.get('social_error');
+    if (socialError) {
+      this.formError.set(socialError);
+    }
+  }
+
   protected showError(control: 'email' | 'password'): boolean {
     const field = this.form.controls[control];
     return field.invalid && field.touched;
-  }
-
-  protected onSocialSuccess(): void {
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
-    void this.router.navigateByUrl(returnUrl);
   }
 
   protected submit(): void {
