@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideEye, LucideEyeOff, LucideLoaderCircle } from '@lucide/angular';
+import { SocialAuthButtonsComponent } from '../core/components/social-auth-buttons.component';
 import { extractApiError } from '../core/lib/api-error';
 import { TravellerAuthService } from '../core/services/traveller-auth.service';
 
@@ -23,7 +24,14 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'kn-register-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, LucideEye, LucideEyeOff, LucideLoaderCircle],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    LucideEye,
+    LucideEyeOff,
+    LucideLoaderCircle,
+    SocialAuthButtonsComponent,
+  ],
   template: `
     <div class="flex min-h-screen items-center justify-center bg-ink px-5 py-16">
       <div class="w-full max-w-md">
@@ -158,6 +166,11 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
               Create account
             }
           </button>
+
+          <kn-social-auth-buttons
+            [disabled]="loading()"
+            (succeeded)="onSocialSuccess()"
+          />
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-foreground/50">
@@ -195,6 +208,10 @@ export class RegisterPage {
   ): boolean {
     const field = this.form.controls[control];
     return field.invalid && field.touched;
+  }
+
+  protected onSocialSuccess(): void {
+    void this.router.navigateByUrl('/dashboard');
   }
 
   protected submit(): void {

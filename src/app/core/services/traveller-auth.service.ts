@@ -11,6 +11,7 @@ import {
   LoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
+  SocialLoginPayload,
   TravellerUser,
 } from '../models/traveller.models';
 
@@ -50,6 +51,15 @@ export class TravellerAuthService {
   login(payload: LoginPayload): Observable<AuthTokenResponse> {
     return this.http
       .post<AuthTokenResponse>(`${this.baseUrl}/login`, {
+        ...payload,
+        device_name: payload.device_name ?? 'web',
+      })
+      .pipe(tap((response) => this.persistSession(response)));
+  }
+
+  socialLogin(payload: SocialLoginPayload): Observable<AuthTokenResponse> {
+    return this.http
+      .post<AuthTokenResponse>(`${this.baseUrl}/social`, {
         ...payload,
         device_name: payload.device_name ?? 'web',
       })

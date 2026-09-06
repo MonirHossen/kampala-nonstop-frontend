@@ -57,6 +57,12 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/register.page').then((m) => m.RegisterPage),
   },
   {
+    path: 'auth/facebook/callback',
+    title: 'Facebook sign-in — Kampala Nonstop',
+    loadComponent: () =>
+      import('./auth/facebook-callback.page').then((m) => m.FacebookCallbackPage),
+  },
+  {
     path: 'forgot-password',
     title: 'Forgot password — Kampala Nonstop',
     canActivate: [travellerGuestGuard],

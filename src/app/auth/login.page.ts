@@ -2,13 +2,21 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideEye, LucideEyeOff, LucideLoaderCircle } from '@lucide/angular';
+import { SocialAuthButtonsComponent } from '../core/components/social-auth-buttons.component';
 import { extractApiError } from '../core/lib/api-error';
 import { TravellerAuthService } from '../core/services/traveller-auth.service';
 
 @Component({
   selector: 'kn-login-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, LucideEye, LucideEyeOff, LucideLoaderCircle],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    LucideEye,
+    LucideEyeOff,
+    LucideLoaderCircle,
+    SocialAuthButtonsComponent,
+  ],
   template: `
     <div class="flex min-h-screen items-center justify-center bg-ink px-5 py-16">
       <div class="w-full max-w-sm">
@@ -86,6 +94,12 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
               Sign in
             }
           </button>
+
+          <kn-social-auth-buttons
+            [disabled]="loading()"
+            [returnUrl]="returnUrl"
+            (succeeded)="onSocialSuccess()"
+          />
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-foreground/50">
@@ -106,6 +120,10 @@ export class LoginPage {
   protected readonly formError = signal<string | null>(null);
   protected readonly show = signal(false);
 
+  protected get returnUrl(): string {
+    return this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+  }
+
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
@@ -114,6 +132,11 @@ export class LoginPage {
   protected showError(control: 'email' | 'password'): boolean {
     const field = this.form.controls[control];
     return field.invalid && field.touched;
+  }
+
+  protected onSocialSuccess(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+    void this.router.navigateByUrl(returnUrl);
   }
 
   protected submit(): void {

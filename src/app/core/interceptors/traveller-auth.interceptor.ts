@@ -32,6 +32,7 @@ export const travellerAuthInterceptor: HttpInterceptorFn = (req, next) => {
       const isPublicAuth =
         req.url.includes('/auth/login') ||
         req.url.includes('/auth/register') ||
+        req.url.includes('/auth/social') ||
         req.url.includes('/auth/forgot-password') ||
         req.url.includes('/auth/reset-password') ||
         req.url.includes('/auth/logout');

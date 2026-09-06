@@ -95,6 +95,12 @@ export interface LoginPayload {
   device_name?: string;
 }
 
+export interface SocialLoginPayload {
+  provider: 'google' | 'facebook';
+  token: string;
+  device_name?: string;
+}
+
 export interface ForgotPasswordPayload {
   email: string;
 }
