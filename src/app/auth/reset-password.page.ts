@@ -129,7 +129,9 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-foreground/50">
-          <a routerLink="/login" class="text-primary hover:underline">Back to sign in</a>
+          <a routerLink="/" [queryParams]="{ auth: 'login' }" class="text-primary hover:underline"
+            >Back to sign in</a
+          >
         </p>
       </div>
     </div>
@@ -215,7 +217,10 @@ export class ResetPasswordPage implements OnInit {
       next: (response) => {
         this.success.set(response.message || 'Password updated. You can sign in now.');
         this.loading.set(false);
-        setTimeout(() => void this.router.navigateByUrl('/login'), 2000);
+        setTimeout(
+          () => void this.router.navigate(['/'], { queryParams: { auth: 'login' } }),
+          2000,
+        );
       },
       error: (error: unknown) => {
         this.needsNewLink.set(true);

@@ -107,6 +107,6 @@ export class DashboardSidebarComponent {
   protected readonly email = computed(() => this.auth.user()?.email ?? '');
 
   protected logout(): void {
-    this.auth.logoutAndRedirect('/login');
+    this.auth.logoutAndRedirect('/?auth=login');
   }
 }

@@ -44,7 +44,7 @@ export const travellerAuthInterceptor: HttpInterceptorFn = (req, next) => {
         isApiRequest &&
         !isPublicAuth
       ) {
-        auth.logoutAndRedirect('/login');
+        auth.logoutAndRedirect('/?auth=login');
       }
 
       return throwError(() => error);

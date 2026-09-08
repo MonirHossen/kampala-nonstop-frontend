@@ -55,9 +55,10 @@ import { scrollToId } from '../shared/scroll-to';
               Dashboard
             </a>
           } @else {
-            <a
-              routerLink="/login"
-              class="eyebrow transition-colors"
+            <button
+              type="button"
+              (click)="openSignIn()"
+              class="eyebrow cursor-pointer transition-colors"
               [class]="
                 headerSolid()
                   ? 'text-foreground hover:text-primary'
@@ -65,7 +66,7 @@ import { scrollToId } from '../shared/scroll-to';
               "
             >
               Sign in
-            </a>
+            </button>
           }
 
           @if (showJoinCta()) {
@@ -106,6 +107,19 @@ export class SiteHeaderComponent {
     this.scrolled.set(window.scrollY > 40);
   }
 
+  /** Opens the home-page auth modal (navigates home when needed). */
+  protected openSignIn(): void {
+    if (this.isHomePath(this.router.url)) {
+      void this.router.navigate(['/'], {
+        queryParams: { auth: 'login' },
+        queryParamsHandling: 'merge',
+      });
+      return;
+    }
+
+    void this.router.navigate(['/'], { queryParams: { auth: 'login' } });
+  }
+
   /** On the join page this scrolls to the form; anywhere else it navigates there. */
   protected goToJoin(): void {
     if (this.isJoinPath(this.router.url)) {
@@ -116,6 +130,11 @@ export class SiteHeaderComponent {
     void this.router.navigate(['/waitlist/join'], {
       queryParams: { source: resolveWaitlistSource() },
     });
+  }
+
+  private isHomePath(url: string): boolean {
+    const path = url.split('?')[0].split('#')[0];
+    return path === '/' || path === '';
   }
 
   private isJoinPath(url: string): boolean {

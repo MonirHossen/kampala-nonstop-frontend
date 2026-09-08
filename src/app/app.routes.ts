@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard, adminLoginGuard } from './admin/admin.guard';
+import { redirectToAuthModal } from './core/guards/auth-modal-redirect.guard';
 import { travellerGuard, travellerGuestGuard } from './core/guards/traveller.guards';
 
 export const routes: Routes = [
@@ -45,16 +46,17 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/terms.page').then((m) => m.TermsPage),
   },
   {
+    // Legacy deep links — bounce to the home-page auth modal.
     path: 'login',
     title: 'Sign in — Kampala Nonstop',
-    canActivate: [travellerGuestGuard],
-    loadComponent: () => import('./auth/login.page').then((m) => m.LoginPage),
+    canActivate: [travellerGuestGuard, redirectToAuthModal('login')],
+    loadComponent: () => import('./pages/home.page').then((m) => m.HomePage),
   },
   {
     path: 'register',
     title: 'Create account — Kampala Nonstop',
-    canActivate: [travellerGuestGuard],
-    loadComponent: () => import('./auth/register.page').then((m) => m.RegisterPage),
+    canActivate: [travellerGuestGuard, redirectToAuthModal('register')],
+    loadComponent: () => import('./pages/home.page').then((m) => m.HomePage),
   },
   {
     path: 'auth/social/callback',

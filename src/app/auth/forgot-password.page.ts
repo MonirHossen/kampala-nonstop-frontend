@@ -69,7 +69,9 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
         </form>
 
         <p class="mt-6 text-center text-sm text-ink-foreground/50">
-          <a routerLink="/login" class="text-primary hover:underline">Back to sign in</a>
+          <a routerLink="/" [queryParams]="{ auth: 'login' }" class="text-primary hover:underline"
+            >Back to sign in</a
+          >
         </p>
       </div>
     </div>

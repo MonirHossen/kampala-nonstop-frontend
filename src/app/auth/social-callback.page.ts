@@ -20,7 +20,8 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
             {{ error() }}
           </p>
           <a
-            routerLink="/login"
+            routerLink="/"
+            [queryParams]="{ auth: 'login' }"
             class="eyebrow mt-7 inline-flex w-full items-center justify-center bg-primary py-4 text-primary-foreground transition-colors hover:bg-clay"
           >
             Back to sign in

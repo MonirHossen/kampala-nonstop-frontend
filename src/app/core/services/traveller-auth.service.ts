@@ -143,7 +143,7 @@ export class TravellerAuthService {
     return this.tokenSignal();
   }
 
-  logoutAndRedirect(returnUrl = '/login'): void {
+  logoutAndRedirect(returnUrl = '/?auth=login'): void {
     this.logout().subscribe({
       next: () => void this.router.navigateByUrl(returnUrl),
       error: () => void this.router.navigateByUrl(returnUrl),

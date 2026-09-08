@@ -14,14 +14,14 @@ export const travellerGuard: CanActivateFn = (_route, state) => {
         return true;
       }
 
-      return router.createUrlTree(['/login'], {
-        queryParams: { returnUrl: state.url },
+      return router.createUrlTree(['/'], {
+        queryParams: { auth: 'login', returnUrl: state.url },
       });
     }),
   );
 };
 
-/** Keeps signed-in travellers out of login / register / password pages. */
+/** Keeps signed-in travellers out of guest auth / password pages. */
 export const travellerGuestGuard: CanActivateFn = () => {
   const auth = inject(TravellerAuthService);
   const router = inject(Router);
