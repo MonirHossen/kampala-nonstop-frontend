@@ -26,6 +26,23 @@ export const routes: Routes = [
       import('./pages/waitlist-unsubscribe.page').then((m) => m.WaitlistUnsubscribePage),
   },
   {
+    path: 'guide',
+    pathMatch: 'full',
+    redirectTo: 'guide/UG',
+  },
+  {
+    path: 'guide/:countryCode',
+    title: 'Country Guide — Kampala Nonstop',
+    loadComponent: () =>
+      import('./guide/guide-landing.page').then((m) => m.GuideLandingPage),
+  },
+  {
+    path: 'guide/:countryCode/travel',
+    title: 'Travel Guide — Kampala Nonstop',
+    loadComponent: () =>
+      import('./guide/travel-guide.page').then((m) => m.TravelGuidePage),
+  },
+  {
     path: 'about',
     title: 'About — Kampala Nonstop',
     loadComponent: () => import('./pages/about.page').then((m) => m.AboutPage),

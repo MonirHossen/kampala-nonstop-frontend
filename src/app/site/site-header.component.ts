@@ -42,6 +42,15 @@ import { scrollToId } from '../shared/scroll-to';
         </a>
 
         <nav class="flex items-center gap-4 sm:gap-6">
+          <a
+            routerLink="/guide"
+            class="eyebrow transition-colors"
+            [class]="guideNavClass()"
+            [attr.aria-current]="guideActive() ? 'page' : null"
+          >
+            Guide
+          </a>
+
           @if (traveller.isAuthenticated()) {
             <a
               routerLink="/dashboard"
@@ -92,14 +101,30 @@ export class SiteHeaderComponent {
 
   protected readonly scrolled = signal(false);
   protected readonly showJoinCta = signal(!this.isJoinPath(this.router.url));
+  protected readonly currentUrl = signal(this.router.url);
   protected readonly headerSolid = computed(() => this.lightBackground() || this.scrolled());
+  protected readonly guideActive = computed(() => this.isGuidePath(this.currentUrl()));
+  protected readonly guideNavClass = computed(() => {
+    if (this.guideActive()) {
+      return this.headerSolid()
+        ? 'text-primary'
+        : 'text-ink-foreground';
+    }
+
+    return this.headerSolid()
+      ? 'text-foreground hover:text-primary'
+      : 'text-ink-foreground/80 hover:text-ink-foreground';
+  });
 
   constructor() {
     this.traveller.bootstrap().subscribe();
 
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe((event) => this.showJoinCta.set(!this.isJoinPath(event.urlAfterRedirects)));
+      .subscribe((event) => {
+        this.showJoinCta.set(!this.isJoinPath(event.urlAfterRedirects));
+        this.currentUrl.set(event.urlAfterRedirects);
+      });
   }
 
   @HostListener('window:scroll')
@@ -139,5 +164,10 @@ export class SiteHeaderComponent {
 
   private isJoinPath(url: string): boolean {
     return url.split('?')[0].split('#')[0] === '/waitlist/join';
+  }
+
+  private isGuidePath(url: string): boolean {
+    const path = url.split('?')[0].split('#')[0];
+    return path === '/guide' || path.startsWith('/guide/');
   }
 }

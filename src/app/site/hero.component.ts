@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { resolveWaitlistSource } from '../core/lib/tracking';
+import { GuideTravelInfoChipsComponent } from '../guide/components/guide-travel-info-chips.component';
 import { RevealDirective } from '../shared/reveal.directive';
 import { scrollToId } from '../shared/scroll-to';
 
@@ -53,10 +54,11 @@ const HERO_SLIDES: readonly HeroSlide[] = [
 @Component({
   selector: 'kn-hero',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, RouterLink],
+  imports: [RevealDirective, RouterLink, GuideTravelInfoChipsComponent],
   template: `
-    <section class="relative min-h-[100svh] overflow-hidden bg-ink">
-      <div class="absolute inset-0">
+    <section class="relative min-h-[100svh] bg-ink">
+      <!-- Clips the drifting background art without trapping hero popovers. -->
+      <div class="absolute inset-0 overflow-hidden">
         @if (outgoingSlide(); as outgoing) {
           <picture
             class="absolute inset-0 z-10 transition-opacity duration-[2000ms] ease-in-out"
@@ -115,9 +117,7 @@ const HERO_SLIDES: readonly HeroSlide[] = [
             </a>
           </div>
 
-          <div
-            class="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-ink-foreground/15 pt-5"
-          >
+          <div class="mt-12 border-t border-ink-foreground/15 pt-5">
             <p class="flex items-center gap-2.5 text-sm text-ink-foreground/70">
               <span class="relative flex h-1.5 w-1.5">
                 <span
@@ -127,6 +127,8 @@ const HERO_SLIDES: readonly HeroSlide[] = [
               </span>
               {{ launchNote() }}
             </p>
+
+            <kn-guide-travel-info-chips class="mt-5 block" tone="ink" [dense]="true" />
           </div>
         </div>
       </div>
