@@ -22,6 +22,7 @@
 
 ## Visual direction
 
+- **Confirmed:** The public navbar is 56 px high on desktop, tablet and mobile, including its scrolled-state border.
 - **Confirmed:** Website typeface is **Noto Sans KR**. **Working guideline:** use regular for body/UI and bold for headings, buttons and navigation, with hierarchy mainly through size and weight.
 - **Rejected:** **Malgun Gothic** was replaced because its Microsoft licensing does not make it safe to assume the desktop font may be uploaded as a webfont.
 - **Confirmed:** Responsive desktop, tablet and mobile UI. The approved mobile mock-up target is 420 px wide, full-page/scrollable, with no device frame and no horizontal scrollbar. Components and imagery must reflow as mobile layouts, not merely shrink.
