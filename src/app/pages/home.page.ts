@@ -41,7 +41,7 @@ export class HomePage implements OnInit {
       if (fromUrl) rememberSource(fromUrl);
 
       const auth = params.get('auth');
-      if (auth === 'login' || auth === 'register') {
+      if (auth === 'login' || auth === 'register' || auth === 'forgot') {
         if (this.authModal.mode() !== auth) {
           this.authModal.open(auth, {
             returnUrl: params.get('returnUrl'),

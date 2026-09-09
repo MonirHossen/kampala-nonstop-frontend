@@ -100,7 +100,9 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
             >
               {{ formError() }}
               @if (needsNewLink()) {
-                <a routerLink="/forgot-password" class="ml-1 underline">Request a new link</a>
+                <a routerLink="/" [queryParams]="{ auth: 'forgot' }" class="ml-1 underline"
+                  >Request a new link</a
+                >
               }
             </p>
           }
