@@ -19,7 +19,7 @@ import { scrollToId } from '../shared/scroll-to';
   imports: [RouterLink],
   template: `
     <header
-      class="fixed inset-x-0 top-0 z-50 transition-colors duration-500"
+      class="fixed inset-x-0 top-0 z-50 h-14 transition-colors duration-500"
       [class]="
         headerSolid()
           ? 'bg-background/92 border-b border-hairline backdrop-blur-sm'
@@ -27,7 +27,7 @@ import { scrollToId } from '../shared/scroll-to';
       "
     >
       <div
-        class="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:h-[76px] sm:px-8"
+        class="mx-auto flex h-full max-w-[1400px] items-center justify-between px-5 sm:px-8"
       >
         <a routerLink="/" class="inline-flex items-center" aria-label="Kampala Nonstop home">
           <img
