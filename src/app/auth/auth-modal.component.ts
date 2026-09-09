@@ -17,7 +17,7 @@ import { Router, RouterLink } from '@angular/router';
 import { LucideEye, LucideEyeOff, LucideLoaderCircle, LucideX } from '@lucide/angular';
 import { SocialAuthButtonsComponent } from '../core/components/social-auth-buttons.component';
 import { extractApiError } from '../core/lib/api-error';
-import { AuthModalService } from '../core/services/auth-modal.service';
+import { AuthModalService, type AuthModalMode } from '../core/services/auth-modal.service';
 import { TravellerAuthService } from '../core/services/traveller-auth.service';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
@@ -47,7 +47,9 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
         class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-ink/60 px-4 py-10 sm:items-center sm:py-8"
         role="dialog"
         aria-modal="true"
-        [attr.aria-label]="mode === 'login' ? 'Sign in' : 'Create account'"
+        [attr.aria-label]="
+          mode === 'login' ? 'Sign in' : mode === 'register' ? 'Create account' : 'Reset password'
+        "
         (click)="close()"
       >
         <div
@@ -113,13 +115,13 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
               </div>
 
               <div class="mt-4 text-right">
-                <a
-                  routerLink="/forgot-password"
-                  (click)="close()"
+                <button
+                  type="button"
+                  (click)="switchTo('forgot')"
                   class="text-xs text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
                 >
                   Forgot password?
-                </a>
+                </button>
               </div>
 
               @if (formError()) {
@@ -157,7 +159,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
                 Create an account
               </button>
             </p>
-          } @else {
+          } @else if (mode === 'register') {
             <h2 class="font-display text-2xl text-foreground">Create account</h2>
             <p class="mt-1 text-sm text-muted-foreground">Join Kampala Nonstop as a traveller</p>
 
@@ -270,14 +272,14 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
                   I agree to the
                   <a
                     routerLink="/terms"
-                    (click)="close()"
+                    (click)="goTo('/terms', $event)"
                     class="text-primary hover:underline"
                     >Terms</a
                   >
                   and
                   <a
                     routerLink="/privacy"
-                    (click)="close()"
+                    (click)="goTo('/privacy', $event)"
                     class="text-primary hover:underline"
                     >Privacy Policy</a
                   >
@@ -324,6 +326,68 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
                 Sign in
               </button>
             </p>
+          } @else {
+            <h2 class="font-display text-2xl text-foreground">Reset password</h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+              Enter your email and we will send a reset link if an account exists.
+            </p>
+
+            <form [formGroup]="forgotForm" (ngSubmit)="submitForgot()" novalidate class="mt-6">
+              <label for="auth-forgot-email" class="eyebrow block text-muted-foreground">Email</label>
+              <input
+                id="auth-forgot-email"
+                type="email"
+                autocomplete="email"
+                formControlName="email"
+                class="mt-2 h-11 w-full border-b bg-transparent outline-none transition-colors"
+                [class]="
+                  forgotForm.controls.email.invalid && forgotForm.controls.email.touched
+                    ? 'border-destructive'
+                    : 'border-input focus:border-primary'
+                "
+              />
+
+              @if (formError()) {
+                <p
+                  role="alert"
+                  class="mt-5 border-l-2 border-destructive bg-destructive/5 px-3 py-2.5 text-xs text-destructive"
+                >
+                  {{ formError() }}
+                </p>
+              }
+
+              @if (forgotSuccess()) {
+                <p
+                  role="status"
+                  class="mt-5 border-l-2 border-forest bg-forest/5 px-3 py-2.5 text-xs text-forest"
+                >
+                  {{ forgotSuccess() }}
+                </p>
+              }
+
+              <button
+                type="submit"
+                [disabled]="loading()"
+                class="eyebrow mt-7 flex w-full items-center justify-center gap-2 bg-primary py-4 text-primary-foreground transition-colors hover:bg-clay disabled:opacity-70"
+              >
+                @if (loading()) {
+                  <svg lucideLoaderCircle class="h-4 w-4 animate-spin"></svg>
+                  Sending&hellip;
+                } @else {
+                  Send reset link
+                }
+              </button>
+            </form>
+
+            <p class="mt-6 text-center text-sm text-muted-foreground">
+              <button
+                type="button"
+                (click)="switchTo('login')"
+                class="text-primary hover:underline"
+              >
+                Back to sign in
+              </button>
+            </p>
           }
         </div>
       </div>
@@ -339,12 +403,17 @@ export class AuthModalComponent {
 
   protected readonly loading = signal(false);
   protected readonly formError = signal<string | null>(null);
+  protected readonly forgotSuccess = signal<string | null>(null);
   protected readonly showLoginPassword = signal(false);
   protected readonly showRegisterPassword = signal(false);
 
   protected readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
+  });
+
+  protected readonly forgotForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
   });
 
   protected readonly registerForm = this.fb.nonNullable.group(
@@ -377,9 +446,11 @@ export class AuthModalComponent {
       document.body.style.overflow = 'hidden';
       this.loading.set(false);
       this.formError.set(externalError);
+      this.forgotSuccess.set(null);
       this.showLoginPassword.set(false);
       this.showRegisterPassword.set(false);
       this.loginForm.reset({ email: '', password: '' });
+      this.forgotForm.reset({ email: '' });
       this.registerForm.reset({
         first_name: '',
         last_name: '',
@@ -392,8 +463,9 @@ export class AuthModalComponent {
     });
   }
 
-  protected switchTo(mode: 'login' | 'register'): void {
+  protected switchTo(mode: AuthModalMode): void {
     this.formError.set(null);
+    this.forgotSuccess.set(null);
     this.authModal.switchTo(mode);
     void this.router.navigate(['/'], {
       queryParams: { auth: mode },
@@ -411,6 +483,14 @@ export class AuthModalComponent {
     });
   }
 
+  /** Close the modal without returning to `/`, so in-modal links can leave the home page. */
+  protected goTo(url: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.authModal.close();
+    void this.router.navigateByUrl(url);
+  }
+
   protected loginFieldError(control: 'email' | 'password'): boolean {
     const field = this.loginForm.controls[control];
     return field.invalid && field.touched;
@@ -421,6 +501,30 @@ export class AuthModalComponent {
   ): boolean {
     const field = this.registerForm.controls[control];
     return field.invalid && field.touched;
+  }
+
+  protected submitForgot(): void {
+    this.formError.set(null);
+    this.forgotSuccess.set(null);
+    this.forgotForm.markAllAsTouched();
+
+    if (this.forgotForm.invalid || this.loading()) {
+      return;
+    }
+
+    this.loading.set(true);
+    this.auth.forgotPassword(this.forgotForm.getRawValue()).subscribe({
+      next: (response) => {
+        this.forgotSuccess.set(
+          response.message || 'If that email exists, we sent a password reset link.',
+        );
+        this.loading.set(false);
+      },
+      error: (error: unknown) => {
+        this.formError.set(extractApiError(error, 'Unable to send reset link.'));
+        this.loading.set(false);
+      },
+    });
   }
 
   protected submitLogin(): void {

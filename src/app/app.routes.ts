@@ -84,8 +84,8 @@ export const routes: Routes = [
   {
     path: 'forgot-password',
     title: 'Forgot password — Kampala Nonstop',
-    canActivate: [travellerGuestGuard],
-    loadComponent: () => import('./auth/forgot-password.page').then((m) => m.ForgotPasswordPage),
+    canActivate: [travellerGuestGuard, redirectToAuthModal('forgot')],
+    loadComponent: () => import('./pages/home.page').then((m) => m.HomePage),
   },
   {
     path: 'reset-password',

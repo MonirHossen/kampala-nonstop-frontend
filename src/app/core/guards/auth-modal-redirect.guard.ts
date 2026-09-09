@@ -1,8 +1,9 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { AuthModalMode } from '../services/auth-modal.service';
 
-/** Sends legacy /login and /register URLs to the home-page auth modal. */
-export function redirectToAuthModal(mode: 'login' | 'register'): CanActivateFn {
+/** Sends legacy /login, /register, and /forgot-password URLs to the home-page auth modal. */
+export function redirectToAuthModal(mode: AuthModalMode): CanActivateFn {
   return (route) => {
     const router = inject(Router);
     const queryParams: Record<string, string> = { auth: mode };
