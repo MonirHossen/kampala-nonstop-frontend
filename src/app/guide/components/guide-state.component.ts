@@ -44,7 +44,7 @@ import { GuideLoadState } from '../guide.models';
             We do not have a live guide for this destination. Uganda is available to explore now.
           </p>
           <a
-            routerLink="/guide/UG"
+            routerLink="/ug/guide"
             class="mt-8 inline-flex bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
             Open Uganda guide

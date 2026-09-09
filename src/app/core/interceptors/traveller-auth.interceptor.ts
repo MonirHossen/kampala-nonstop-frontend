@@ -37,12 +37,15 @@ export const travellerAuthInterceptor: HttpInterceptorFn = (req, next) => {
         req.url.includes('/auth/forgot-password') ||
         req.url.includes('/auth/reset-password') ||
         req.url.includes('/auth/logout');
+      const isPublicGuide =
+        /\/api\/v1\/guide\//.test(req.url) || req.url.includes('/local-knowledge/random');
 
       if (
         error instanceof HttpErrorResponse &&
         error.status === 401 &&
         isApiRequest &&
-        !isPublicAuth
+        !isPublicAuth &&
+        !isPublicGuide
       ) {
         auth.logoutAndRedirect('/?auth=login');
       }

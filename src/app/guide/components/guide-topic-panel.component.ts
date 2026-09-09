@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { GuideTravelTopic } from '../guide.models';
+import { GuideTopic } from '../content/guide-content.types';
 
 @Component({
   selector: 'kn-guide-topic-panel',
@@ -28,7 +28,7 @@ import { GuideTravelTopic } from '../guide.models';
   `,
 })
 export class GuideTopicPanelComponent {
-  readonly topic = input<GuideTravelTopic | null>(null);
+  readonly topic = input<GuideTopic | null>(null);
 
   protected readonly paragraphs = computed(() => {
     const content = this.topic()?.content?.trim();

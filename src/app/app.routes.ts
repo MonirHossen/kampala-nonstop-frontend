@@ -2,11 +2,13 @@ import { Routes } from '@angular/router';
 import { adminGuard, adminLoginGuard } from './admin/admin.guard';
 import { redirectToAuthModal } from './core/guards/auth-modal-redirect.guard';
 import { travellerGuard, travellerGuestGuard } from './core/guards/traveller.guards';
+import { knownCountryMatch } from './guide/known-country.guard';
 
 export const routes: Routes = [
   {
     path: '',
     title: 'Kampala Nonstop | Discover Kampala Differently',
+    data: { localKnowledgeContext: 'HOME' },
     loadComponent: () => import('./pages/home.page').then((m) => m.HomePage),
   },
   {
@@ -28,28 +30,27 @@ export const routes: Routes = [
   {
     path: 'guide',
     pathMatch: 'full',
-    redirectTo: 'guide/UG',
-  },
-  {
-    path: 'guide/:countryCode',
-    title: 'Country Guide — Kampala Nonstop',
-    loadComponent: () =>
-      import('./guide/guide-landing.page').then((m) => m.GuideLandingPage),
+    redirectTo: 'ug/guide',
   },
   {
     path: 'guide/:countryCode/travel',
-    title: 'Travel Guide — Kampala Nonstop',
-    loadComponent: () =>
-      import('./guide/travel-guide.page').then((m) => m.TravelGuidePage),
+    redirectTo: 'ug/guide/travel-guide',
+  },
+  {
+    path: 'guide/:countryCode',
+    pathMatch: 'full',
+    redirectTo: 'ug/guide',
   },
   {
     path: 'about',
     title: 'About — Kampala Nonstop',
+    data: { localKnowledgeContext: 'HOME' },
     loadComponent: () => import('./pages/about.page').then((m) => m.AboutPage),
   },
   {
     path: 'contact',
     title: 'Contact — Kampala Nonstop',
+    data: { localKnowledgeContext: 'HOME' },
     loadComponent: () => import('./pages/contact.page').then((m) => m.ContactPage),
   },
   {
@@ -97,6 +98,7 @@ export const routes: Routes = [
     path: 'dashboard',
     title: 'Dashboard — Kampala Nonstop',
     canActivate: [travellerGuard],
+    data: { localKnowledgeContext: 'HOME' },
     loadComponent: () =>
       import('./dashboard/dashboard-layout.component').then((m) => m.DashboardLayoutComponent),
     children: [
@@ -149,6 +151,53 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () => import('./admin/admin-settings.page').then((m) => m.AdminSettingsPage),
+      },
+    ],
+  },
+  {
+    path: ':countryCode',
+    canMatch: [knownCountryMatch],
+    children: [
+      {
+        path: 'guide',
+        loadComponent: () =>
+          import('./guide/guide-shell.component').then((m) => m.GuideShellComponent),
+        children: [
+          {
+            path: '',
+            title: 'Country Guide — Kampala Nonstop',
+            data: { localKnowledgeContext: 'GUIDE_OVERVIEW' },
+            loadComponent: () => import('./guide/guide-hub.page').then((m) => m.GuideHubPage),
+          },
+          {
+            path: 'essentials',
+            title: 'Essentials — Kampala Nonstop',
+            data: { localKnowledgeContext: 'GUIDE_ESSENTIALS' },
+            loadComponent: () =>
+              import('./guide/guide-essentials.page').then((m) => m.GuideEssentialsPage),
+          },
+          {
+            path: 'travel-guide',
+            title: 'Travel Guide — Kampala Nonstop',
+            data: { localKnowledgeContext: 'GUIDE_TRAVEL_GUIDE' },
+            loadComponent: () =>
+              import('./guide/guide-travel-guide.page').then((m) => m.GuideTravelGuidePage),
+          },
+          {
+            path: 'travel-information',
+            title: 'Travel Information — Kampala Nonstop',
+            data: { localKnowledgeContext: 'GUIDE_TRAVEL_INFORMATION' },
+            loadComponent: () =>
+              import('./guide/guide-travel-information.page').then((m) => m.GuideTravelInformationPage),
+          },
+          {
+            path: 'regions',
+            title: 'Regions — Kampala Nonstop',
+            data: { localKnowledgeContext: 'GUIDE_REGION' },
+            loadComponent: () =>
+              import('./guide/guide-regions.page').then((m) => m.GuideRegionsPage),
+          },
+        ],
       },
     ],
   },

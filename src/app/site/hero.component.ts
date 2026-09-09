@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { resolveWaitlistSource } from '../core/lib/tracking';
-import { GuideTravelInfoChipsComponent } from '../guide/components/guide-travel-info-chips.component';
 import { RevealDirective } from '../shared/reveal.directive';
 import { scrollToId } from '../shared/scroll-to';
 
@@ -54,7 +53,7 @@ const HERO_SLIDES: readonly HeroSlide[] = [
 @Component({
   selector: 'kn-hero',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, RouterLink, GuideTravelInfoChipsComponent],
+  imports: [RevealDirective, RouterLink],
   template: `
     <section class="relative min-h-[100svh] bg-ink">
       <!-- Clips the drifting background art without trapping hero popovers. -->
@@ -128,7 +127,6 @@ const HERO_SLIDES: readonly HeroSlide[] = [
               {{ launchNote() }}
             </p>
 
-            <kn-guide-travel-info-chips class="mt-5 block" tone="ink" [dense]="true" />
           </div>
         </div>
       </div>

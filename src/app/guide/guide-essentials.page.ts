@@ -1,0 +1,433 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { extractApiError } from '../core/lib/api-error';
+import { GuideQuickInfoComponent } from './components/guide-quick-info.component';
+import { GuideStateComponent } from './components/guide-state.component';
+import { guideContentFor } from './content/guide-content.registry';
+import { GuideApiService } from './guide-api.service';
+import { countryDisplayName } from './guide-country-name';
+import { GuideEssential, GuideLoadState } from './guide.models';
+import { guideCountryCode, guideLink } from './guide-route';
+
+const NARRATIVE_CODES = new Set([
+  'ABOUT',
+  'HISTORY',
+  'CULTURE_TRADITIONS',
+  'FOOD_DRINK_SOCIAL',
+  'LANGUAGES_COMMUNICATION',
+  'GEOGRAPHY_CLIMATE',
+  'MAJOR_DESTINATIONS',
+  'TOURISM_GLANCE',
+  'KAMPALA_CITY_LIFE',
+  'SAFETY_REASSURANCE',
+  'COST_OF_LIVING',
+  'PUBLIC_HOLIDAYS',
+  'LOCAL_ETIQUETTE',
+]);
+
+const HIDDEN_TAB_CODES = new Set(['HISTORY']);
+const QUICK_FACTS_TAB = 'QUICK_FACTS';
+
+type NarrativeBlock =
+  | { type: 'paragraph'; text: string }
+  | { type: 'subheading'; text: string }
+  | { type: 'list'; items: { label?: string; text: string }[] }
+  | { type: 'rates'; rows: { currency: string; range: string }[] };
+
+type EssentialsTab = {
+  code: string;
+  label: string;
+};
+
+type NarrativePanel = {
+  code: string;
+  heading: string;
+  blocks: NarrativeBlock[];
+  extras: NarrativePanel[];
+};
+
+@Component({
+  selector: 'kn-guide-essentials-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [GuideQuickInfoComponent, GuideStateComponent, RouterLink],
+  template: `
+    @switch (state().status) {
+      @case ('loading') {
+        <kn-guide-state [state]="state()" />
+      }
+      @case ('error') {
+        <kn-guide-state [state]="state()" />
+      }
+      @case ('empty') {
+        <kn-guide-state [state]="state()" />
+      }
+      @case ('ready') {
+        <section class="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 sm:py-16">
+          <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+            <div>
+              <nav aria-label="Uganda essentials sections">
+                <div class="flex flex-wrap gap-2">
+                  @for (tab of tabs(); track tab.code) {
+                    <button
+                      type="button"
+                      class="rounded-full border px-3.5 py-1.5 text-[0.72rem] font-bold uppercase tracking-[0.12em] transition-colors"
+                      [class]="
+                        tab.code === selectedCode()
+                          ? 'border-ink bg-ink text-ink-foreground'
+                          : 'border-hairline bg-paper text-muted-foreground hover:border-primary/45 hover:text-foreground'
+                      "
+                      [attr.aria-pressed]="tab.code === selectedCode()"
+                      (click)="selectTab(tab.code)"
+                    >
+                      {{ tab.label }}
+                    </button>
+                  }
+                </div>
+              </nav>
+
+              @if (selectedCode() === quickFactsCode) {
+                <div class="mt-10">
+                  <p class="eyebrow text-clay">Everyday essentials</p>
+                  <h2 class="mt-3 font-display text-3xl text-foreground sm:text-4xl">Quick facts</h2>
+                  <dl class="mt-8 grid gap-3 sm:grid-cols-2">
+                    @for (item of facts(); track item.id) {
+                      <div
+                        class="rounded-xl border border-hairline bg-gradient-to-b from-paper to-sand/40 px-5 py-4"
+                      >
+                        <dt class="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                          {{ item.name }}
+                        </dt>
+                        <dd class="mt-2 text-[0.95rem] leading-snug text-foreground">
+                          {{ item.value_text }}
+                        </dd>
+                      </div>
+                    }
+                  </dl>
+                </div>
+              } @else if (selectedPanel(); as panel) {
+                <article class="mt-10">
+                  @for (section of panelSections(panel); track section.code) {
+                    <div class="mb-10 last:mb-0">
+                      <h2 class="font-display text-3xl text-foreground sm:text-4xl">
+                        {{ section.heading }}
+                      </h2>
+                      <div class="mt-5 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
+                        @for (block of section.blocks; track $index) {
+                          @switch (block.type) {
+                            @case ('paragraph') {
+                              <p>{{ block.text }}</p>
+                            }
+                            @case ('subheading') {
+                              <h3 class="pt-2 font-display text-2xl text-foreground">{{ block.text }}</h3>
+                            }
+                            @case ('list') {
+                              <ul class="list-disc space-y-2 pl-5">
+                                @for (item of block.items; track $index) {
+                                  <li>
+                                    @if (item.label) {
+                                      <strong>{{ item.label }}</strong>
+                                      — {{ item.text }}
+                                    } @else {
+                                      {{ item.text }}
+                                    }
+                                  </li>
+                                }
+                              </ul>
+                            }
+                            @case ('rates') {
+                              <dl class="grid gap-2 sm:grid-cols-3">
+                                @for (row of block.rows; track row.currency) {
+                                  <div class="rounded-xl border border-hairline bg-paper px-4 py-3">
+                                    <dt class="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                                      {{ row.currency }}
+                                    </dt>
+                                    <dd class="mt-1 text-sm text-foreground">{{ row.range }}</dd>
+                                  </div>
+                                }
+                              </dl>
+                            }
+                          }
+                        }
+                      </div>
+                    </div>
+                  }
+                </article>
+              }
+
+              <div class="mt-14 rounded-xl border border-hairline bg-sand/40 px-6 py-8 sm:px-8">
+                <p class="eyebrow text-clay">Ready when you are</p>
+                <h2 class="mt-3 font-display text-3xl text-foreground">
+                  Ssebo or Nnyabo — your adventure awaits
+                </h2>
+                <p class="mt-3 max-w-xl text-muted-foreground">
+                  Next, use the Travel Guide for practical trip planning, or check Travel Information
+                  for visas and typical costs.
+                </p>
+                <a
+                  [routerLink]="travelGuideLink()"
+                  class="mt-6 inline-flex bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+                >
+                  Open Travel Guide
+                </a>
+              </div>
+            </div>
+
+            <kn-guide-quick-info
+              [essentials]="facts()"
+              [countryName]="countryName()"
+              [countryCode]="countryCode()"
+            />
+          </div>
+        </section>
+      }
+    }
+  `,
+})
+export class GuideEssentialsPage implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly guideApi = inject(GuideApiService);
+
+  protected readonly quickFactsCode = QUICK_FACTS_TAB;
+  protected readonly countryCode = computed(() => guideCountryCode(this.route));
+  protected readonly countryName = computed(() => {
+    const fromRegistry = guideContentFor(this.countryCode())?.countryName;
+    return fromRegistry ?? countryDisplayName(this.countryCode());
+  });
+  protected readonly travelGuideLink = computed(() => guideLink(this.countryCode(), 'travel-guide'));
+
+  protected readonly state = signal<GuideLoadState>({ status: 'loading' });
+  protected readonly selectedCode = signal<string>(this.initialTabCode());
+
+  protected readonly facts = computed((): GuideEssential[] => {
+    const current = this.state();
+    return current.status === 'ready' ? current.essentials.filter((item) => !isNarrative(item)) : [];
+  });
+
+  protected readonly tabs = computed((): EssentialsTab[] => {
+    const current = this.state();
+    if (current.status !== 'ready') {
+      return [];
+    }
+
+    const narrativeTabs = current.essentials
+      .filter((item) => isNarrative(item) && item.code && !HIDDEN_TAB_CODES.has(item.code))
+      .map((item) => ({
+        code: item.code as string,
+        label: narrativeHeading(item),
+      }));
+
+    return [{ code: QUICK_FACTS_TAB, label: 'Quick Facts' }, ...narrativeTabs];
+  });
+
+  protected readonly selectedPanel = computed((): NarrativePanel | null => {
+    const current = this.state();
+    if (current.status !== 'ready') {
+      return null;
+    }
+
+    const code = this.selectedCode();
+    if (code === QUICK_FACTS_TAB) {
+      return null;
+    }
+
+    const item = current.essentials.find((entry) => entry.code === code);
+    if (!item) {
+      return null;
+    }
+
+    const extras =
+      code === 'ABOUT'
+        ? current.essentials.filter((entry) => entry.code === 'HISTORY').map(toPanel)
+        : [];
+
+    return { ...toPanel(item), extras };
+  });
+
+  protected panelSections(panel: NarrativePanel): NarrativePanel[] {
+    return [panel, ...panel.extras];
+  }
+
+  ngOnInit(): void {
+    const code = this.countryCode();
+    const fallback = fallbackEssentials(code);
+
+    this.guideApi.getEssentials(code).subscribe({
+      next: (essentials) => {
+        const merged = essentials.length > 0 ? essentials : fallback;
+        this.state.set(merged.length > 0 ? { status: 'ready', essentials: merged } : { status: 'empty' });
+        this.ensureSelectedTab();
+      },
+      error: (error: unknown) => {
+        if (fallback.length > 0) {
+          this.state.set({ status: 'ready', essentials: fallback });
+          this.ensureSelectedTab();
+          return;
+        }
+
+        const message =
+          error instanceof HttpErrorResponse
+            ? extractApiError(error)
+            : 'The essentials list could not be loaded.';
+        this.state.set({ status: 'error', message });
+      },
+    });
+  }
+
+  protected selectTab(code: string): void {
+    this.selectedCode.set(code);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { section: tabQueryValue(code) },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private initialTabCode(): string {
+    const requested = this.route.snapshot.queryParamMap.get('section');
+    return requested ? tabCodeFromQuery(requested) : 'ABOUT';
+  }
+
+  private ensureSelectedTab(): void {
+    const available = this.tabs().map((tab) => tab.code);
+    if (available.includes(this.selectedCode())) {
+      return;
+    }
+
+    this.selectedCode.set(available[1] ?? available[0] ?? 'ABOUT');
+  }
+}
+
+function isNarrative(item: GuideEssential): boolean {
+  if (item.code && NARRATIVE_CODES.has(item.code)) {
+    return true;
+  }
+
+  return item.value_data?.['display'] === 'narrative';
+}
+
+function narrativeHeading(item: GuideEssential): string {
+  const heading = item.value_data?.['heading'];
+  if (typeof heading === 'string' && heading.trim() !== '') {
+    return heading;
+  }
+
+  return item.name || 'Essentials';
+}
+
+function toPanel(item: GuideEssential): NarrativePanel {
+  return {
+    code: item.code ?? item.id,
+    heading: narrativeHeading(item),
+    blocks: narrativeBlocks(item),
+    extras: [],
+  };
+}
+
+function narrativeBlocks(item: GuideEssential): NarrativeBlock[] {
+  const raw = item.value_data?.['blocks'];
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw.map(normaliseBlock).filter((block): block is NarrativeBlock => block !== null);
+  }
+
+  return narrativeParagraphs(item).map((text) => ({ type: 'paragraph', text }));
+}
+
+function normaliseBlock(raw: unknown): NarrativeBlock | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+
+  const block = raw as Record<string, unknown>;
+  if (block['type'] === 'paragraph' && typeof block['text'] === 'string') {
+    return { type: 'paragraph', text: block['text'] };
+  }
+  if (block['type'] === 'subheading' && typeof block['text'] === 'string') {
+    return { type: 'subheading', text: block['text'] };
+  }
+  if (block['type'] === 'list' && Array.isArray(block['items'])) {
+    const items = block['items']
+      .map((entry) => {
+        if (typeof entry === 'string') {
+          return { text: entry };
+        }
+        if (entry && typeof entry === 'object') {
+          const item = entry as Record<string, unknown>;
+          const text = typeof item['text'] === 'string' ? item['text'] : '';
+          const label = typeof item['label'] === 'string' ? item['label'] : undefined;
+          return text ? { label, text } : null;
+        }
+        return null;
+      })
+      .filter((entry): entry is { label?: string; text: string } => entry !== null);
+
+    return items.length > 0 ? { type: 'list', items } : null;
+  }
+  if (block['type'] === 'rates' && Array.isArray(block['rows'])) {
+    const rows = block['rows']
+      .map((entry) => {
+        if (!entry || typeof entry !== 'object') {
+          return null;
+        }
+        const row = entry as Record<string, unknown>;
+        if (typeof row['currency'] !== 'string' || typeof row['range'] !== 'string') {
+          return null;
+        }
+        return { currency: row['currency'], range: row['range'] };
+      })
+      .filter((entry): entry is { currency: string; range: string } => entry !== null);
+
+    return rows.length > 0 ? { type: 'rates', rows } : null;
+  }
+
+  return null;
+}
+
+function narrativeParagraphs(item: GuideEssential): string[] {
+  const raw = item.value_data?.['paragraphs'];
+  if (Array.isArray(raw)) {
+    const paragraphs = raw.filter((part): part is string => typeof part === 'string' && part.trim() !== '');
+    if (paragraphs.length > 0) {
+      return paragraphs;
+    }
+  }
+
+  const text = item.value_text?.trim();
+  if (!text) {
+    return [];
+  }
+
+  const parts = text.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+  return parts.length > 0 ? parts : [text];
+}
+
+function fallbackEssentials(countryCode: string): GuideEssential[] {
+  const content = guideContentFor(countryCode);
+  if (!content) {
+    return [];
+  }
+
+  const codes = ['ABOUT', 'HISTORY'] as const;
+  return content.essentialsNarrative.map((section, index) => ({
+    id: `fallback-${codes[index] ?? index}`,
+    code: codes[index] ?? `NARRATIVE_${index + 1}`,
+    name: section.heading,
+    value_text: section.paragraphs.join('\n\n'),
+    value_data: {
+      display: 'narrative',
+      heading: section.heading,
+      paragraphs: section.paragraphs,
+    },
+    sort_order: index + 1,
+  }));
+}
+
+function tabQueryValue(code: string): string {
+  return code.toLowerCase().replaceAll('_', '-');
+}
+
+function tabCodeFromQuery(value: string): string {
+  return value.trim().toUpperCase().replaceAll('-', '_');
+}

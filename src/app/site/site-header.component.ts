@@ -43,7 +43,7 @@ import { scrollToId } from '../shared/scroll-to';
 
         <nav class="flex items-center gap-4 sm:gap-6">
           <a
-            routerLink="/guide"
+            routerLink="/ug/guide"
             class="eyebrow transition-colors"
             [class]="guideNavClass()"
             [attr.aria-current]="guideActive() ? 'page' : null"
@@ -168,6 +168,6 @@ export class SiteHeaderComponent {
 
   private isGuidePath(url: string): boolean {
     const path = url.split('?')[0].split('#')[0];
-    return path === '/guide' || path.startsWith('/guide/');
+    return /\/[a-z]{2}\/guide/i.test(path) || path === '/guide' || path.startsWith('/guide/');
   }
 }

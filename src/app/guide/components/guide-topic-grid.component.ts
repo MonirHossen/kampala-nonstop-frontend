@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
-import { GuideTravelTopic } from '../guide.models';
+import { GuideTopic } from '../content/guide-content.types';
 import { guideTopicIcon } from '../guide-topic-icons';
 
 @Component({
@@ -18,7 +18,7 @@ import { guideTopicIcon } from '../guide-topic-icons';
       role="listbox"
       aria-label="Travel guide topics"
     >
-      @for (topic of topics(); track topic.id) {
+      @for (topic of topics(); track topic.code) {
         <button
           type="button"
           role="option"
@@ -55,15 +55,15 @@ import { guideTopicIcon } from '../guide-topic-icons';
   `,
 })
 export class GuideTopicGridComponent {
-  readonly topics = input.required<GuideTravelTopic[]>();
+  readonly topics = input.required<GuideTopic[]>();
   readonly selectedCode = input<string | null>(null);
-  readonly topicSelect = output<GuideTravelTopic>();
+  readonly topicSelect = output<GuideTopic>();
 
-  protected isSelected(topic: GuideTravelTopic): boolean {
+  protected isSelected(topic: GuideTopic): boolean {
     return topic.code === this.selectedCode();
   }
 
-  protected cardClass(topic: GuideTravelTopic): string {
+  protected cardClass(topic: GuideTopic): string {
     if (this.isSelected(topic)) {
       return 'border-ink bg-gradient-to-br from-ink via-ink to-clay text-ink-foreground shadow-[0_18px_34px_-18px_rgba(28,20,12,0.65)]';
     }
@@ -71,7 +71,7 @@ export class GuideTopicGridComponent {
     return 'border-hairline bg-gradient-to-b from-paper to-sand/45 text-foreground hover:-translate-y-1 hover:border-primary/45 hover:to-primary/12 hover:shadow-[0_16px_30px_-20px_rgba(40,28,18,0.5)]';
   }
 
-  protected iconWrapClass(topic: GuideTravelTopic): string {
+  protected iconWrapClass(topic: GuideTopic): string {
     return this.isSelected(topic)
       ? 'bg-primary text-primary-foreground'
       : 'bg-sand/80 text-clay group-hover:bg-primary/15 group-hover:text-primary';
