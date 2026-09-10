@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { extractApiError } from '../core/lib/api-error';
 import { GuideQuickInfoComponent } from './components/guide-quick-info.component';
 import { GuideStateComponent } from './components/guide-state.component';
@@ -8,7 +8,7 @@ import { guideContentFor } from './content/guide-content.registry';
 import { GuideApiService } from './guide-api.service';
 import { countryDisplayName } from './guide-country-name';
 import { GuideEssential, GuideLoadState } from './guide.models';
-import { guideCountryCode, guideLink } from './guide-route';
+import { guideCountryCode } from './guide-route';
 
 const NARRATIVE_CODES = new Set([
   'ABOUT',
@@ -50,7 +50,7 @@ type NarrativePanel = {
 @Component({
   selector: 'kn-guide-essentials-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GuideQuickInfoComponent, GuideStateComponent, RouterLink],
+  imports: [GuideQuickInfoComponent, GuideStateComponent],
   template: `
     @switch (state().status) {
       @case ('loading') {
@@ -155,22 +155,6 @@ type NarrativePanel = {
                 </article>
               }
 
-              <div class="mt-14 rounded-xl border border-hairline bg-sand/40 px-6 py-8 sm:px-8">
-                <p class="eyebrow text-clay">Ready when you are</p>
-                <h2 class="mt-3 font-display text-3xl text-foreground">
-                  Ssebo or Nnyabo — your adventure awaits
-                </h2>
-                <p class="mt-3 max-w-xl text-muted-foreground">
-                  Next, use the Travel Guide for practical trip planning, or check Travel Information
-                  for visas and typical costs.
-                </p>
-                <a
-                  [routerLink]="travelGuideLink()"
-                  class="mt-6 inline-flex bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
-                >
-                  Open Travel Guide
-                </a>
-              </div>
             </div>
 
             <kn-guide-quick-info
@@ -195,8 +179,6 @@ export class GuideEssentialsPage implements OnInit {
     const fromRegistry = guideContentFor(this.countryCode())?.countryName;
     return fromRegistry ?? countryDisplayName(this.countryCode());
   });
-  protected readonly travelGuideLink = computed(() => guideLink(this.countryCode(), 'travel-guide'));
-
   protected readonly state = signal<GuideLoadState>({ status: 'loading' });
   protected readonly selectedCode = signal<string>(this.initialTabCode());
 
