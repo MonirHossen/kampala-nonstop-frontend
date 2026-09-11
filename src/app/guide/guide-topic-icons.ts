@@ -1,10 +1,15 @@
 import {
   LucideBackpack,
   LucideBanknote,
+  LucideBookOpen,
   LucideCloudSun,
+  LucideCompass,
   LucideHandshake,
+  LucideInfo,
   LucideLandmark,
+  LucideMap,
   LucideMapPinned,
+  LucidePlane,
   LucidePlaneLanding,
   LucideShieldPlus,
   LucideSmartphone,
@@ -26,10 +31,26 @@ export const GUIDE_TOPIC_ICONS: Readonly<Record<string, LucideIconData>> = {
   WHAT_TO_PACK: LucideBackpack.icon,
 };
 
+export const GUIDE_SECTION_ICONS: Readonly<Record<string, LucideIconData>> = {
+  overview: LucideBookOpen.icon,
+  essentials: LucideInfo.icon,
+  'travel-guide': LucideCompass.icon,
+  'travel-information': LucidePlane.icon,
+  regions: LucideMap.icon,
+};
+
 export function guideTopicIcon(code: string | null | undefined): LucideIconData {
   if (!code) {
     return LucideMapPinned.icon;
   }
 
   return GUIDE_TOPIC_ICONS[code] ?? LucideMapPinned.icon;
+}
+
+export function guideSectionIcon(slug: string | null | undefined): LucideIconData {
+  if (!slug) {
+    return GUIDE_SECTION_ICONS['overview'];
+  }
+
+  return GUIDE_SECTION_ICONS[slug] ?? LucideBookOpen.icon;
 }

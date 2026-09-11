@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowledge-section.component';
 import { SiteHeaderComponent } from './site-header.component';
 import { SiteFooterComponent } from './site-footer.component';
 
 @Component({
   selector: 'kn-page-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SiteHeaderComponent, SiteFooterComponent],
+  imports: [SiteHeaderComponent, SiteFooterComponent, LocalKnowledgeSectionComponent],
   template: `
     <div class="flex min-h-screen flex-col bg-background">
       <kn-site-header [lightBackground]="true" />
@@ -18,6 +19,7 @@ import { SiteFooterComponent } from './site-footer.component';
         <div class="mt-8 space-y-5 text-[1rem] leading-relaxed text-muted-foreground">
           <ng-content />
         </div>
+        <kn-local-knowledge-section [inset]="true" />
       </main>
       <kn-site-footer class="mt-auto" />
     </div>

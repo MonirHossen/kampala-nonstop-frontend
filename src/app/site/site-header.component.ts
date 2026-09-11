@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { LucideMenu, LucideX } from '@lucide/angular';
 import { filter } from 'rxjs';
 import { resolveWaitlistSource } from '../core/lib/tracking';
 import { TravellerAuthService } from '../core/services/traveller-auth.service';
@@ -16,7 +17,7 @@ import { scrollToId } from '../shared/scroll-to';
 @Component({
   selector: 'kn-site-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, LucideMenu, LucideX],
   template: `
     <header
       class="fixed inset-x-0 top-0 z-50 h-14 transition-colors duration-500"
@@ -41,7 +42,7 @@ import { scrollToId } from '../shared/scroll-to';
           />
         </a>
 
-        <nav class="flex items-center gap-4 sm:gap-6">
+        <nav class="hidden items-center gap-4 md:flex sm:gap-6" aria-label="Primary">
           <a
             routerLink="/ug/guide"
             class="eyebrow transition-colors"
@@ -55,11 +56,7 @@ import { scrollToId } from '../shared/scroll-to';
             <a
               routerLink="/dashboard"
               class="eyebrow transition-colors"
-              [class]="
-                headerSolid()
-                  ? 'text-foreground hover:text-primary'
-                  : 'text-ink-foreground/80 hover:text-ink-foreground'
-              "
+              [class]="accountNavClass()"
             >
               Dashboard
             </a>
@@ -68,11 +65,7 @@ import { scrollToId } from '../shared/scroll-to';
               type="button"
               (click)="openSignIn()"
               class="eyebrow cursor-pointer transition-colors"
-              [class]="
-                headerSolid()
-                  ? 'text-foreground hover:text-primary'
-                  : 'text-ink-foreground/80 hover:text-ink-foreground'
-              "
+              [class]="accountNavClass()"
             >
               Sign in
             </button>
@@ -88,7 +81,72 @@ import { scrollToId } from '../shared/scroll-to';
             </button>
           }
         </nav>
+
+        <button
+          type="button"
+          class="inline-flex h-10 w-10 items-center justify-center md:hidden"
+          [class]="hamburgerClass()"
+          [attr.aria-expanded]="menuOpen()"
+          [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'"
+          aria-controls="site-mobile-nav"
+          (click)="toggleMenu()"
+        >
+          @if (menuOpen()) {
+            <svg lucideX class="h-6 w-6" aria-hidden="true"></svg>
+          } @else {
+            <svg lucideMenu class="h-6 w-6" aria-hidden="true"></svg>
+          }
+        </button>
       </div>
+
+      @if (menuOpen()) {
+        <nav
+          id="site-mobile-nav"
+          class="absolute inset-x-0 top-14 md:hidden"
+          [class]="mobilePanelClass()"
+          aria-label="Primary"
+        >
+          <div class="mx-auto flex max-w-[1400px] flex-col gap-1 px-5 py-4 sm:px-8">
+            <a
+              routerLink="/ug/guide"
+              class="eyebrow px-1 py-3 transition-colors"
+              [class]="guideNavClass()"
+              [attr.aria-current]="guideActive() ? 'page' : null"
+            >
+              Guide
+            </a>
+
+            @if (traveller.isAuthenticated()) {
+              <a
+                routerLink="/dashboard"
+                class="eyebrow px-1 py-3 transition-colors"
+                [class]="accountNavClass()"
+              >
+                Dashboard
+              </a>
+            } @else {
+              <button
+                type="button"
+                (click)="openSignIn()"
+                class="eyebrow cursor-pointer px-1 py-3 text-left transition-colors"
+                [class]="accountNavClass()"
+              >
+                Sign in
+              </button>
+            }
+
+            @if (showJoinCta()) {
+              <button
+                type="button"
+                (click)="goToJoin()"
+                class="eyebrow mt-2 w-full cursor-pointer bg-primary px-4 py-2.5 text-center text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5"
+              >
+                Join the Waitlist
+              </button>
+            }
+          </div>
+        </nav>
+      }
     </header>
   `,
 })
@@ -100,21 +158,31 @@ export class SiteHeaderComponent {
   protected readonly traveller = inject(TravellerAuthService);
 
   protected readonly scrolled = signal(false);
+  protected readonly menuOpen = signal(false);
   protected readonly showJoinCta = signal(!this.isJoinPath(this.router.url));
   protected readonly currentUrl = signal(this.router.url);
   protected readonly headerSolid = computed(() => this.lightBackground() || this.scrolled());
   protected readonly guideActive = computed(() => this.isGuidePath(this.currentUrl()));
+  protected readonly hamburgerClass = computed(() =>
+    this.headerSolid() ? 'text-foreground' : 'text-ink-foreground',
+  );
+  protected readonly mobilePanelClass = computed(() =>
+    this.headerSolid()
+      ? 'bg-background/95 border-b border-hairline backdrop-blur-sm'
+      : 'bg-ink/95 border-b border-ink-foreground/15 backdrop-blur-sm',
+  );
   protected readonly guideNavClass = computed(() => {
     if (this.guideActive()) {
-      return this.headerSolid()
-        ? 'text-primary'
-        : 'text-ink-foreground';
+      return this.headerSolid() ? 'text-primary' : 'text-ink-foreground';
     }
 
-    return this.headerSolid()
-      ? 'text-foreground hover:text-primary'
-      : 'text-ink-foreground/80 hover:text-ink-foreground';
+    return this.accountNavClass();
   });
+  protected readonly accountNavClass = computed(() =>
+    this.headerSolid()
+      ? 'text-foreground hover:text-primary'
+      : 'text-ink-foreground/80 hover:text-ink-foreground',
+  );
 
   constructor() {
     this.traveller.bootstrap().subscribe();
@@ -124,6 +192,7 @@ export class SiteHeaderComponent {
       .subscribe((event) => {
         this.showJoinCta.set(!this.isJoinPath(event.urlAfterRedirects));
         this.currentUrl.set(event.urlAfterRedirects);
+        this.menuOpen.set(false);
       });
   }
 
@@ -132,8 +201,26 @@ export class SiteHeaderComponent {
     this.scrolled.set(window.scrollY > 40);
   }
 
+  @HostListener('window:keydown.escape')
+  protected onEscape(): void {
+    this.menuOpen.set(false);
+  }
+
+  @HostListener('window:resize')
+  protected onResize(): void {
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      this.menuOpen.set(false);
+    }
+  }
+
+  protected toggleMenu(): void {
+    this.menuOpen.update((open) => !open);
+  }
+
   /** Opens the home-page auth modal (navigates home when needed). */
   protected openSignIn(): void {
+    this.menuOpen.set(false);
+
     if (this.isHomePath(this.router.url)) {
       void this.router.navigate(['/'], {
         queryParams: { auth: 'login' },
@@ -147,6 +234,8 @@ export class SiteHeaderComponent {
 
   /** On the join page this scrolls to the form; anywhere else it navigates there. */
   protected goToJoin(): void {
+    this.menuOpen.set(false);
+
     if (this.isJoinPath(this.router.url)) {
       scrollToId('waitlist');
       return;

@@ -14,6 +14,7 @@ import {
 } from '../core/services/waitlist-api.service';
 import { DEFAULT_WAITLIST_SOURCE } from '../core/lib/tracking';
 import { SettingsStore } from '../core/services/settings.store';
+import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowledge-section.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { RevealDirective } from '../shared/reveal.directive';
@@ -24,6 +25,7 @@ import { RevealDirective } from '../shared/reveal.directive';
   imports: [
     SiteHeaderComponent,
     SiteFooterComponent,
+    LocalKnowledgeSectionComponent,
     ReactiveFormsModule,
     RouterLink,
     RevealDirective,
@@ -126,6 +128,7 @@ import { RevealDirective } from '../shared/reveal.directive';
           </div>
         </section>
       </main>
+      <kn-local-knowledge-section />
       <kn-site-footer />
     </div>
   `,

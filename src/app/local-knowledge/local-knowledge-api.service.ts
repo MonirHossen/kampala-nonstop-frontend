@@ -9,6 +9,7 @@ export type LocalKnowledgeRandomParams = {
   pageContext?: string | null;
   geographicAreaCode?: string | null;
   excludeIds?: string[];
+  limit?: number;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -16,10 +17,12 @@ export class LocalKnowledgeApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl.replace(/\/$/, '')}/local-knowledge`;
 
-  getRandom(params: LocalKnowledgeRandomParams): Observable<LocalKnowledgeItem | null> {
+  getRandom(params: LocalKnowledgeRandomParams): Observable<LocalKnowledgeItem[]> {
+    const limit = Math.min(Math.max(params.limit ?? 1, 1), 10);
+
     let httpParams = new HttpParams()
       .set('country_code', params.countryCode.trim().toUpperCase())
-      .set('limit', '1');
+      .set('limit', String(limit));
 
     if (params.pageContext) {
       httpParams = httpParams.set('page_context', params.pageContext);
@@ -35,6 +38,6 @@ export class LocalKnowledgeApiService {
 
     return this.http
       .get<{ data: LocalKnowledgeItem[] }>(`${this.baseUrl}/random`, { params: httpParams })
-      .pipe(map((response) => response.data[0] ?? null));
+      .pipe(map((response) => response.data ?? []));
   }
 }

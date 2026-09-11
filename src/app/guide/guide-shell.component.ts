@@ -1,16 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { LucideDynamicIcon } from '@lucide/angular';
 import { filter, map, startWith } from 'rxjs';
+import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowledge-section.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { GuideHeroComponent } from './components/guide-hero.component';
 import { guideContentFor } from './content/guide-content.registry';
 import { countryDisplayName } from './guide-country-name';
 import type { GuideCrumb } from './components/guide-breadcrumb.component';
+import { guideSectionIcon } from './guide-topic-icons';
+import type { LucideIconData } from '@lucide/angular';
 
 type GuideTab = {
   path: string;
+  slug: string;
   label: string;
   exact: boolean;
 };
@@ -22,9 +27,11 @@ type GuideTab = {
     SiteHeaderComponent,
     SiteFooterComponent,
     GuideHeroComponent,
+    LocalKnowledgeSectionComponent,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    LucideDynamicIcon,
   ],
   template: `
     <div class="flex min-h-screen flex-col bg-background">
@@ -32,28 +39,29 @@ type GuideTab = {
 
       <kn-guide-hero
         [crumbs]="crumbs()"
-        [eyebrow]="hero().eyebrow"
-        [title]="hero().title"
-        [lede]="hero().lede"
-        [backgroundImage]="hero().image"
+        [title]="heroTitle()"
+        [backgroundImage]="heroImage"
       />
 
       @if (content(); as guide) {
-        <nav
-          class="border-b border-hairline bg-paper/80 backdrop-blur-sm"
-          aria-label="Guide sections"
-        >
+        <nav class="border-b border-hairline bg-paper" aria-label="Country Guide">
           <div
-            class="mx-auto flex max-w-[1400px] gap-1 overflow-x-auto px-5 sm:px-8"
+            class="mx-auto flex max-w-[1400px] flex-wrap gap-2 overflow-x-auto px-5 py-3 sm:px-8"
             role="tablist"
           >
             @for (tab of tabs; track tab.path) {
               <a
                 [routerLink]="tab.path ? tab.path : './'"
-                routerLinkActive="text-primary border-primary"
+                routerLinkActive="!bg-primary !text-primary-foreground !border-primary"
                 [routerLinkActiveOptions]="{ exact: tab.exact }"
-                class="shrink-0 border-b-2 border-transparent px-3 py-3.5 text-[0.72rem] font-bold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
+                class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-hairline bg-background px-3.5 py-2.5 text-[0.78rem] font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
               >
+                <svg
+                  lucideIcon
+                  [lucideIcon]="iconFor(tab.slug)"
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                ></svg>
                 {{ tab.label }}
               </a>
             }
@@ -65,6 +73,7 @@ type GuideTab = {
         <router-outlet />
       </main>
 
+      <kn-local-knowledge-section />
       <kn-site-footer />
     </div>
   `,
@@ -75,6 +84,7 @@ export class GuideShellComponent {
   protected readonly countryCode = computed(() => this.countryFromUrl());
   protected readonly countryName = computed(() => countryDisplayName(this.countryCode()));
   protected readonly content = computed(() => guideContentFor(this.countryCode()));
+  protected readonly heroImage = '/img/title-banner.jpg';
 
   private readonly url = toSignal(
     this.router.events.pipe(
@@ -86,82 +96,48 @@ export class GuideShellComponent {
   );
 
   protected readonly tabs: GuideTab[] = [
-    { path: '', label: 'Overview', exact: true },
-    { path: 'essentials', label: 'Essentials', exact: false },
-    { path: 'travel-guide', label: 'Travel Guide', exact: false },
-    { path: 'travel-information', label: 'Travel Information', exact: false },
-    { path: 'regions', label: 'Regions', exact: false },
+    { path: '', slug: 'overview', label: 'Overview', exact: true },
+    { path: 'essentials', slug: 'essentials', label: 'Essentials', exact: false },
+    { path: 'travel-guide', slug: 'travel-guide', label: 'Travel Guide', exact: false },
+    { path: 'travel-information', slug: 'travel-information', label: 'Travel Information', exact: false },
+    { path: 'regions', slug: 'regions', label: 'Regions', exact: false },
   ];
 
   protected readonly crumbs = computed((): GuideCrumb[] => {
     const code = this.countryCode().toLowerCase();
-    const name = this.countryName();
-    const section = this.sectionSlug();
-    const items: GuideCrumb[] = [
+    return [
+      { label: 'Home', link: '/' },
       { label: 'Guide', link: ['/', code, 'guide'] },
-      { label: name, link: ['/', code, 'guide'] },
+      { label: this.heroTitle() },
     ];
-
-    if (section) {
-      items.push({ label: this.sectionLabel(section) });
-    }
-
-    return items;
   });
 
-  protected readonly hero = computed(() => {
+  protected readonly heroTitle = computed(() => {
     const guide = this.content();
     const name = this.countryName();
     const section = this.sectionSlug();
-    const image = '/img/hero_culture_desktop.jpg';
 
     if (!guide) {
-      return {
-        eyebrow: 'Country guide',
-        title: `${name} guide`,
-        lede: 'A destination guide for this country is not published yet.',
-        image,
-      };
+      return `${name} guide`;
     }
 
     switch (section) {
       case 'essentials':
-        return {
-          eyebrow: 'Country guide',
-          title: `${guide.countryName} essentials`,
-          lede: 'Quick facts, plus a short read on the country and its history.',
-          image,
-        };
+        return `${guide.countryName} Essentials`;
       case 'travel-guide':
-        return {
-          eyebrow: 'Country guide',
-          title: 'Travel Guide',
-          lede: 'Ten practical topics to help you prepare and find your way.',
-          image: '/img/hero_adventure_desktop.jpg',
-        };
+        return 'Travel Guide';
       case 'travel-information':
-        return {
-          eyebrow: 'Country guide',
-          title: 'Travel Information',
-          lede: 'Visa guidance, visa-free entry and what the trip actually costs to start.',
-          image: '/img/hero_events_desktop.jpg',
-        };
+        return 'Travel Information';
       case 'regions':
-        return {
-          eyebrow: 'Country guide',
-          title: 'Regions',
-          lede: guide.regionsIntro,
-          image: '/img/hero_nature_desktop.jpg',
-        };
+        return 'Regions';
       default:
-        return {
-          eyebrow: 'Country guide',
-          title: guide.hubTitle,
-          lede: guide.hubLede,
-          image,
-        };
+        return guide.hubTitle;
     }
   });
+
+  protected iconFor(slug: string): LucideIconData {
+    return guideSectionIcon(slug);
+  }
 
   private countryFromUrl(): string {
     const match = this.url().match(/^\/+([a-z]{2})\/guide/i);
@@ -171,20 +147,5 @@ export class GuideShellComponent {
   private sectionSlug(): string {
     const match = this.url().match(/\/guide(?:\/([^/?#]+))?/i);
     return match?.[1] ?? '';
-  }
-
-  private sectionLabel(slug: string): string {
-    switch (slug) {
-      case 'essentials':
-        return 'Essentials';
-      case 'travel-guide':
-        return 'Travel Guide';
-      case 'travel-information':
-        return 'Travel Information';
-      case 'regions':
-        return 'Regions';
-      default:
-        return slug;
-    }
   }
 }

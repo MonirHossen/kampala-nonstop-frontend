@@ -6,6 +6,7 @@ import {
   rememberSource,
 } from '../core/lib/tracking';
 import { SettingsStore } from '../core/services/settings.store';
+import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowledge-section.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { RevealDirective } from '../shared/reveal.directive';
@@ -14,7 +15,13 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
 @Component({
   selector: 'kn-waitlist-join-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [WaitlistFormComponent, SiteFooterComponent, SiteHeaderComponent, RevealDirective],
+  imports: [
+    WaitlistFormComponent,
+    SiteFooterComponent,
+    SiteHeaderComponent,
+    RevealDirective,
+    LocalKnowledgeSectionComponent,
+  ],
   template: `
     <div class="bg-background">
       <kn-site-header />
@@ -65,6 +72,7 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
         </div>
       </main>
 
+      <kn-local-knowledge-section />
       <kn-site-footer />
     </div>
   `,
