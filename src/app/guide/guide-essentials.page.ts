@@ -28,7 +28,6 @@ const NARRATIVE_CODES = new Set([
 ]);
 
 const HIDDEN_TAB_CODES = new Set(['HISTORY']);
-const QUICK_FACTS_TAB = 'QUICK_FACTS';
 
 type NarrativeBlock =
   | { type: 'paragraph'; text: string }
@@ -66,7 +65,14 @@ type NarrativePanel = {
       @case ('ready') {
         <section class="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 sm:py-16">
           <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
-            <div>
+            <kn-guide-quick-info
+              class="lg:col-start-2 lg:row-start-1"
+              [essentials]="facts()"
+              [countryName]="countryName()"
+              [countryCode]="countryCode()"
+            />
+
+            <div class="lg:col-start-1 lg:row-start-1">
               <nav aria-label="Uganda essentials sections">
                 <kn-guide-section-nav
                   [items]="sectionItems()"
@@ -82,83 +88,57 @@ type NarrativePanel = {
                 tabindex="-1"
                 class="mt-10 scroll-mt-[6.5rem] outline-none"
               >
-              @if (selectedCode() === quickFactsCode) {
-                <div>
-                  <p class="eyebrow text-clay">Everyday essentials</p>
-                  <h2 class="mt-3 font-display text-3xl text-foreground sm:text-4xl">Quick facts</h2>
-                  <dl class="mt-8 grid gap-3 sm:grid-cols-2">
-                    @for (item of facts(); track item.id) {
-                      <div
-                        class="rounded-xl border border-hairline bg-gradient-to-b from-paper to-sand/40 px-5 py-4"
-                      >
-                        <dt class="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-                          {{ item.name }}
-                        </dt>
-                        <dd class="mt-2 text-[0.95rem] leading-snug text-foreground">
-                          {{ item.value_text }}
-                        </dd>
-                      </div>
-                    }
-                  </dl>
-                </div>
-              } @else if (selectedPanel(); as panel) {
-                <article>
-                  @for (section of panelSections(panel); track section.code) {
-                    <div class="mb-10 last:mb-0">
-                      <h2 class="font-display text-3xl text-foreground sm:text-4xl">
-                        {{ section.heading }}
-                      </h2>
-                      <div class="mt-5 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
-                        @for (block of section.blocks; track $index) {
-                          @switch (block.type) {
-                            @case ('paragraph') {
-                              <p>{{ block.text }}</p>
-                            }
-                            @case ('subheading') {
-                              <h3 class="pt-2 font-display text-2xl text-foreground">{{ block.text }}</h3>
-                            }
-                            @case ('list') {
-                              <ul class="list-disc space-y-2 pl-5">
-                                @for (item of block.items; track $index) {
-                                  <li>
-                                    @if (item.label) {
-                                      <strong>{{ item.label }}</strong>
-                                      — {{ item.text }}
-                                    } @else {
-                                      {{ item.text }}
-                                    }
-                                  </li>
-                                }
-                              </ul>
-                            }
-                            @case ('rates') {
-                              <dl class="grid gap-2 sm:grid-cols-3">
-                                @for (row of block.rows; track row.currency) {
-                                  <div class="rounded-xl border border-hairline bg-paper px-4 py-3">
-                                    <dt class="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                                      {{ row.currency }}
-                                    </dt>
-                                    <dd class="mt-1 text-sm text-foreground">{{ row.range }}</dd>
-                                  </div>
-                                }
-                              </dl>
+                @if (selectedPanel(); as panel) {
+                  <article>
+                    @for (section of panelSections(panel); track section.code) {
+                      <div class="mb-10 last:mb-0">
+                        <h2 class="font-display text-3xl text-foreground sm:text-4xl">
+                          {{ section.heading }}
+                        </h2>
+                        <div class="mt-5 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
+                          @for (block of section.blocks; track $index) {
+                            @switch (block.type) {
+                              @case ('paragraph') {
+                                <p>{{ block.text }}</p>
+                              }
+                              @case ('subheading') {
+                                <h3 class="pt-2 font-display text-2xl text-foreground">{{ block.text }}</h3>
+                              }
+                              @case ('list') {
+                                <ul class="list-disc space-y-2 pl-5">
+                                  @for (item of block.items; track $index) {
+                                    <li>
+                                      @if (item.label) {
+                                        <strong>{{ item.label }}</strong>
+                                        — {{ item.text }}
+                                      } @else {
+                                        {{ item.text }}
+                                      }
+                                    </li>
+                                  }
+                                </ul>
+                              }
+                              @case ('rates') {
+                                <dl class="grid gap-2 sm:grid-cols-3">
+                                  @for (row of block.rows; track row.currency) {
+                                    <div class="rounded-xl border border-hairline bg-paper px-4 py-3">
+                                      <dt class="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                                        {{ row.currency }}
+                                      </dt>
+                                      <dd class="mt-1 text-sm text-foreground">{{ row.range }}</dd>
+                                    </div>
+                                  }
+                                </dl>
+                              }
                             }
                           }
-                        }
+                        </div>
                       </div>
-                    </div>
-                  }
-                </article>
-              }
+                    }
+                  </article>
+                }
               </div>
-
             </div>
-
-            <kn-guide-quick-info
-              [essentials]="facts()"
-              [countryName]="countryName()"
-              [countryCode]="countryCode()"
-            />
           </div>
         </section>
       }
@@ -170,7 +150,6 @@ export class GuideEssentialsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly guideApi = inject(GuideApiService);
 
-  protected readonly quickFactsCode = QUICK_FACTS_TAB;
   protected readonly countryCode = computed(() => guideCountryCode(this.route));
   protected readonly countryName = computed(() => {
     const fromRegistry = guideContentFor(this.countryCode())?.countryName;
@@ -197,7 +176,7 @@ export class GuideEssentialsPage implements OnInit {
         label: narrativeHeading(item),
       }));
 
-    return [{ code: QUICK_FACTS_TAB, label: 'Quick Facts' }, ...narrativeTabs];
+    return narrativeTabs;
   });
 
   protected readonly sectionItems = computed(() =>
@@ -211,9 +190,6 @@ export class GuideEssentialsPage implements OnInit {
     }
 
     const code = this.selectedCode();
-    if (code === QUICK_FACTS_TAB) {
-      return null;
-    }
 
     const item = current.essentials.find((entry) => entry.code === code);
     if (!item) {
@@ -279,7 +255,7 @@ export class GuideEssentialsPage implements OnInit {
       return;
     }
 
-    this.selectedCode.set(available[1] ?? available[0] ?? 'ABOUT');
+    this.selectedCode.set(available[0] ?? 'ABOUT');
   }
 }
 

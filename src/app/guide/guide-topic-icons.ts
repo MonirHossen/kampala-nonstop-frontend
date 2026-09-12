@@ -22,7 +22,6 @@ import {
   LucideShieldCheck,
   LucideShieldPlus,
   LucideSmartphone,
-  LucideSparkles,
   LucideStamp,
   LucideSun,
   LucideUtensilsCrossed,
@@ -54,7 +53,6 @@ export const GUIDE_SECTION_ICONS: Readonly<Record<string, LucideIconData>> = {
 
 /** Lucide icon data for essentials and travel-information section buttons. */
 export const GUIDE_NAV_ICONS: Readonly<Record<string, LucideIconData>> = {
-  QUICK_FACTS: LucideSparkles.icon,
   ABOUT: LucideGlobe.icon,
   CULTURE_TRADITIONS: LucideMusic.icon,
   FOOD_DRINK_SOCIAL: LucideUtensilsCrossed.icon,

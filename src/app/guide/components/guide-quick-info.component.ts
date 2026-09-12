@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { GuideEssential } from '../guide.models';
 
 @Component({
@@ -17,9 +17,9 @@ import { GuideEssential } from '../guide.models';
           {{ countryCode() }}
         </span>
 
-        <p class="eyebrow text-primary">At a glance</p>
-        <h2 class="mt-1.5 font-display text-[1.75rem] leading-none">{{ countryName() }}</h2>
-        <p class="mt-2.5 text-[0.78rem] text-ink-foreground/50">{{ summaryLine() }}</p>
+        <h2 class="relative font-display text-xl leading-snug sm:text-[1.35rem]">
+          {{ countryName() }} at a glance
+        </h2>
       </header>
 
       @if (essentials().length > 0) {
@@ -47,9 +47,4 @@ export class GuideQuickInfoComponent {
   readonly essentials = input<GuideEssential[]>([]);
   readonly countryName = input('Uganda');
   readonly countryCode = input('UG');
-
-  protected readonly summaryLine = computed(() => {
-    const count = this.essentials().length;
-    return `${count} ${count === 1 ? 'essential' : 'essentials'}`;
-  });
 }

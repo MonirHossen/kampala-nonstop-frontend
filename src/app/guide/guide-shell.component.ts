@@ -44,7 +44,8 @@ type GuideTab = {
       />
 
       @if (content(); as guide) {
-        <nav class="border-b border-hairline bg-paper" aria-label="Country Guide">
+        @if (sectionSlug()) {
+          <nav class="border-b border-hairline bg-paper" aria-label="Country Guide">
           <div
             class="mx-auto flex max-w-[1400px] flex-wrap gap-2 overflow-x-auto px-5 py-3 sm:px-8"
             role="tablist"
@@ -67,6 +68,7 @@ type GuideTab = {
             }
           </div>
         </nav>
+        }
       }
 
       <main class="flex-1">
@@ -144,7 +146,7 @@ export class GuideShellComponent {
     return (match?.[1] ?? 'ug').toUpperCase();
   }
 
-  private sectionSlug(): string {
+  protected sectionSlug(): string {
     const match = this.url().match(/\/guide(?:\/([^/?#]+))?/i);
     return match?.[1] ?? '';
   }
