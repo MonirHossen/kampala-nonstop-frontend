@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { ActivatedRoute, Router } from '@angular/router';
 import { extractApiError } from '../core/lib/api-error';
 import { GuideQuickInfoComponent } from './components/guide-quick-info.component';
+import { GuideSectionNavComponent } from './components/guide-section-nav.component';
 import { GuideStateComponent } from './components/guide-state.component';
 import { guideContentFor } from './content/guide-content.registry';
 import { GuideApiService } from './guide-api.service';
@@ -50,7 +51,7 @@ type NarrativePanel = {
 @Component({
   selector: 'kn-guide-essentials-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GuideQuickInfoComponent, GuideStateComponent],
+  imports: [GuideQuickInfoComponent, GuideSectionNavComponent, GuideStateComponent],
   template: `
     @switch (state().status) {
       @case ('loading') {
@@ -67,27 +68,22 @@ type NarrativePanel = {
           <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
             <div>
               <nav aria-label="Uganda essentials sections">
-                <div class="flex flex-wrap gap-2">
-                  @for (tab of tabs(); track tab.code) {
-                    <button
-                      type="button"
-                      class="rounded-full border px-3.5 py-1.5 text-[0.72rem] font-bold uppercase tracking-[0.12em] transition-colors"
-                      [class]="
-                        tab.code === selectedCode()
-                          ? 'border-ink bg-ink text-ink-foreground'
-                          : 'border-hairline bg-paper text-muted-foreground hover:border-primary/45 hover:text-foreground'
-                      "
-                      [attr.aria-pressed]="tab.code === selectedCode()"
-                      (click)="selectTab(tab.code)"
-                    >
-                      {{ tab.label }}
-                    </button>
-                  }
-                </div>
+                <kn-guide-section-nav
+                  [items]="sectionItems()"
+                  [selectedId]="selectedCode()"
+                  panelId="essentials-section-panel"
+                  ariaLabel="Uganda essentials sections"
+                  (itemSelect)="selectTab($event)"
+                />
               </nav>
 
+              <div
+                id="essentials-section-panel"
+                tabindex="-1"
+                class="mt-10 scroll-mt-[6.5rem] outline-none"
+              >
               @if (selectedCode() === quickFactsCode) {
-                <div class="mt-10">
+                <div>
                   <p class="eyebrow text-clay">Everyday essentials</p>
                   <h2 class="mt-3 font-display text-3xl text-foreground sm:text-4xl">Quick facts</h2>
                   <dl class="mt-8 grid gap-3 sm:grid-cols-2">
@@ -106,7 +102,7 @@ type NarrativePanel = {
                   </dl>
                 </div>
               } @else if (selectedPanel(); as panel) {
-                <article class="mt-10">
+                <article>
                   @for (section of panelSections(panel); track section.code) {
                     <div class="mb-10 last:mb-0">
                       <h2 class="font-display text-3xl text-foreground sm:text-4xl">
@@ -154,6 +150,7 @@ type NarrativePanel = {
                   }
                 </article>
               }
+              </div>
 
             </div>
 
@@ -202,6 +199,10 @@ export class GuideEssentialsPage implements OnInit {
 
     return [{ code: QUICK_FACTS_TAB, label: 'Quick Facts' }, ...narrativeTabs];
   });
+
+  protected readonly sectionItems = computed(() =>
+    this.tabs().map((tab) => ({ id: tab.code, label: tab.label })),
+  );
 
   protected readonly selectedPanel = computed((): NarrativePanel | null => {
     const current = this.state();

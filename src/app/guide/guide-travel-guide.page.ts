@@ -18,11 +18,17 @@ import { guideCountryCode } from './guide-route';
           <kn-guide-topic-grid
             [topics]="guide.travelGuideTopics"
             [selectedCode]="selectedTopic()?.code ?? null"
+            panelId="travel-guide-topic-panel"
             (topicSelect)="selectTopic($event)"
           />
         </div>
 
-        <div class="mt-12" knReveal>
+        <div
+          id="travel-guide-topic-panel"
+          tabindex="-1"
+          class="mt-12 scroll-mt-[6.5rem] outline-none"
+          knReveal
+        >
           <kn-guide-topic-panel [topic]="selectedTopic()" />
         </div>
       </section>

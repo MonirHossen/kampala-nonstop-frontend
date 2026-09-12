@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { RevealDirective } from '../shared/reveal.directive';
+import { GuideSectionNavComponent } from './components/guide-section-nav.component';
+import { GuideTextLinkComponent } from './components/guide-text-link.component';
 import { guideContentFor } from './content/guide-content.registry';
 import { guideCountryCode } from './guide-route';
 
 @Component({
   selector: 'kn-guide-travel-information-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, RouterLink],
+  imports: [RevealDirective, RouterLink, GuideSectionNavComponent, GuideTextLinkComponent],
   template: `
     @if (content(); as guide) {
       @let info = guide.travelInformation;
@@ -19,28 +21,23 @@ import { guideCountryCode } from './guide-route';
           </p>
 
           <nav class="mt-8" aria-label="Travel information sections">
-            <div class="flex flex-wrap gap-2">
-              @for (item of info.nav; track item.id) {
-                <button
-                  type="button"
-                  class="rounded-full border px-3.5 py-1.5 text-[0.72rem] font-bold uppercase tracking-[0.12em] transition-colors"
-                  [class]="
-                    item.id === activeSection()
-                      ? 'border-ink bg-ink text-ink-foreground'
-                      : 'border-hairline bg-paper text-muted-foreground hover:border-primary/45 hover:text-foreground'
-                  "
-                  [attr.aria-pressed]="item.id === activeSection()"
-                  (click)="activeSection.set(item.id)"
-                >
-                  {{ item.label }}
-                </button>
-              }
-            </div>
+            <kn-guide-section-nav
+              [items]="info.nav"
+              [selectedId]="activeSection()"
+              panelId="travel-information-section-panel"
+              ariaLabel="Travel information sections"
+              (itemSelect)="activeSection.set($event)"
+            />
           </nav>
         </div>
 
+        <div
+          id="travel-information-section-panel"
+          tabindex="-1"
+          class="mt-12 scroll-mt-[6.5rem] outline-none"
+        >
         @if (activeSection() === 'visa-information') {
-          <div class="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div knReveal>
               <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.visaHeading }}</h3>
               <div class="mt-4 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
@@ -49,10 +46,12 @@ import { guideCountryCode } from './guide-route';
                 }
               </div>
               <a
+                knGuideLink
                 [href]="info.officialPortalUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="mt-5 inline-flex text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                class="mt-5 text-sm"
+                [external]="true"
               >
                 {{ info.officialPortalLabel }}
               </a>
@@ -104,15 +103,16 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'flights-to-uganda') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.flightsHeading }}</h3>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.flightsIntro }}</p>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">
               <a
+                knGuideLink
                 [href]="info.airlineUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="font-semibold text-primary underline-offset-4 hover:underline"
+                [external]="true"
               >
                 {{ info.airlineName }}
               </a>
@@ -143,7 +143,7 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'arrival-getting-around') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">
               {{ info.gettingAroundHeading }}
             </h3>
@@ -166,7 +166,7 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'money-payments') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.moneyHeading }}</h3>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.moneyIntro }}</p>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.moneyGuideLabel }}</p>
@@ -193,7 +193,7 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'health-safety') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.healthHeading }}</h3>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.healthIntro }}</p>
             <div class="mt-8 grid gap-4 sm:grid-cols-2">
@@ -224,7 +224,7 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'connectivity-power') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">
               {{ info.connectivityHeading }}
             </h3>
@@ -256,7 +256,7 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'what-to-pack') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.packHeading }}</h3>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.packIntro }}</p>
             <p class="mt-6 font-semibold text-foreground">{{ info.packListLabel }}</p>
@@ -273,7 +273,7 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'cultural-etiquette') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.etiquetteHeading }}</h3>
             <ul class="mt-6 space-y-3 text-[1.02rem] leading-relaxed text-foreground/90">
               @for (item of info.etiquettePoints; track item) {
@@ -294,7 +294,7 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'when-to-travel') {
-          <div class="mt-12" knReveal>
+          <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.whenHeading }}</h3>
             <div class="mt-4 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
               @for (paragraph of info.whenParagraphs; track $index) {
@@ -303,6 +303,7 @@ import { guideCountryCode } from './guide-route';
             </div>
           </div>
         }
+        </div>
 
         <div
           knReveal

@@ -83,6 +83,7 @@ export class LocalKnowledgePopupComponent implements OnInit {
 
   private timer: ReturnType<typeof setTimeout> | null = null;
   private phoneQuery: MediaQueryList | null = null;
+  private dismissed = false;
 
   protected readonly overlayOpen = signal(false);
   protected readonly isPhone = signal(false);
@@ -114,6 +115,8 @@ export class LocalKnowledgePopupComponent implements OnInit {
   }
 
   protected dismissOverlay(): void {
+    this.dismissed = true;
+    this.clearTimer();
     this.overlayOpen.set(false);
   }
 
@@ -126,13 +129,14 @@ export class LocalKnowledgePopupComponent implements OnInit {
     }
 
     const path = this.pathFromUrl(this.router.url);
-    if (!this.isSuppressed(path) && this.store.current()) {
+    if (!this.dismissed && !this.isSuppressed(path) && this.store.current()) {
       this.overlayOpen.set(true);
     }
   };
 
   private scheduleForUrl(url: string): void {
     this.clearTimer();
+    this.dismissed = false;
     this.overlayOpen.set(false);
 
     const path = this.pathFromUrl(url);
@@ -151,7 +155,11 @@ export class LocalKnowledgePopupComponent implements OnInit {
 
     const delay = this.reducedMotion ? 400 : POPUP_DELAY_MS;
     this.timer = setTimeout(() => {
-      if (this.isPhone() && !this.isSuppressed(this.pathFromUrl(this.router.url))) {
+      if (
+        !this.dismissed &&
+        this.isPhone() &&
+        !this.isSuppressed(this.pathFromUrl(this.router.url))
+      ) {
         this.overlayOpen.set(true);
       }
     }, delay);

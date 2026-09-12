@@ -14,18 +14,18 @@ import { LocalKnowledgeStore } from './local-knowledge.store';
       @if (showClose()) {
         <button
           type="button"
-          class="absolute right-3 top-3 rounded-md p-1 text-ink-foreground/50 transition-colors hover:text-ink-foreground"
+          class="absolute right-1.5 top-1.5 z-10 flex h-10 w-10 items-center justify-center rounded-md text-ink-foreground/50 transition-colors hover:text-ink-foreground"
           aria-label="Dismiss local knowledge"
-          (click)="close.emit()"
+          (click)="onClose($event)"
         >
-          <svg lucideX class="h-4 w-4" aria-hidden="true"></svg>
+          <svg lucideX class="pointer-events-none h-4 w-4" aria-hidden="true"></svg>
         </button>
       }
 
       @for (entry of [item()]; track entry.id) {
         <div
           class="kn-lk-card-copy flex flex-1 flex-col px-5 pb-12 pt-4"
-          [class.pr-10]="showClose()"
+          [class.pr-12]="showClose()"
           [class.kn-lk-card-copy--static]="reducedMotion"
         >
           <span class="flex items-center gap-2">
@@ -62,14 +62,14 @@ import { LocalKnowledgeStore } from './local-knowledge.store';
 
       <button
         type="button"
-        class="absolute bottom-3 right-3 rounded-md p-1.5 text-ink-foreground/50 transition-colors hover:text-ink-foreground disabled:cursor-not-allowed disabled:opacity-40"
+        class="absolute bottom-1.5 right-1.5 z-10 flex h-10 w-10 items-center justify-center rounded-md text-ink-foreground/50 transition-colors hover:text-ink-foreground disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Show another local knowledge"
         [disabled]="isRefreshing()"
         (click)="store.refresh(refreshIndex())"
       >
         <svg
           lucideRefreshCw
-          class="h-4 w-4"
+          class="pointer-events-none h-4 w-4"
           [class.animate-spin]="isRefreshing()"
           aria-hidden="true"
         ></svg>
@@ -119,5 +119,11 @@ export class LocalKnowledgeCardComponent {
 
   protected isRefreshing(): boolean {
     return this.store.refreshingIndex() === this.refreshIndex();
+  }
+
+  protected onClose(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.close.emit();
   }
 }
