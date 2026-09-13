@@ -47,7 +47,7 @@ type GuideTab = {
         @if (sectionSlug()) {
           <nav class="border-b border-hairline bg-paper" aria-label="Country Guide">
           <div
-            class="mx-auto flex max-w-[1400px] flex-wrap gap-2 overflow-x-auto px-5 py-3 sm:px-8"
+            class="mx-auto grid max-w-[1400px] grid-cols-2 gap-2 px-5 py-3 sm:flex sm:flex-wrap sm:overflow-x-auto sm:px-8"
             role="tablist"
           >
             @for (tab of tabs; track tab.path) {
@@ -55,15 +55,15 @@ type GuideTab = {
                 [routerLink]="tab.path ? tab.path : './'"
                 routerLinkActive="!bg-primary !text-primary-foreground !border-primary"
                 [routerLinkActiveOptions]="{ exact: tab.exact }"
-                class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-hairline bg-background px-3.5 py-2.5 text-[0.78rem] font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
+                class="inline-flex min-w-0 items-center gap-2 rounded-lg border border-hairline bg-background px-2.5 py-2.5 text-[0.72rem] font-semibold leading-snug text-foreground transition-colors hover:border-primary hover:text-primary sm:shrink-0 sm:px-3.5 sm:text-[0.78rem]"
               >
                 <svg
                   lucideIcon
                   [lucideIcon]="iconFor(tab.slug)"
-                  class="h-4 w-4"
+                  class="h-4 w-4 shrink-0"
                   aria-hidden="true"
                 ></svg>
-                {{ tab.label }}
+                <span class="min-w-0">{{ tab.label }}</span>
               </a>
             }
           </div>
