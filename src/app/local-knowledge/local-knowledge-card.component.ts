@@ -8,13 +8,13 @@ import { LocalKnowledgeStore } from './local-knowledge.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [LucideLightbulb, LucideRefreshCw, LucideX],
   template: `
-    <div
-      class="relative flex h-full flex-col overflow-hidden rounded-xl bg-gradient-to-br from-ink via-ink to-clay text-ink-foreground shadow-[0_26px_50px_-20px_rgba(28,20,12,0.55)]"
+    <article
+      class="relative overflow-hidden rounded-xl bg-gradient-to-br from-ink via-ink to-clay text-ink-foreground shadow-[0_26px_50px_-22px_rgba(28,20,12,0.55)]"
     >
       @if (showClose()) {
         <button
           type="button"
-          class="absolute right-1.5 top-1.5 z-10 flex h-10 w-10 items-center justify-center rounded-md text-ink-foreground/50 transition-colors hover:text-ink-foreground"
+          class="absolute right-2 top-2 z-10 flex h-10 w-10 items-center justify-center rounded-md text-ink-foreground/50 transition-colors hover:text-ink-foreground"
           aria-label="Dismiss local knowledge"
           (click)="onClose($event)"
         >
@@ -24,7 +24,7 @@ import { LocalKnowledgeStore } from './local-knowledge.store';
 
       @for (entry of [item()]; track entry.id) {
         <div
-          class="kn-lk-card-copy flex flex-1 flex-col px-5 pb-12 pt-4"
+          class="kn-lk-card-copy relative px-6 py-6 sm:px-8 sm:py-8"
           [class.pr-12]="showClose()"
           [class.kn-lk-card-copy--static]="reducedMotion"
         >
@@ -34,56 +34,63 @@ import { LocalKnowledgeStore } from './local-knowledge.store';
           </span>
 
           @if (entry.title) {
-            <h3 class="mt-2.5 font-display text-lg leading-snug">{{ entry.title }}</h3>
+            <h3 class="mt-4 font-display text-[1.45rem] leading-snug sm:text-[1.75rem]">
+              {{ entry.title }}
+            </h3>
           }
 
-          <p class="mt-2.5 text-[0.9rem] leading-[1.65] text-ink-foreground/85">
+          <p class="mt-3 max-w-prose text-[0.98rem] leading-[1.75] text-ink-foreground/85 sm:text-[1.05rem]">
             {{ entry.content }}
           </p>
 
           @if (entry.explanation) {
-            <p class="mt-3 text-[0.82rem] leading-relaxed text-ink-foreground/60">
+            <p class="mt-3 max-w-prose text-[0.9rem] leading-relaxed text-ink-foreground/55">
               {{ entry.explanation }}
             </p>
           }
 
-          @if (entry.language; as language) {
+          <div
+            class="mt-7 flex flex-col gap-3 border-t border-ink-foreground/12 pt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+          >
             <p
-              class="mt-auto border-t border-ink-foreground/12 pt-2.5 text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-ink-foreground/45"
+              class="min-h-[1.1rem] text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ink-foreground/45"
             >
-              {{ language.name }}
-              @if (language.native_name && language.native_name !== language.name) {
-                · {{ language.native_name }}
+              @if (entry.language; as language) {
+                {{ language.name }}
+                @if (language.native_name && language.native_name !== language.name) {
+                  · {{ language.native_name }}
+                }
+              } @else if (entry.geographic_area; as area) {
+                {{ area.name }}
               }
             </p>
-          }
+
+            <button
+              type="button"
+              class="inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-md text-ink-foreground/55 transition-colors hover:bg-ink-foreground/10 hover:text-ink-foreground disabled:cursor-not-allowed disabled:opacity-40 sm:self-auto"
+              aria-label="Show another local knowledge"
+              [disabled]="isRefreshing()"
+              (click)="store.refresh(refreshIndex())"
+            >
+              <svg
+                lucideRefreshCw
+                class="h-4 w-4"
+                [class.animate-spin]="isRefreshing()"
+                aria-hidden="true"
+              ></svg>
+            </button>
+          </div>
         </div>
       }
-
-      <button
-        type="button"
-        class="absolute bottom-1.5 right-1.5 z-10 flex h-10 w-10 items-center justify-center rounded-md text-ink-foreground/50 transition-colors hover:text-ink-foreground disabled:cursor-not-allowed disabled:opacity-40"
-        aria-label="Show another local knowledge"
-        [disabled]="isRefreshing()"
-        (click)="store.refresh(refreshIndex())"
-      >
-        <svg
-          lucideRefreshCw
-          class="pointer-events-none h-4 w-4"
-          [class.animate-spin]="isRefreshing()"
-          aria-hidden="true"
-        ></svg>
-      </button>
-    </div>
+    </article>
   `,
   styles: `
     :host {
       display: block;
-      height: 100%;
     }
 
     .kn-lk-card-copy {
-      animation: kn-lk-copy-in 0.18s ease both;
+      animation: kn-lk-copy-in 0.2s ease both;
     }
 
     .kn-lk-card-copy--static {
@@ -93,9 +100,11 @@ import { LocalKnowledgeStore } from './local-knowledge.store';
     @keyframes kn-lk-copy-in {
       from {
         opacity: 0;
+        transform: translateY(4px);
       }
       to {
         opacity: 1;
+        transform: translateY(0);
       }
     }
 
