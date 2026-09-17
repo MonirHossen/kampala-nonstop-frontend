@@ -21,15 +21,23 @@ import { GuideBreadcrumbComponent, type GuideCrumb } from './guide-breadcrumb.co
         class="relative mx-auto flex min-h-[18rem] max-w-[1400px] flex-col items-center justify-center px-5 pb-14 pt-28 text-center sm:min-h-[22rem] sm:px-8 sm:pb-16 sm:pt-32"
       >
         <h1 class="hero-headline max-w-4xl text-ink-foreground">{{ title() }}</h1>
-        <div class="mt-6">
-          <kn-guide-breadcrumb [crumbs]="crumbs()" tone="light" />
-        </div>
+        @if (description()) {
+          <p class="mt-3 max-w-3xl text-sm leading-relaxed text-ink-foreground/80 sm:text-base">
+            {{ description() }}
+          </p>
+        }
+        @if (crumbs().length) {
+          <div class="mt-6">
+            <kn-guide-breadcrumb [crumbs]="crumbs()" tone="light" />
+          </div>
+        }
       </div>
     </section>
   `,
 })
 export class GuideHeroComponent {
-  readonly crumbs = input.required<GuideCrumb[]>();
+  readonly crumbs = input<GuideCrumb[]>([]);
+  readonly description = input('');
   readonly title = input.required<string>();
   readonly backgroundImage = input('/img/title-banner.jpg');
 }

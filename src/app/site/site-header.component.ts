@@ -7,7 +7,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideMenu, LucideX } from '@lucide/angular';
 import { filter } from 'rxjs';
 import { resolveWaitlistSource } from '../core/lib/tracking';
@@ -17,7 +17,7 @@ import { scrollToId } from '../shared/scroll-to';
 @Component({
   selector: 'kn-site-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, LucideMenu, LucideX],
+  imports: [RouterLink, RouterLinkActive, LucideMenu, LucideX],
   template: `
     <header
       class="fixed inset-x-0 top-0 z-50 h-14 transition-colors duration-500"
@@ -42,7 +42,7 @@ import { scrollToId } from '../shared/scroll-to';
           />
         </a>
 
-        <nav class="hidden items-center gap-4 md:flex sm:gap-6" aria-label="Primary">
+        <nav class="hidden items-center gap-4 lg:flex sm:gap-6" aria-label="Primary">
           <a
             routerLink="/ug/guide"
             class="eyebrow transition-colors"
@@ -52,6 +52,15 @@ import { scrollToId } from '../shared/scroll-to';
             Guide
           </a>
 
+          @for (item of serviceLinks; track item.path) {
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="!text-primary"
+              ariaCurrentWhenActive="page"
+              class="eyebrow transition-colors"
+              [class]="accountNavClass()"
+            >{{ item.label }}</a>
+          }
           @if (traveller.isAuthenticated()) {
             <a
               routerLink="/dashboard"
@@ -84,7 +93,7 @@ import { scrollToId } from '../shared/scroll-to';
 
         <button
           type="button"
-          class="inline-flex h-10 w-10 items-center justify-center md:hidden"
+          class="inline-flex h-10 w-10 items-center justify-center lg:hidden"
           [class]="hamburgerClass()"
           [attr.aria-expanded]="menuOpen()"
           [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'"
@@ -102,7 +111,7 @@ import { scrollToId } from '../shared/scroll-to';
       @if (menuOpen()) {
         <nav
           id="site-mobile-nav"
-          class="absolute inset-x-0 top-14 md:hidden"
+          class="absolute inset-x-0 top-14 lg:hidden"
           [class]="mobilePanelClass()"
           aria-label="Primary"
         >
@@ -116,6 +125,16 @@ import { scrollToId } from '../shared/scroll-to';
               Guide
             </a>
 
+            @for (item of serviceLinks; track item.path) {
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="!text-primary"
+                ariaCurrentWhenActive="page"
+                class="eyebrow px-1 py-3 transition-colors"
+                [class]="accountNavClass()"
+                (click)="menuOpen.set(false)"
+              >{{ item.label }}</a>
+            }
             @if (traveller.isAuthenticated()) {
               <a
                 routerLink="/dashboard"
@@ -153,6 +172,12 @@ import { scrollToId } from '../shared/scroll-to';
 export class SiteHeaderComponent {
   /** Use on light-background pages so the dark logo and solid header show immediately. */
   readonly lightBackground = input(false);
+
+  protected readonly serviceLinks = [
+    { path: '/discover', label: 'Discover' },
+    { path: '/services', label: 'Services' },
+    { path: '/concierge', label: 'Concierge' },
+  ];
 
   private readonly router = inject(Router);
   protected readonly traveller = inject(TravellerAuthService);
@@ -208,7 +233,7 @@ export class SiteHeaderComponent {
 
   @HostListener('window:resize')
   protected onResize(): void {
-    if (window.matchMedia('(min-width: 768px)').matches) {
+    if (window.matchMedia('(min-width: 1024px)').matches) {
       this.menuOpen.set(false);
     }
   }

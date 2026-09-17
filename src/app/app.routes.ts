@@ -6,6 +6,21 @@ import { knownCountryMatch } from './guide/known-country.guard';
 
 export const routes: Routes = [
   {
+    path: 'discover',
+    title: 'Discover Uganda — Kampala Nonstop',
+    loadComponent: () => import('./pages/discover.page').then((m) => m.DiscoverPage),
+  },
+  {
+    path: 'services',
+    title: 'Travel & Practical Services — Kampala Nonstop',
+    loadComponent: () => import('./pages/services.page').then((m) => m.ServicesPage),
+  },
+  {
+    path: 'concierge',
+    title: 'Concierge Services — Kampala Nonstop',
+    loadComponent: () => import('./pages/concierge.page').then((m) => m.ConciergePage),
+  },
+  {
     path: '',
     title: 'Kampala Nonstop | Discover Kampala Differently',
     data: { localKnowledgeContext: 'HOME' },
