@@ -19,8 +19,8 @@ import { SiteFooterComponent } from './site-footer.component';
         <div class="mt-8 space-y-5 text-[1rem] leading-relaxed text-muted-foreground">
           <ng-content />
         </div>
-        <kn-local-knowledge-section [inset]="true" />
       </main>
+      <kn-local-knowledge-section />
       <kn-site-footer class="mt-auto" />
     </div>
   `,

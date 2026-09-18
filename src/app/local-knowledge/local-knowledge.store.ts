@@ -4,7 +4,7 @@ import { LocalKnowledgeApiService } from './local-knowledge-api.service';
 import { LocalKnowledgeItem } from './local-knowledge.models';
 
 const SEEN_STORAGE_KEY = 'kn.localKnowledge.seenIds';
-export const LOCAL_KNOWLEDGE_DESKTOP_COUNT = 3;
+export const LOCAL_KNOWLEDGE_PAGE_COUNT = 1;
 
 /** Laravel validates exclude_ids as a string with max:2000. */
 const EXCLUDE_IDS_MAX_CHARS = 1800;
@@ -26,7 +26,7 @@ export class LocalKnowledgeStore {
   private readonly refreshingSlot = signal<number | null>(null);
   private lastParams: LocalKnowledgeFetchParams | null = null;
   private fetchGeneration = 0;
-  private slotGeneration = [0, 0, 0];
+  private slotGeneration = [0];
 
   readonly items = computed(() => this.itemList());
   readonly current = computed(() => this.itemList()[0] ?? null);
@@ -95,7 +95,7 @@ export class LocalKnowledgeStore {
     this.request(
       params,
       this.excludeIdsForRequest(),
-      LOCAL_KNOWLEDGE_DESKTOP_COUNT,
+      LOCAL_KNOWLEDGE_PAGE_COUNT,
       (items) => {
         if (generation !== this.fetchGeneration) {
           return;
@@ -181,8 +181,9 @@ export class LocalKnowledgeStore {
   }
 
   private applyItems(items: LocalKnowledgeItem[]): void {
-    this.itemList.set(items);
-    for (const item of items) {
+    const next = items.slice(0, LOCAL_KNOWLEDGE_PAGE_COUNT);
+    this.itemList.set(next);
+    for (const item of next) {
       this.markSeen(item.id);
     }
   }
