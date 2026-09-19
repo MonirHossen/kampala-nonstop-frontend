@@ -28,6 +28,18 @@ import { SiteHeaderComponent } from '../site/site-header.component';
       <kn-site-header />
       <main>
         <kn-hero [launchNote]="settings.launchNote()" />
+        <section id="about" aria-labelledby="home-about-heading" class="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 sm:py-20">
+          <div class="mt-6 max-w-4xl space-y-5 text-base leading-relaxed text-muted-foreground">
+            <p>
+              <strong class="font-bold text-foreground">Kampala Nonstop is a Uganda-focused destination platform designed to help travellers discover, plan and experience more of the country through one trusted service.</strong>
+            </p>
+            <p>
+              Imagine having a super-connected friend waiting for you in Uganda, who’s determined to make sure you have the best possible experience of the country. They understand your needs, know where to go, what’s happening, who to call and how to make things happen —
+              <strong class="font-bold text-foreground">helping you experience the side of Uganda that only local knowledge can unlock.</strong>
+            </p>
+            <p><strong class="font-bold text-foreground">That’s Kampala Nonstop.</strong></p>
+          </div>
+        </section>
       </main>
       <kn-local-knowledge-section />
       <kn-site-footer />
