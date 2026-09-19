@@ -30,7 +30,7 @@ const SUPPRESSED_PREFIXES = [
   template: `
     @if (store.current(); as item) {
       @if (inset()) {
-        <section class="mt-12" aria-label="Local knowledge">
+        <section [class.mt-12]="!flush()" class="min-w-0" aria-label="Local knowledge">
           <p class="eyebrow text-clay">Local knowledge</p>
           <div class="mt-5 max-w-2xl">
             <kn-local-knowledge-card [item]="item" />
@@ -42,21 +42,6 @@ const SUPPRESSED_PREFIXES = [
             <div
               class="grid items-start gap-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[minmax(0,22rem)_minmax(0,40rem)]"
             >
-              <header class="max-w-md">
-                <div class="flex items-center gap-3">
-                  <span class="h-px w-10 bg-primary"></span>
-                  <p class="eyebrow text-clay">Local knowledge</p>
-                </div>
-                <h2
-                  class="mt-4 font-display text-[1.65rem] leading-tight text-foreground sm:text-[2rem]"
-                >
-                  A little of Uganda, before you go.
-                </h2>
-                <p class="mt-3 text-[0.95rem] leading-relaxed text-foreground/65">
-                  One tip at a time — culture, phrases, and practical know-how from locals.
-                </p>
-              </header>
-
               <div class="w-full max-w-2xl lg:max-w-none">
                 <kn-local-knowledge-card [item]="item" />
               </div>
@@ -79,6 +64,8 @@ export class LocalKnowledgeSectionComponent implements OnInit {
 
   /** Skip the wide page gutter when the parent already constrains width. */
   readonly inset = input(false);
+  /** Let a parent grid supply spacing when this section sits beside other content. */
+  readonly flush = input(false);
 
   ngOnInit(): void {
     this.scheduleForUrl(this.router.url);
