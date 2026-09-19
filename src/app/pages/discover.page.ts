@@ -1,18 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {
-  LucideDynamicIcon, LucideUtensils, LucideLandmark, LucideMusic,
-  LucideTrees, LucideMountain, LucideTickets, LucideFlower2,
-  LucideBike, LucideShoppingBag, LucideHandshake,
-  LucideStar, LucideFootprints, LucideCalendarDays, LucideMap, LucideConciergeBell,
-  LucideArrowRight,
-} from '@lucide/angular';
+import { LucideDynamicIcon, LucideArrowRight } from '@lucide/angular';
+import { RouterLink } from '@angular/router';
+import { DISCOVER_THEMES, DISCOVER_TYPES } from './discover-options';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 
 @Component({
   selector: 'kn-discover-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SiteHeaderComponent, SiteFooterComponent, LucideDynamicIcon],
+  imports: [SiteHeaderComponent, SiteFooterComponent, LucideDynamicIcon, RouterLink],
   template: `
     <div class="flex min-h-screen flex-col bg-background">
       <kn-site-header [lightBackground]="true" />
@@ -55,10 +51,10 @@ import { SiteFooterComponent } from '../site/site-footer.component';
                     class="absolute inset-0 -z-20 h-full w-full object-cover object-center"
                   />
                   <div class="absolute inset-0 -z-10 bg-black/55" aria-hidden="true"></div>
-                  <div class="flex w-full flex-col items-start justify-center gap-3 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
+                  <a routerLink="/discover/catalogue" [queryParams]="{ interest: theme.label }" class="flex w-full focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white flex-col items-start justify-center gap-3 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4">
                     <svg lucideIcon [lucideIcon]="theme.icon" class="h-8 w-8 shrink-0 sm:h-9 sm:w-9" aria-hidden="true"></svg>
                     <h3 class="min-w-0 text-sm font-bold leading-snug sm:flex-1">{{ theme.label }}</h3>
-                  </div>
+                  </a>
                 </li>
               }
             </ul>
@@ -73,15 +69,15 @@ import { SiteFooterComponent } from '../site/site-footer.component';
             </p>
             <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4">
               @for (type of listingTypes; track type.label) {
-                <button
-                  type="button"
-                  disabled
+                <a
+                  routerLink="/discover/catalogue"
+                  [queryParams]="{ type: type.label }"
                   class="relative flex min-h-24 min-w-0 items-center gap-2 rounded-xl bg-muted px-3 pb-9 pt-5 text-left text-xs font-bold text-foreground disabled:cursor-not-allowed disabled:opacity-100 sm:gap-3 sm:px-4 sm:text-sm"
                 >
                   <svg lucideIcon [lucideIcon]="type.icon" class="h-7 w-7 shrink-0 text-emerald-950 sm:h-9 sm:w-9" aria-hidden="true"></svg>
                   <span class="min-w-0 flex-1">{{ type.label }}</span>
                   <svg lucideIcon [lucideIcon]="arrowIcon" class="absolute bottom-3 right-3 h-4 w-4 sm:right-4" aria-hidden="true"></svg>
-                </button>
+                </a>
               }
             </div>
           </section>
@@ -93,24 +89,7 @@ import { SiteFooterComponent } from '../site/site-footer.component';
 })
 export class DiscoverPage {
   // Editorial discovery themes, independent of the internal catalogue taxonomy.
-  protected readonly themes = [
-    { label: 'Food & Local Life', image: 'discover_food_and_local_life', icon: LucideUtensils.icon },
-    { label: 'Culture & Heritage', image: 'discover_culture_and_heritage', icon: LucideLandmark.icon },
-    { label: 'Music, Nightlife & Entertainment', image: 'discover_music_nightlife_entertainment', icon: LucideMusic.icon },
-    { label: 'Nature & Wildlife', image: 'discover_wildlife_and_nature', icon: LucideTrees.icon },
-    { label: 'Adventure & Outdoors', image: 'discover_adventure_and_outdoors', icon: LucideMountain.icon },
-    { label: 'Events & Festivals', image: 'discover_events_and_festivals', icon: LucideTickets.icon },
-    { label: 'Wellness & Relaxation', image: 'discover_wellness_and_beauty', icon: LucideFlower2.icon },
-    { label: 'Sports & Recreation', image: 'discover_sports_and_recreation', icon: LucideBike.icon },
-    { label: 'Shopping', image: 'discover_shopping', icon: LucideShoppingBag.icon },
-    { label: 'Community & Impact', image: 'discover_community_and_impact', icon: LucideHandshake.icon },
-  ];
+  protected readonly themes = DISCOVER_THEMES;
   protected readonly arrowIcon = LucideArrowRight.icon;
-  protected readonly listingTypes = [
-    { label: 'Experiences', icon: LucideStar.icon },
-    { label: 'Activities', icon: LucideFootprints.icon },
-    { label: 'Events', icon: LucideCalendarDays.icon },
-    { label: 'Tours', icon: LucideMap.icon },
-    { label: 'Services', icon: LucideConciergeBell.icon },
-  ];
+  protected readonly listingTypes = DISCOVER_TYPES;
 }
