@@ -42,20 +42,21 @@ type GuideTab = {
         [crumbs]="crumbs()"
         [title]="heroTitle()"
         [backgroundImage]="heroImage()"
-      />
+        [showBreadcrumbs]="!content()"
+      >
 
       @if (content(); as guide) {
         @if (sectionSlug()) {
-          <nav class="border-b border-hairline bg-paper" aria-label="Country Guide">
+          <nav aria-label="Country Guide">
           <div
-            class="mx-auto grid max-w-[1400px] grid-cols-2 gap-2 px-5 py-3 sm:flex sm:flex-wrap sm:overflow-x-auto sm:px-8"
-            role="tablist"
+            class="mx-auto grid max-w-[1400px] grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center"
           >
             @for (tab of tabs; track tab.path) {
               <a
                 [routerLink]="tab.path ? tab.path : './'"
                 routerLinkActive="!bg-primary !text-primary-foreground !border-primary"
                 [routerLinkActiveOptions]="{ exact: tab.exact }"
+                ariaCurrentWhenActive="page"
                 class="inline-flex min-w-0 items-center gap-2 rounded-lg border border-hairline bg-background px-2.5 py-2.5 text-[0.72rem] font-semibold leading-snug text-foreground transition-colors hover:border-primary hover:text-primary sm:shrink-0 sm:px-3.5 sm:text-[0.78rem]"
               >
                 <svg
@@ -72,11 +73,15 @@ type GuideTab = {
         }
       }
 
+      </kn-guide-hero>
+
       <main class="flex-1">
         <router-outlet />
       </main>
 
-      <kn-local-knowledge-section />
+      @if (sectionSlug() || !content()) {
+        <kn-local-knowledge-section />
+      }
       <kn-site-footer />
     </div>
   `,

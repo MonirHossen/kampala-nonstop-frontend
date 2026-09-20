@@ -8,27 +8,19 @@ const UGANDA_HUB_CARDS: GuideHubCard[] = [
   {
     slug: 'essentials',
     title: 'Essentials',
-    lede: 'Get to know Uganda: its people, culture, geography and everyday essentials.',
-    cta: 'Explore Essentials',
-  },
+    lede: 'Get to know Uganda: its people, culture, geography and everyday essentials.',  },
   {
     slug: 'travel-guide',
     title: 'Travel Guide',
-    lede: 'Explore ten practical topics to help you prepare and find your way.',
-    cta: 'Explore Travel Guide',
-  },
+    lede: 'Explore ten practical topics to help you prepare and find your way.',  },
   {
     slug: 'travel-information',
     title: 'Travel Information',
-    lede: 'Find visa information, arrival details, transport options and packing advice.',
-    cta: 'Explore Travel Information',
-  },
+    lede: 'Find visa information, arrival details, transport options and packing advice.',  },
   {
     slug: 'regions',
     title: 'Regions',
-    lede: 'Find your bearings across Central, West, East and North.',
-    cta: 'Explore Regions',
-  },
+    lede: 'Find your bearings across Central, West, East and North.',  },
 ];
 
 export const UGANDA_GUIDE_CONTENT: CountryGuideContent = {

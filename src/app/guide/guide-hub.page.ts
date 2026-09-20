@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowledge-section.component';
 import { guideContentFor } from './content/guide-content.registry';
 import { guideHubCardImage } from './guide-art';
 import { countryDisplayName } from './guide-country-name';
@@ -10,7 +11,7 @@ import { guideSectionIcon } from './guide-topic-icons';
 @Component({
   selector: 'kn-guide-hub-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, LucideDynamicIcon],
+  imports: [RouterLink, LucideDynamicIcon, LocalKnowledgeSectionComponent],
   template: `
     @if (content(); as guide) {
       <section class="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 sm:py-20">
@@ -20,7 +21,7 @@ import { guideSectionIcon } from './guide-topic-icons';
               <a
                 [routerLink]="card.slug"
                 [relativeTo]="guideRoute"
-                class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-hairline bg-paper transition-all duration-300 hover:-translate-y-1 hover:border-primary/45 hover:shadow-[0_28px_50px_-26px_rgba(40,28,18,0.55)]"
+                class="group relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-primary bg-paper transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_50px_-26px_rgba(40,28,18,0.55)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
               >
                 <figure class="relative aspect-[16/9] overflow-hidden">
                   <img
@@ -52,49 +53,43 @@ import { guideSectionIcon } from './guide-topic-icons';
                   <p class="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground sm:text-base">
                     {{ card.lede }}
                   </p>
-                  <span class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                    Explore {{ card.title }}
-                    <span
-                      class="transition-transform duration-300 group-hover:translate-x-1"
-                      aria-hidden="true"
-                    >
-                      →
-                    </span>
-                  </span>
                 </div>
               </a>
             </li>
           }
         </ul>
 
-        <aside class="relative mt-8 overflow-hidden rounded-2xl">
-          <img
-            src="/img/uganda/uganda-city-sunset.jpg"
-            alt=""
-            class="absolute inset-0 h-full w-full object-cover"
-            aria-hidden="true"
-            loading="lazy"
-          />
-          <span class="absolute inset-0 bg-ink/72" aria-hidden="true"></span>
-          <div
-            class="relative flex flex-col gap-5 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-12"
-          >
-            <div>
-              <h2 class="font-display text-2xl text-ink-foreground sm:text-3xl">
-                Turn your ideas into a trip
-              </h2>
-              <p class="mt-2 max-w-xl text-ink-foreground/85">
-                Bring your interests, dates and destinations together when you’re ready.
-              </p>
-            </div>
-            <a
-              routerLink="/waitlist/join"
-              class="inline-flex shrink-0 bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground hover:text-primary"
+        <div class="mt-8 grid items-start gap-8 min-[1400px]:grid-cols-[56rem_minmax(0,1fr)]">
+          <aside class="relative min-w-0 overflow-hidden rounded-2xl">
+            <img
+              src="/img/uganda/uganda-city-sunset.jpg"
+              alt=""
+              class="absolute inset-0 h-full w-full object-cover"
+              aria-hidden="true"
+              loading="lazy"
+            />
+            <span class="absolute inset-0 bg-ink/72" aria-hidden="true"></span>
+            <div
+              class="relative flex flex-col gap-5 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-12"
             >
-              Plan My Trip
-            </a>
-          </div>
-        </aside>
+              <div>
+                <h2 class="font-display text-2xl text-ink-foreground sm:text-3xl">
+                  Turn your ideas into a trip
+                </h2>
+                <p class="mt-2 max-w-xl text-ink-foreground/85">
+                  Bring your interests, dates and destinations together when you’re ready.
+                </p>
+              </div>
+              <a
+                routerLink="/waitlist/join"
+                class="inline-flex shrink-0 bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground hover:text-primary"
+              >
+                Plan My Trip
+              </a>
+            </div>
+          </aside>
+          <kn-local-knowledge-section [inset]="true" [flush]="true" />
+        </div>
       </section>
     } @else {
       <section class="mx-auto max-w-[1400px] px-5 py-20 sm:px-8">
