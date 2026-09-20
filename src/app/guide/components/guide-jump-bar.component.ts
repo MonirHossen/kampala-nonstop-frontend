@@ -16,7 +16,7 @@ import { LucideChevronUp, LucideDynamicIcon, type LucideIconData } from '@lucide
           (click)="back.emit()"
         >
           <span
-            class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"
+            class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_18px_-12px_rgba(196,87,45,0.7)]"
           >
             <svg lucideIcon [lucideIcon]="icon()" class="h-3.5 w-3.5" aria-hidden="true"></svg>
           </span>

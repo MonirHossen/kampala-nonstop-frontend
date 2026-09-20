@@ -27,13 +27,8 @@ import {
   imports: [LucideDynamicIcon, GuideJumpBarComponent],
   template: `
     <div #picker class="scroll-mt-20">
-      <div class="flex items-baseline justify-between gap-4 border-b-2 border-ink pb-3">
-        <h2 class="eyebrow text-clay">Browse topics</h2>
-        <span class="text-[0.7rem] text-muted-foreground">{{ topics().length }} topics</span>
-      </div>
-
       <div
-        class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5"
+        class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5"
         role="listbox"
         aria-label="Travel guide topics"
       >
@@ -43,31 +38,44 @@ import {
             role="option"
             [attr.aria-selected]="isSelected(topic)"
             (click)="select(topic)"
-            class="group relative flex flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-5"
+            class="group relative flex h-60 flex-col items-stretch gap-3 overflow-hidden rounded-2xl border p-3 pt-4 text-left outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-64 sm:p-4 sm:pt-5"
             [class]="cardClass(topic)"
           >
-            <span
-              class="inline-flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-300"
-              [class]="iconWrapClass(topic)"
-            >
-              <svg
-                lucideIcon
-                [lucideIcon]="iconFor(topic.code)"
-                class="h-[1.15rem] w-[1.15rem]"
-                aria-hidden="true"
-              ></svg>
+            <span class="flex items-center gap-3 border-b pb-3" [class]="headerRuleClass(topic)">
+              <span
+                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300"
+                [class]="iconWrapClass(topic)"
+              >
+                <svg
+                  lucideIcon
+                  [lucideIcon]="iconFor(topic.code)"
+                  class="h-[1.05rem] w-[1.05rem]"
+                  aria-hidden="true"
+                ></svg>
+              </span>
+              <span class="h-px flex-1" [class]="ruleClass(topic)"></span>
             </span>
 
-            <span class="font-display text-[1.05rem] leading-tight">{{ topic.name }}</span>
+            <span class="font-display text-[1.05rem] leading-snug">{{ topic.name }}</span>
 
             @if (topic.description) {
               <span
                 class="line-clamp-2 text-[0.78rem] leading-relaxed"
-                [class]="isSelected(topic) ? 'text-ink-foreground/60' : 'text-muted-foreground'"
+                [class]="textClass(topic)"
               >
                 {{ topic.description }}
               </span>
             }
+
+            <span class="mt-auto flex items-center gap-2 pt-1">
+              <span class="h-px flex-1" [class]="ruleClass(topic)"></span>
+              <span
+                class="text-xl leading-none transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                [class]="arrowClass(topic)"
+                aria-hidden="true"
+                >→</span
+              >
+            </span>
           </button>
         }
       </div>
@@ -135,9 +143,29 @@ export class GuideTopicGridComponent implements AfterViewInit {
     return 'border-hairline bg-gradient-to-b from-paper to-sand/45 text-foreground hover:-translate-y-1 hover:border-primary/45 hover:to-primary/12 hover:shadow-[0_16px_30px_-20px_rgba(40,28,18,0.5)]';
   }
 
+  protected headerRuleClass(topic: GuideTopic): string {
+    return this.isSelected(topic) ? 'border-ink-foreground/20' : 'border-hairline/80';
+  }
+
+  protected arrowClass(topic: GuideTopic): string {
+    return this.isSelected(topic)
+      ? 'text-primary'
+      : 'text-clay/45 group-hover:text-primary';
+  }
+
+  protected ruleClass(topic: GuideTopic): string {
+    return this.isSelected(topic)
+      ? 'bg-ink-foreground/20'
+      : 'bg-hairline/80';
+  }
+
+  protected textClass(topic: GuideTopic): string {
+    return this.isSelected(topic) ? 'text-ink-foreground/60' : 'text-muted-foreground';
+  }
+
   protected iconWrapClass(topic: GuideTopic): string {
     return this.isSelected(topic)
-      ? 'bg-primary text-primary-foreground'
+      ? 'bg-primary text-primary-foreground shadow-[0_10px_18px_-12px_rgba(196,87,45,0.7)]'
       : 'bg-sand/80 text-clay group-hover:bg-primary/15 group-hover:text-primary';
   }
 

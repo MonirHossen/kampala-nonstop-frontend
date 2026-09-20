@@ -6,18 +6,24 @@ import { GuideEssential } from '../guide.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block lg:sticky lg:top-24 lg:self-start' },
   template: `
-    <aside class="overflow-hidden rounded-xl border border-hairline bg-paper">
-      <header
-        class="relative overflow-hidden bg-gradient-to-br from-ink via-ink to-clay px-5 py-5 text-ink-foreground"
-      >
+    <aside class="overflow-hidden rounded-2xl border border-hairline bg-paper">
+      <header class="relative overflow-hidden">
+        <img
+          src="/img/uganda/uganda-map.svg"
+          alt=""
+          class="absolute inset-0 h-full w-full object-cover"
+          aria-hidden="true"
+          loading="lazy"
+        />
+        <span class="absolute inset-0 bg-ink/72" aria-hidden="true"></span>
         <span
-          class="pointer-events-none absolute -right-1 -top-3 font-display text-[4.5rem] leading-none text-ink-foreground/[0.07]"
+          class="pointer-events-none absolute -right-1 -top-3 font-display text-[4.5rem] leading-none text-ink-foreground/[0.12]"
           aria-hidden="true"
         >
           {{ countryCode() }}
         </span>
 
-        <h2 class="relative font-display text-xl leading-snug sm:text-[1.35rem]">
+        <h2 class="relative px-5 pb-6 pt-24 font-display text-xl leading-snug text-ink-foreground sm:text-[1.35rem]">
           {{ countryName() }} at a glance
         </h2>
       </header>

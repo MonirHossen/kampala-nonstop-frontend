@@ -8,6 +8,7 @@ import { SiteFooterComponent } from '../site/site-footer.component';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { GuideHeroComponent } from './components/guide-hero.component';
 import { guideContentFor } from './content/guide-content.registry';
+import { guideHeroImage } from './guide-art';
 import { countryDisplayName } from './guide-country-name';
 import type { GuideCrumb } from './components/guide-breadcrumb.component';
 import { guideSectionIcon } from './guide-topic-icons';
@@ -40,7 +41,7 @@ type GuideTab = {
       <kn-guide-hero
         [crumbs]="crumbs()"
         [title]="heroTitle()"
-        [backgroundImage]="heroImage"
+        [backgroundImage]="heroImage()"
       />
 
       @if (content(); as guide) {
@@ -86,7 +87,7 @@ export class GuideShellComponent {
   protected readonly countryCode = computed(() => this.countryFromUrl());
   protected readonly countryName = computed(() => countryDisplayName(this.countryCode()));
   protected readonly content = computed(() => guideContentFor(this.countryCode()));
-  protected readonly heroImage = '/img/title-banner.jpg';
+  protected readonly heroImage = computed(() => guideHeroImage(this.sectionSlug()));
 
   private readonly url = toSignal(
     this.router.events.pipe(

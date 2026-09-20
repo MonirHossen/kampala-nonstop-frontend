@@ -31,5 +31,5 @@ import { GuideBreadcrumbComponent, type GuideCrumb } from './guide-breadcrumb.co
 export class GuideHeroComponent {
   readonly crumbs = input.required<GuideCrumb[]>();
   readonly title = input.required<string>();
-  readonly backgroundImage = input('/img/title-banner.jpg');
+  readonly backgroundImage = input('/img/uganda/uganda-skyline.jpg');
 }
