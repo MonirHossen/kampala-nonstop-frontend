@@ -15,7 +15,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
                 Kampala<span class="text-primary">Nonstop</span>
               </p>
             </a>
-            <p class="mt-3 text-ink-foreground/80">Discover Kampala differently.</p>
+            <p class="mt-3 text-ink-foreground/80">Personalised trip planning for Uganda.</p>
             <p class="eyebrow mt-6 text-ink-foreground/70">Kampala, Uganda</p>
           </div>
 

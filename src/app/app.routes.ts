@@ -7,7 +7,7 @@ import { knownCountryMatch } from './guide/known-country.guard';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Kampala Nonstop | Discover Kampala Differently',
+    title: 'Kampala Nonstop | personalised trip planning for Uganda',
     data: { localKnowledgeContext: 'HOME' },
     loadComponent: () => import('./pages/home.page').then((m) => m.HomePage),
   },
