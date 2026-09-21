@@ -11,11 +11,12 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { LucideDynamicIcon } from '@lucide/angular';
+import { LucideArrowUp, LucideDynamicIcon } from '@lucide/angular';
 import { guideNavIcon } from '../guide-topic-icons';
 import { GuideJumpBarComponent } from './guide-jump-bar.component';
 import {
   guideScrollBehavior,
+  GUIDE_HEADER_OFFSET_PX,
   observeGuidePickerVisibility,
   scheduleRevealGuidePanel,
 } from './guide-picker-reveal';
@@ -69,6 +70,19 @@ export type GuideSectionNavItem = {
       }
     </div>
 
+    @if (floatingReturn()) {
+      @if (passedGrid()) {
+        <button
+          type="button"
+          aria-label="Back to travel information sections"
+          title="Back to sections"
+          (click)="scrollToGrid()"
+          class="fixed right-5 bottom-[calc(1.25rem+env(safe-area-inset-bottom))] z-40 flex h-12 w-12 items-center justify-center rounded-full border border-clay bg-background text-clay shadow-lg transition-colors hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 md:right-8"
+        >
+          <svg lucideIcon [lucideIcon]="arrowUp" class="h-6 w-6" aria-hidden="true"></svg>
+        </button>
+      }
+    } @else {
     <kn-guide-jump-bar
       [visible]="showJumpBar()"
       [label]="selectedLabel()"
@@ -76,6 +90,7 @@ export type GuideSectionNavItem = {
       backLabel="Sections"
       (back)="scrollToGrid()"
     />
+    }
   `,
 })
 export class GuideSectionNavComponent implements AfterViewInit {
@@ -86,9 +101,12 @@ export class GuideSectionNavComponent implements AfterViewInit {
   readonly selectedId = input.required<string>();
   readonly panelId = input.required<string>();
   readonly ariaLabel = input('Guide sections');
+  readonly floatingReturn = input(false);
   readonly itemSelect = output<string>();
 
   private readonly gridVisible = signal(true);
+  protected readonly passedGrid = signal(false);
+  protected readonly arrowUp = LucideArrowUp;
 
   protected readonly selectedLabel = computed(() => {
     const id = this.selectedId();
@@ -100,7 +118,18 @@ export class GuideSectionNavComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const grid = this.grid()?.nativeElement;
     if (grid) {
-      observeGuidePickerVisibility(grid, (visible) => this.gridVisible.set(visible), this.destroyRef);
+      if (this.floatingReturn() && typeof IntersectionObserver !== 'undefined') {
+        const observer = new IntersectionObserver(
+          ([entry]) => this.passedGrid.set(
+            !entry.isIntersecting && entry.boundingClientRect.bottom <= GUIDE_HEADER_OFFSET_PX,
+          ),
+          { threshold: 0, rootMargin: `-${GUIDE_HEADER_OFFSET_PX}px 0px 0px 0px` },
+        );
+        observer.observe(grid);
+        this.destroyRef.onDestroy(() => observer.disconnect());
+      } else {
+        observeGuidePickerVisibility(grid, (visible) => this.gridVisible.set(visible), this.destroyRef);
+      }
     }
   }
 
@@ -110,6 +139,7 @@ export class GuideSectionNavComponent implements AfterViewInit {
   }
 
   protected scrollToGrid(): void {
+    this.grid()?.nativeElement.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true });
     this.grid()?.nativeElement.scrollIntoView({
       behavior: guideScrollBehavior(),
       block: 'start',

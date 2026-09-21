@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { RevealDirective } from '../shared/reveal.directive';
+import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowledge-section.component';
 import { GuideNarrativeBlocksComponent } from './components/guide-narrative-blocks.component';
 import { GuideSectionNavComponent } from './components/guide-section-nav.component';
 import { GuideTextLinkComponent } from './components/guide-text-link.component';
@@ -14,6 +15,7 @@ import { guideCountryCode } from './guide-route';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RevealDirective,
+    LocalKnowledgeSectionComponent,
     RouterLink,
     GuideSectionNavComponent,
     GuideTextLinkComponent,
@@ -23,7 +25,7 @@ import { guideCountryCode } from './guide-route';
     @if (content(); as guide) {
       @let info = guide.travelInformation;
       <section class="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 sm:py-16">
-        <div knReveal>
+        <div>
           <h2 class="font-display text-3xl text-foreground sm:text-4xl">{{ info.introHeading }}</h2>
           <p class="mt-4 max-w-3xl text-[1.05rem] leading-relaxed text-muted-foreground">
             {{ info.intro }}
@@ -35,6 +37,7 @@ import { guideCountryCode } from './guide-route';
               [selectedId]="activeSection()"
               panelId="travel-information-section-panel"
               ariaLabel="Travel information sections"
+              [floatingReturn]="true"
               (itemSelect)="activeSection.set($event)"
             />
           </nav>
@@ -76,12 +79,6 @@ import { guideCountryCode } from './guide-route';
                 {{ info.officialPortalLabel }}
               </a>
 
-              <h3 class="mt-12 font-display text-2xl text-foreground sm:text-3xl">
-                {{ info.visaFreeHeading }}
-              </h3>
-              <div class="mt-4">
-                <kn-guide-narrative-blocks [blocks]="toBlocks(info.visaFreeParagraphs)" />
-              </div>
             </div>
 
             <aside knReveal class="space-y-6">
@@ -114,15 +111,27 @@ import { guideCountryCode } from './guide-route';
             </aside>
           </div>
 
+          <div class="mt-12 grid items-start gap-8 min-[1400px]:grid-cols-[56rem_minmax(0,1fr)]">
+            <div knReveal class="min-w-0">
+              <h3 class="font-display text-2xl text-foreground sm:text-3xl">
+                {{ info.visaFreeHeading }}
+              </h3>
+              <div class="mt-4">
+                <kn-guide-narrative-blocks [blocks]="toBlocks(info.visaFreeParagraphs)" />
+              </div>
+            </div>
+            <kn-local-knowledge-section [inset]="true" [flush]="true" />
+          </div>
+
           <div class="mt-16" knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.costsHeading }}</h3>
             <p class="mt-3 text-muted-foreground">{{ info.costsIntro }}</p>
 
-            <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+            <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               @for (cost of info.costs; track cost.name) {
                 <li class="rounded-xl border border-hairline bg-gradient-to-b from-paper to-sand/40 p-6">
                   <p class="eyebrow text-clay">{{ cost.name }}</p>
-                  <p class="mt-2 font-display text-3xl text-foreground">{{ cost.price }}</p>
+                  <p class="mt-2 text-sm font-bold text-foreground">{{ cost.price }}</p>
                   @if (cost.note) {
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ cost.note }}</p>
                   }
