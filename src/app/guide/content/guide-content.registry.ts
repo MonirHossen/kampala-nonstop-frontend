@@ -20,7 +20,7 @@ const UGANDA_HUB_CARDS: GuideHubCard[] = [
   {
     slug: 'regions',
     title: 'Regions',
-    lede: 'Find your bearings across Central, West, East and North.',  },
+    lede: 'Find your bearings across Central, Western, Eastern and Northern.',  },
 ];
 
 export const UGANDA_GUIDE_CONTENT: CountryGuideContent = {

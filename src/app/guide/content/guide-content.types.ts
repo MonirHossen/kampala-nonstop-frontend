@@ -111,6 +111,8 @@ export type GuideRegion = {
   orientation: string;
   actionLabel: string;
   actionTopic: string;
+  /** Wikipedia / Wikimedia Commons locator map for this region. */
+  mapSrc: string;
 };
 
 export type GuideHubCard = {

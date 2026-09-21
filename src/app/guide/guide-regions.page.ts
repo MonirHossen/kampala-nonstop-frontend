@@ -4,7 +4,7 @@ import { GuideRegionsComponent } from './components/guide-regions.component';
 import { GuideTextLinkComponent } from './components/guide-text-link.component';
 import { guideContentFor } from './content/guide-content.registry';
 import type { GuideRegion } from './content/guide-content.types';
-import { guideRegionImage } from './guide-art';
+import { guideRegionImage, guideRegionMap } from './guide-art';
 import { guideCountryCode } from './guide-route';
 
 @Component({
@@ -28,26 +28,49 @@ import { guideCountryCode } from './guide-route';
           class="mx-auto max-w-[1400px] scroll-mt-[6.5rem] px-5 pb-16 outline-none sm:px-8 sm:pb-20"
         >
           <article class="overflow-hidden rounded-xl border border-hairline bg-paper">
-            <figure class="relative overflow-hidden">
-              <img
-                [src]="regionImage(region.code)"
-                alt=""
-                class="aspect-[16/8] w-full object-cover sm:aspect-[16/5]"
-                loading="lazy"
-              />
-              <span
-                class="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/15 to-transparent"
-                aria-hidden="true"
-              ></span>
-              <span
-                class="absolute bottom-4 left-5 flex items-end gap-3 text-ink-foreground sm:bottom-6 sm:left-8"
+            <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(16rem,0.78fr)]">
+              <figure class="relative min-h-[14rem] overflow-hidden sm:min-h-[16rem]">
+                <img
+                  [src]="regionImage(region.code)"
+                  [alt]="region.title + ' Region of Uganda'"
+                  class="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+                <span
+                  class="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/25 to-transparent"
+                  aria-hidden="true"
+                ></span>
+                <figcaption
+                  class="absolute bottom-4 left-5 flex items-end gap-3 text-ink-foreground sm:bottom-6 sm:left-8"
+                >
+                  <span class="font-display text-4xl leading-none text-primary" aria-hidden="true">
+                    {{ bearing(region.code) }}
+                  </span>
+                  <span>
+                    <span class="block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-ink-foreground/70">
+                      Region of Uganda
+                    </span>
+                    <h2 class="mt-1 font-display text-2xl leading-none sm:text-4xl">
+                      {{ region.title }}
+                    </h2>
+                  </span>
+                </figcaption>
+              </figure>
+
+              <figure
+                class="flex items-center justify-center border-t border-hairline bg-gradient-to-b from-sand/80 to-paper px-5 py-6 sm:px-7 lg:border-l lg:border-t-0"
               >
-                <span class="font-display text-4xl leading-none text-primary" aria-hidden="true">
-                  {{ bearing(region.code) }}
-                </span>
-                <h2 class="font-display text-2xl leading-none sm:text-4xl">{{ region.title }}</h2>
-              </span>
-            </figure>
+                <img
+                  [src]="region.mapSrc || regionMap(region.code)"
+                  width="500"
+                  height="508"
+                  [alt]="region.title + ' Region locator map, Uganda'"
+                  class="kn-detail-map h-auto w-full max-w-[17rem] drop-shadow-[0_12px_24px_rgba(40,28,18,0.12)]"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+            </div>
 
             <div class="grid gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_320px] sm:p-8 sm:pr-10">
               <div>
@@ -111,6 +134,12 @@ import { guideCountryCode } from './guide-route';
       }
     }
   `,
+  styles: `
+    .kn-detail-map {
+      aspect-ratio: 1441 / 1466;
+      object-fit: contain;
+    }
+  `,
 })
 export class GuideRegionsPage {
   private readonly route = inject(ActivatedRoute);
@@ -130,6 +159,10 @@ export class GuideRegionsPage {
 
   protected regionImage(code: string | null): string {
     return guideRegionImage(code);
+  }
+
+  protected regionMap(code: string | null): string {
+    return guideRegionMap(code);
   }
 
   protected bearing(code: string | null): string {

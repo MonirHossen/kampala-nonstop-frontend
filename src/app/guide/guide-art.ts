@@ -146,9 +146,24 @@ const REGION_IMAGE_BY_CODE: Readonly<Record<string, string>> = {
   NORTH: IMG.giraffes,
 };
 
+/** Wikipedia locator maps (Wikimedia Commons: Uganda – Central/Western/Eastern/Northern). */
+const REGION_MAP_BY_CODE: Readonly<Record<string, string>> = {
+  CENTRAL: '/img/uganda/regions/uganda-central.svg',
+  WEST: '/img/uganda/regions/uganda-western.svg',
+  EAST: '/img/uganda/regions/uganda-eastern.svg',
+  NORTH: '/img/uganda/regions/uganda-northern.svg',
+};
+
 export function guideRegionImage(code: string | null | undefined): string {
   if (!code) {
     return GUIDE_ART_IMAGES.banner;
   }
   return REGION_IMAGE_BY_CODE[code] ?? GUIDE_ART_IMAGES.banner;
+}
+
+export function guideRegionMap(code: string | null | undefined): string {
+  if (!code) {
+    return REGION_MAP_BY_CODE['CENTRAL'];
+  }
+  return REGION_MAP_BY_CODE[code] ?? REGION_MAP_BY_CODE['CENTRAL'];
 }
