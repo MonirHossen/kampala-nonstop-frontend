@@ -79,7 +79,7 @@ type GuideTab = {
         <router-outlet />
       </main>
 
-      @if (sectionSlug() || !content()) {
+      @if (!content() || (sectionSlug() && sectionSlug() !== 'travel-guide' && sectionSlug() !== 'travel-information')) {
         <kn-local-knowledge-section />
       }
       <kn-site-footer />

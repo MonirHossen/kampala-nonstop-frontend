@@ -4,29 +4,28 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  computed,
   inject,
   input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { LucideDynamicIcon } from '@lucide/angular';
+import { LucideArrowUp, LucideDynamicIcon } from '@lucide/angular';
 import { GuideTopic } from '../content/guide-content.types';
 import { guideTopicIcon } from '../guide-topic-icons';
-import { GuideJumpBarComponent } from './guide-jump-bar.component';
+import { RevealDirective } from '../../shared/reveal.directive';
 import {
   guideScrollBehavior,
-  observeGuidePickerVisibility,
+  GUIDE_HEADER_OFFSET_PX,
   scheduleRevealGuidePanel,
 } from './guide-picker-reveal';
 
 @Component({
   selector: 'kn-guide-topic-grid',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideDynamicIcon, GuideJumpBarComponent],
+  imports: [LucideDynamicIcon, RevealDirective],
   template: `
-    <div #picker class="scroll-mt-20">
+    <div #picker class="scroll-mt-20" knReveal>
       <div
         class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5"
         role="listbox"
@@ -38,10 +37,11 @@ import {
             role="option"
             [attr.aria-selected]="isSelected(topic)"
             (click)="select(topic)"
-            class="group relative flex h-60 flex-col items-stretch gap-3 overflow-hidden rounded-2xl border p-3 pt-4 text-left outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-64 sm:p-4 sm:pt-5"
+            class="group relative flex h-full flex-col items-stretch gap-2 overflow-hidden rounded-2xl border p-3 text-left outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-4"
             [class]="cardClass(topic)"
           >
-            <span class="flex items-center gap-3 border-b pb-3" [class]="headerRuleClass(topic)">
+            <span class="flex items-center gap-2">
+              <span class="min-w-0 font-display text-[1.05rem] leading-snug">{{ topic.name }}</span>
               <span
                 class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300"
                 [class]="iconWrapClass(topic)"
@@ -53,10 +53,7 @@ import {
                   aria-hidden="true"
                 ></svg>
               </span>
-              <span class="h-px flex-1" [class]="ruleClass(topic)"></span>
             </span>
-
-            <span class="font-display text-[1.05rem] leading-snug">{{ topic.name }}</span>
 
             @if (topic.description) {
               <span
@@ -67,7 +64,7 @@ import {
               </span>
             }
 
-            <span class="mt-auto flex items-center gap-2 pt-1">
+            <span class="mt-auto flex items-center gap-2">
               <span class="h-px flex-1" [class]="ruleClass(topic)"></span>
               <span
                 class="text-xl leading-none transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
@@ -81,13 +78,18 @@ import {
       </div>
     </div>
 
-    <kn-guide-jump-bar
-      [visible]="showJumpBar()"
-      [label]="selectedLabel()"
-      [icon]="iconFor(selectedCode())"
-      backLabel="Topics"
-      (back)="scrollToPicker()"
-    />
+    <!-- Keep fixed navigation outside the reveal animation's containing block. -->
+    @if (showBackToTopics()) {
+      <button
+        type="button"
+        aria-label="Back to travel guide topics"
+        title="Back to topics"
+        (click)="scrollToPicker()"
+        class="fixed right-5 bottom-[calc(1.25rem+env(safe-area-inset-bottom))] z-40 flex h-12 w-12 items-center justify-center rounded-full border border-clay bg-background text-clay shadow-lg transition-colors hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 md:right-8"
+      >
+        <svg lucideIcon [lucideIcon]="arrowUp" class="h-6 w-6" aria-hidden="true"></svg>
+      </button>
+    }
   `,
 })
 export class GuideTopicGridComponent implements AfterViewInit {
@@ -99,23 +101,20 @@ export class GuideTopicGridComponent implements AfterViewInit {
   readonly panelId = input.required<string>();
   readonly topicSelect = output<GuideTopic>();
 
-  private readonly pickerVisible = signal(true);
-
-  protected readonly selectedLabel = computed(() => {
-    const code = this.selectedCode();
-    return this.topics().find((topic) => topic.code === code)?.name ?? 'Topics';
-  });
-
-  protected readonly showJumpBar = computed(() => !this.pickerVisible());
+  protected readonly arrowUp = LucideArrowUp;
+  protected readonly showBackToTopics = signal(false);
 
   ngAfterViewInit(): void {
     const picker = this.picker()?.nativeElement;
-    if (picker) {
-      observeGuidePickerVisibility(
-        picker,
-        (visible) => this.pickerVisible.set(visible),
-        this.destroyRef,
+    if (picker && typeof IntersectionObserver !== 'undefined') {
+      const observer = new IntersectionObserver(
+        ([entry]) => this.showBackToTopics.set(
+          !entry.isIntersecting && entry.boundingClientRect.bottom <= GUIDE_HEADER_OFFSET_PX,
+        ),
+        { threshold: 0, rootMargin: `-${GUIDE_HEADER_OFFSET_PX}px 0px 0px 0px` },
       );
+      observer.observe(picker);
+      this.destroyRef.onDestroy(() => observer.disconnect());
     }
   }
 
@@ -125,7 +124,9 @@ export class GuideTopicGridComponent implements AfterViewInit {
   }
 
   protected scrollToPicker(): void {
-    this.picker()?.nativeElement.scrollIntoView({
+    const picker = this.picker()?.nativeElement;
+    picker?.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true });
+    picker?.scrollIntoView({
       behavior: guideScrollBehavior(),
       block: 'start',
     });
@@ -141,10 +142,6 @@ export class GuideTopicGridComponent implements AfterViewInit {
     }
 
     return 'border-hairline bg-gradient-to-b from-paper to-sand/45 text-foreground hover:-translate-y-1 hover:border-primary/45 hover:to-primary/12 hover:shadow-[0_16px_30px_-20px_rgba(40,28,18,0.5)]';
-  }
-
-  protected headerRuleClass(topic: GuideTopic): string {
-    return this.isSelected(topic) ? 'border-ink-foreground/20' : 'border-hairline/80';
   }
 
   protected arrowClass(topic: GuideTopic): string {
