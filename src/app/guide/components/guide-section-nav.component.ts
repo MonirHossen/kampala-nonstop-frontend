@@ -51,7 +51,7 @@ export type GuideSectionNavItem = {
           }
 
           <span
-            class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors duration-300"
+            class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors duration-300"
             [class]="iconWrapClass(item)"
           >
             <svg
@@ -62,7 +62,7 @@ export type GuideSectionNavItem = {
             ></svg>
           </span>
 
-          <span class="font-display text-[0.78rem] leading-snug sm:text-[0.82rem]">
+          <span class="truncate font-display text-[0.78rem] leading-snug sm:text-[0.82rem]">
             {{ item.label }}
           </span>
         </button>
@@ -130,7 +130,7 @@ export class GuideSectionNavComponent implements AfterViewInit {
 
   protected iconWrapClass(item: GuideSectionNavItem): string {
     return this.isSelected(item)
-      ? 'bg-primary text-primary-foreground'
+      ? 'bg-primary text-primary-foreground shadow-[0_10px_18px_-12px_rgba(196,87,45,0.7)]'
       : 'bg-sand/80 text-clay group-hover:bg-primary/15 group-hover:text-primary';
   }
 

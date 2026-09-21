@@ -8,6 +8,7 @@ import { SiteFooterComponent } from '../site/site-footer.component';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { GuideHeroComponent } from './components/guide-hero.component';
 import { guideContentFor } from './content/guide-content.registry';
+import { guideHeroImage } from './guide-art';
 import { countryDisplayName } from './guide-country-name';
 import type { GuideCrumb } from './components/guide-breadcrumb.component';
 import { guideSectionIcon } from './guide-topic-icons';
@@ -40,21 +41,22 @@ type GuideTab = {
       <kn-guide-hero
         [crumbs]="crumbs()"
         [title]="heroTitle()"
-        [backgroundImage]="heroImage"
-      />
+        [backgroundImage]="heroImage()"
+        [showBreadcrumbs]="!content()"
+      >
 
       @if (content(); as guide) {
         @if (sectionSlug()) {
-          <nav class="border-b border-hairline bg-paper" aria-label="Country Guide">
+          <nav aria-label="Country Guide">
           <div
-            class="mx-auto grid max-w-[1400px] grid-cols-2 gap-2 px-5 py-3 sm:flex sm:flex-wrap sm:overflow-x-auto sm:px-8"
-            role="tablist"
+            class="mx-auto grid max-w-[1400px] grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center"
           >
             @for (tab of tabs; track tab.path) {
               <a
                 [routerLink]="tab.path ? tab.path : './'"
                 routerLinkActive="!bg-primary !text-primary-foreground !border-primary"
                 [routerLinkActiveOptions]="{ exact: tab.exact }"
+                ariaCurrentWhenActive="page"
                 class="inline-flex min-w-0 items-center gap-2 rounded-lg border border-hairline bg-background px-2.5 py-2.5 text-[0.72rem] font-semibold leading-snug text-foreground transition-colors hover:border-primary hover:text-primary sm:shrink-0 sm:px-3.5 sm:text-[0.78rem]"
               >
                 <svg
@@ -71,11 +73,15 @@ type GuideTab = {
         }
       }
 
+      </kn-guide-hero>
+
       <main class="flex-1">
         <router-outlet />
       </main>
 
-      <kn-local-knowledge-section />
+      @if (sectionSlug() || !content()) {
+        <kn-local-knowledge-section />
+      }
       <kn-site-footer />
     </div>
   `,
@@ -86,7 +92,7 @@ export class GuideShellComponent {
   protected readonly countryCode = computed(() => this.countryFromUrl());
   protected readonly countryName = computed(() => countryDisplayName(this.countryCode()));
   protected readonly content = computed(() => guideContentFor(this.countryCode()));
-  protected readonly heroImage = '/img/title-banner.jpg';
+  protected readonly heroImage = computed(() => guideHeroImage(this.sectionSlug()));
 
   private readonly url = toSignal(
     this.router.events.pipe(

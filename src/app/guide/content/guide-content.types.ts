@@ -116,9 +116,7 @@ export type GuideRegion = {
 export type GuideHubCard = {
   slug: 'essentials' | 'travel-guide' | 'travel-information' | 'regions';
   title: string;
-  lede: string;
-  cta: string;
-};
+  lede: string;};
 
 export type CountryGuideContent = {
   countryCode: string;

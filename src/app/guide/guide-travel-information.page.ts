@@ -1,15 +1,24 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { RevealDirective } from '../shared/reveal.directive';
+import { GuideNarrativeBlocksComponent } from './components/guide-narrative-blocks.component';
 import { GuideSectionNavComponent } from './components/guide-section-nav.component';
 import { GuideTextLinkComponent } from './components/guide-text-link.component';
+import { GuideNarrativeBlock } from './guide-content-format';
 import { guideContentFor } from './content/guide-content.registry';
+import { guideInfoSectionImage } from './guide-art';
 import { guideCountryCode } from './guide-route';
 
 @Component({
   selector: 'kn-guide-travel-information-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, RouterLink, GuideSectionNavComponent, GuideTextLinkComponent],
+  imports: [
+    RevealDirective,
+    RouterLink,
+    GuideSectionNavComponent,
+    GuideTextLinkComponent,
+    GuideNarrativeBlocksComponent,
+  ],
   template: `
     @if (content(); as guide) {
       @let info = guide.travelInformation;
@@ -37,13 +46,24 @@ import { guideCountryCode } from './guide-route';
           class="mt-12 scroll-mt-[6.5rem] outline-none"
         >
         @if (activeSection() === 'visa-information') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('visa-information')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div knReveal>
               <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.visaHeading }}</h3>
-              <div class="mt-4 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
-                @for (paragraph of info.visaParagraphs; track $index) {
-                  <p>{{ paragraph }}</p>
-                }
+              <div class="mt-4">
+                <kn-guide-narrative-blocks [blocks]="toBlocks(info.visaParagraphs)" />
               </div>
               <a
                 knGuideLink
@@ -59,20 +79,33 @@ import { guideCountryCode } from './guide-route';
               <h3 class="mt-12 font-display text-2xl text-foreground sm:text-3xl">
                 {{ info.visaFreeHeading }}
               </h3>
-              <div class="mt-4 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
-                @for (paragraph of info.visaFreeParagraphs; track $index) {
-                  <p>{{ paragraph }}</p>
-                }
+              <div class="mt-4">
+                <kn-guide-narrative-blocks [blocks]="toBlocks(info.visaFreeParagraphs)" />
               </div>
             </div>
 
             <aside knReveal class="space-y-6">
               <div class="rounded-xl border border-hairline bg-paper p-6">
                 <p class="eyebrow text-clay">{{ info.atAGlanceHeading }}</p>
-                <ul class="mt-4 space-y-3 text-sm leading-relaxed text-foreground">
+                <ul class="mt-4 space-y-4 text-sm leading-relaxed text-foreground">
                   @for (item of info.atAGlance; track item) {
                     <li class="flex gap-3">
-                      <span class="mt-1.5 h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true"></span>
+                      <span
+                        class="mt-[0.21em] flex h-4 w-4 shrink-0 items-center justify-center text-primary"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="h-3.5 w-3.5"
+                        >
+                          <path d="m9 6 6 6-6 6"></path>
+                        </svg>
+                      </span>
                       {{ item }}
                     </li>
                   }
@@ -87,9 +120,7 @@ import { guideCountryCode } from './guide-route';
 
             <ul class="mt-8 grid gap-4 sm:grid-cols-2">
               @for (cost of info.costs; track cost.name) {
-                <li
-                  class="rounded-xl border border-hairline bg-gradient-to-b from-paper to-sand/40 p-6"
-                >
+                <li class="rounded-xl border border-hairline bg-gradient-to-b from-paper to-sand/40 p-6">
                   <p class="eyebrow text-clay">{{ cost.name }}</p>
                   <p class="mt-2 font-display text-3xl text-foreground">{{ cost.price }}</p>
                   @if (cost.note) {
@@ -103,6 +134,19 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'flights-to-uganda') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('flights-to-uganda')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.flightsHeading }}</h3>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.flightsIntro }}</p>
@@ -143,6 +187,19 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'arrival-getting-around') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('arrival-getting-around')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">
               {{ info.gettingAroundHeading }}
@@ -166,9 +223,24 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'money-payments') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('money-payments')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.moneyHeading }}</h3>
-            <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.moneyIntro }}</p>
+            <div class="mt-4">
+              <kn-guide-narrative-blocks [blocks]="toBlocks([info.moneyIntro])" />
+            </div>
             <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.moneyGuideLabel }}</p>
             <ul class="mt-6 grid gap-4 sm:grid-cols-3">
               @for (row of info.fx; track row.currency) {
@@ -184,25 +256,53 @@ import { guideCountryCode } from './guide-route';
                 </li>
               }
             </ul>
-            <div class="mt-6 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
-              @for (paragraph of info.moneyParagraphs; track $index) {
-                <p>{{ paragraph }}</p>
-              }
+            <div class="mt-6">
+              <kn-guide-narrative-blocks [blocks]="toBlocks(info.moneyParagraphs)" />
             </div>
           </div>
         }
 
         @if (activeSection() === 'health-safety') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('health-safety')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.healthHeading }}</h3>
-            <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.healthIntro }}</p>
+            <div class="mt-4">
+              <kn-guide-narrative-blocks [blocks]="toBlocks([info.healthIntro])" />
+            </div>
             <div class="mt-8 grid gap-4 sm:grid-cols-2">
               <div class="rounded-xl border border-hairline bg-paper p-6">
                 <p class="eyebrow text-clay">{{ info.healthColumnHeading }}</p>
-                <ul class="mt-4 space-y-3 text-sm leading-relaxed text-foreground">
+                <ul class="mt-4 space-y-4 text-sm leading-relaxed text-foreground">
                   @for (item of info.healthPoints; track item) {
                     <li class="flex gap-3">
-                      <span class="mt-1.5 h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true"></span>
+                      <span
+                        class="mt-[0.21em] flex h-4 w-4 shrink-0 items-center justify-center text-primary"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="h-3.5 w-3.5"
+                        >
+                          <path d="m9 6 6 6-6 6"></path>
+                        </svg>
+                      </span>
                       {{ item }}
                     </li>
                   }
@@ -210,10 +310,25 @@ import { guideCountryCode } from './guide-route';
               </div>
               <div class="rounded-xl border border-hairline bg-paper p-6">
                 <p class="eyebrow text-clay">{{ info.safetyColumnHeading }}</p>
-                <ul class="mt-4 space-y-3 text-sm leading-relaxed text-foreground">
+                <ul class="mt-4 space-y-4 text-sm leading-relaxed text-foreground">
                   @for (item of info.safetyPoints; track item) {
                     <li class="flex gap-3">
-                      <span class="mt-1.5 h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true"></span>
+                      <span
+                        class="mt-[0.21em] flex h-4 w-4 shrink-0 items-center justify-center text-primary"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="h-3.5 w-3.5"
+                        >
+                          <path d="m9 6 6 6-6 6"></path>
+                        </svg>
+                      </span>
                       {{ item }}
                     </li>
                   }
@@ -224,6 +339,19 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'connectivity-power') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('connectivity-power')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">
               {{ info.connectivityHeading }}
@@ -231,10 +359,25 @@ import { guideCountryCode } from './guide-route';
             <div class="mt-8 grid gap-4 sm:grid-cols-2">
               <div class="rounded-xl border border-hairline bg-paper p-6">
                 <p class="eyebrow text-clay">{{ info.connectivityColumnHeading }}</p>
-                <ul class="mt-4 space-y-3 text-sm leading-relaxed text-foreground">
+                <ul class="mt-4 space-y-4 text-sm leading-relaxed text-foreground">
                   @for (item of info.connectivityPoints; track item) {
                     <li class="flex gap-3">
-                      <span class="mt-1.5 h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true"></span>
+                      <span
+                        class="mt-[0.21em] flex h-4 w-4 shrink-0 items-center justify-center text-primary"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="h-3.5 w-3.5"
+                        >
+                          <path d="m9 6 6 6-6 6"></path>
+                        </svg>
+                      </span>
                       {{ item }}
                     </li>
                   }
@@ -242,10 +385,25 @@ import { guideCountryCode } from './guide-route';
               </div>
               <div class="rounded-xl border border-hairline bg-paper p-6">
                 <p class="eyebrow text-clay">{{ info.electricityColumnHeading }}</p>
-                <ul class="mt-4 space-y-3 text-sm leading-relaxed text-foreground">
+                <ul class="mt-4 space-y-4 text-sm leading-relaxed text-foreground">
                   @for (item of info.electricityPoints; track item) {
                     <li class="flex gap-3">
-                      <span class="mt-1.5 h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true"></span>
+                      <span
+                        class="mt-[0.21em] flex h-4 w-4 shrink-0 items-center justify-center text-primary"
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="h-3.5 w-3.5"
+                        >
+                          <path d="m9 6 6 6-6 6"></path>
+                        </svg>
+                      </span>
                       {{ item }}
                     </li>
                   }
@@ -256,14 +414,44 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'what-to-pack') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('what-to-pack')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.packHeading }}</h3>
-            <p class="mt-4 text-[1.02rem] leading-relaxed text-foreground/90">{{ info.packIntro }}</p>
+            <div class="mt-4">
+              <kn-guide-narrative-blocks [blocks]="toBlocks([info.packIntro])" />
+            </div>
             <p class="mt-6 font-semibold text-foreground">{{ info.packListLabel }}</p>
-            <ul class="mt-4 space-y-3 text-[1.02rem] leading-relaxed text-foreground/90">
+            <ul class="mt-5 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
               @for (item of info.packItems; track item) {
                 <li class="flex gap-3">
-                  <span class="mt-2.5 h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true"></span>
+                  <span
+                    class="mt-[0.21em] flex h-4 w-4 shrink-0 items-center justify-center text-primary"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-3.5 w-3.5"
+                    >
+                      <path d="m9 6 6 6-6 6"></path>
+                    </svg>
+                  </span>
                   {{ item }}
                 </li>
               }
@@ -273,12 +461,40 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'cultural-etiquette') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('cultural-etiquette')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.etiquetteHeading }}</h3>
-            <ul class="mt-6 space-y-3 text-[1.02rem] leading-relaxed text-foreground/90">
+            <ul class="mt-6 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
               @for (item of info.etiquettePoints; track item) {
                 <li class="flex gap-3">
-                  <span class="mt-2.5 h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true"></span>
+                  <span
+                    class="mt-[0.21em] flex h-4 w-4 shrink-0 items-center justify-center text-primary"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-3.5 w-3.5"
+                    >
+                      <path d="m9 6 6 6-6 6"></path>
+                    </svg>
+                  </span>
                   {{ item }}
                 </li>
               }
@@ -294,29 +510,47 @@ import { guideCountryCode } from './guide-route';
         }
 
         @if (activeSection() === 'when-to-travel') {
+          <figure class="relative mb-10 overflow-hidden rounded-2xl">
+            <img
+              [src]="infoImage('when-to-travel')"
+              alt=""
+              class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+              loading="lazy"
+            />
+            <span
+              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"
+              aria-hidden="true"
+            ></span>
+          </figure>
+
           <div knReveal>
             <h3 class="font-display text-2xl text-foreground sm:text-3xl">{{ info.whenHeading }}</h3>
-            <div class="mt-4 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
-              @for (paragraph of info.whenParagraphs; track $index) {
-                <p>{{ paragraph }}</p>
-              }
+            <div class="mt-4">
+              <kn-guide-narrative-blocks [blocks]="toBlocks(info.whenParagraphs)" />
             </div>
           </div>
         }
         </div>
 
-        <div
-          knReveal
-          class="mt-16 rounded-xl bg-ink px-6 py-10 text-center text-ink-foreground sm:px-10 sm:py-12"
-        >
-          <p class="eyebrow text-primary">{{ info.ctaEyebrow }}</p>
-          <h3 class="mt-4 font-display text-2xl sm:text-3xl">{{ info.ctaHeading }}</h3>
-          <a
-            routerLink="/waitlist/join"
-            class="mt-8 inline-flex bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
-          >
-            {{ info.ctaLabel }}
-          </a>
+        <div knReveal class="relative mt-16 overflow-hidden rounded-2xl">
+          <img
+            src="/img/uganda/uganda-mosque.jpg"
+            alt=""
+            class="absolute inset-0 h-full w-full object-cover"
+            aria-hidden="true"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-ink/78" aria-hidden="true"></div>
+          <div class="relative px-6 py-10 text-center text-ink-foreground sm:px-10 sm:py-12">
+            <p class="eyebrow text-primary">{{ info.ctaEyebrow }}</p>
+            <h3 class="mt-4 font-display text-2xl sm:text-3xl">{{ info.ctaHeading }}</h3>
+            <a
+              routerLink="/waitlist/join"
+              class="mt-8 inline-flex bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+            >
+              {{ info.ctaLabel }}
+            </a>
+          </div>
         </div>
       </section>
     }
@@ -329,4 +563,12 @@ export class GuideTravelInformationPage {
 
   protected readonly content = computed(() => guideContentFor(this.countryCode()));
   protected readonly activeSection = signal('visa-information');
+
+  protected infoImage(id: string): string {
+    return guideInfoSectionImage(id);
+  }
+
+  protected toBlocks(strings: string[]): GuideNarrativeBlock[] {
+    return strings.map((text) => ({ type: 'paragraph', text }));
+  }
 }

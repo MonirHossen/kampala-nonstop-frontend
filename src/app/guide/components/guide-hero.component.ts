@@ -21,8 +21,11 @@ import { GuideBreadcrumbComponent, type GuideCrumb } from './guide-breadcrumb.co
         class="relative mx-auto flex min-h-[18rem] max-w-[1400px] flex-col items-center justify-center px-5 pb-14 pt-28 text-center sm:min-h-[22rem] sm:px-8 sm:pb-16 sm:pt-32"
       >
         <h1 class="hero-headline max-w-4xl text-ink-foreground">{{ title() }}</h1>
-        <div class="mt-6">
-          <kn-guide-breadcrumb [crumbs]="crumbs()" tone="light" />
+        <div class="mt-6 w-full">
+          @if (showBreadcrumbs()) {
+            <kn-guide-breadcrumb [crumbs]="crumbs()" tone="light" />
+          }
+          <ng-content />
         </div>
       </div>
     </section>
@@ -30,6 +33,7 @@ import { GuideBreadcrumbComponent, type GuideCrumb } from './guide-breadcrumb.co
 })
 export class GuideHeroComponent {
   readonly crumbs = input.required<GuideCrumb[]>();
+  readonly showBreadcrumbs = input(true);
   readonly title = input.required<string>();
-  readonly backgroundImage = input('/img/title-banner.jpg');
+  readonly backgroundImage = input('/img/uganda/uganda-skyline.jpg');
 }

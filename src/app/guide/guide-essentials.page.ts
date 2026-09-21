@@ -2,10 +2,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { extractApiError } from '../core/lib/api-error';
+import { GuideNarrativeBlocksComponent } from './components/guide-narrative-blocks.component';
 import { GuideQuickInfoComponent } from './components/guide-quick-info.component';
 import { GuideSectionNavComponent } from './components/guide-section-nav.component';
 import { GuideStateComponent } from './components/guide-state.component';
+import { GuideNarrativeBlock } from './guide-content-format';
 import { guideContentFor } from './content/guide-content.registry';
+import { guideEssentialsImage } from './guide-art';
 import { GuideApiService } from './guide-api.service';
 import { countryDisplayName } from './guide-country-name';
 import { GuideEssential, GuideLoadState } from './guide.models';
@@ -29,12 +32,6 @@ const NARRATIVE_CODES = new Set([
 
 const HIDDEN_TAB_CODES = new Set(['HISTORY']);
 
-type NarrativeBlock =
-  | { type: 'paragraph'; text: string }
-  | { type: 'subheading'; text: string }
-  | { type: 'list'; items: { label?: string; text: string }[] }
-  | { type: 'rates'; rows: { currency: string; range: string }[] };
-
 type EssentialsTab = {
   code: string;
   label: string;
@@ -43,14 +40,21 @@ type EssentialsTab = {
 type NarrativePanel = {
   code: string;
   heading: string;
-  blocks: NarrativeBlock[];
+  blocks: GuideNarrativeBlock[];
   extras: NarrativePanel[];
 };
+
+type NarrativeBlock = GuideNarrativeBlock;
 
 @Component({
   selector: 'kn-guide-essentials-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GuideQuickInfoComponent, GuideSectionNavComponent, GuideStateComponent],
+  imports: [
+    GuideQuickInfoComponent,
+    GuideSectionNavComponent,
+    GuideStateComponent,
+    GuideNarrativeBlocksComponent,
+  ],
   template: `
     @switch (state().status) {
       @case ('loading') {
@@ -91,47 +95,26 @@ type NarrativePanel = {
                 @if (selectedPanel(); as panel) {
                   <article>
                     @for (section of panelSections(panel); track section.code) {
-                      <div class="mb-10 last:mb-0">
+                      <div class="mb-14 last:mb-0">
                         <h2 class="font-display text-3xl text-foreground sm:text-4xl">
                           {{ section.heading }}
                         </h2>
-                        <div class="mt-5 space-y-4 text-[1.02rem] leading-relaxed text-foreground/90">
-                          @for (block of section.blocks; track $index) {
-                            @switch (block.type) {
-                              @case ('paragraph') {
-                                <p>{{ block.text }}</p>
-                              }
-                              @case ('subheading') {
-                                <h3 class="pt-2 font-display text-2xl text-foreground">{{ block.text }}</h3>
-                              }
-                              @case ('list') {
-                                <ul class="list-disc space-y-2 pl-5">
-                                  @for (item of block.items; track $index) {
-                                    <li>
-                                      @if (item.label) {
-                                        <strong>{{ item.label }}</strong>
-                                        — {{ item.text }}
-                                      } @else {
-                                        {{ item.text }}
-                                      }
-                                    </li>
-                                  }
-                                </ul>
-                              }
-                              @case ('rates') {
-                                <dl class="grid gap-2 sm:grid-cols-3">
-                                  @for (row of block.rows; track row.currency) {
-                                    <div class="rounded-xl border border-hairline bg-paper px-4 py-3">
-                                      <dt class="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                                        {{ row.currency }}
-                                      </dt>
-                                      <dd class="mt-1 text-sm text-foreground">{{ row.range }}</dd>
-                                    </div>
-                                  }
-                                </dl>
-                              }
-                            }
-                          }
+
+                        <figure class="relative mb-10 mt-6 overflow-hidden rounded-2xl">
+                          <img
+                            [src]="sectionImage(section.code)"
+                            alt=""
+                            class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                            loading="lazy"
+                          />
+                          <span
+                            class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/35 via-transparent to-transparent"
+                            aria-hidden="true"
+                          ></span>
+                        </figure>
+
+                        <div class="mt-6">
+                          <kn-guide-narrative-blocks [blocks]="section.blocks" />
                         </div>
                       </div>
                     }
@@ -206,6 +189,10 @@ export class GuideEssentialsPage implements OnInit {
 
   protected panelSections(panel: NarrativePanel): NarrativePanel[] {
     return [panel, ...panel.extras];
+  }
+
+  protected sectionImage(code: string): string {
+    return guideEssentialsImage(code);
   }
 
   ngOnInit(): void {
