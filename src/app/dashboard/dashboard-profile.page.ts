@@ -3,14 +3,23 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { LucideEye, LucideEyeOff, LucideLoaderCircle } from '@lucide/angular';
 import { extractApiError } from '../core/lib/api-error';
+import { findCountry, type Country } from '../core/lib/countries';
 import { UserCitizenship, UserConsent } from '../core/models/traveller.models';
+import { CurrencyApiService, type CurrencyOption } from '../core/services/currency-api.service';
 import { TravellerAuthService } from '../core/services/traveller-auth.service';
 import { UserApiService } from '../core/services/user-api.service';
+import { CountrySelectorComponent } from '../waitlist/country-selector.component';
 
 @Component({
   selector: 'kn-dashboard-profile-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, LucideEye, LucideEyeOff, LucideLoaderCircle],
+  imports: [
+    ReactiveFormsModule,
+    LucideEye,
+    LucideEyeOff,
+    LucideLoaderCircle,
+    CountrySelectorComponent,
+  ],
   template: `
     <div>
       <p class="eyebrow text-muted-foreground">Account</p>
@@ -42,6 +51,18 @@ import { UserApiService } from '../core/services/user-api.service';
             >
               <h2 class="font-display text-xl text-foreground">Personal details</h2>
               <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label class="eyebrow text-muted-foreground">Profile photo</label>
+                  @if (photoUrl()) {
+                    <img
+                      [src]="photoUrl()!"
+                      alt="Profile photo"
+                      class="mt-3 h-20 w-20 rounded-full object-cover"
+                    />
+                  } @else {
+                    <p class="mt-3 text-sm text-muted-foreground">No photo yet.</p>
+                  }
+                </div>
                 <div>
                   <label class="eyebrow text-muted-foreground">First name</label>
                   <input
@@ -110,21 +131,16 @@ import { UserApiService } from '../core/services/user-api.service';
                   />
                 </div>
                 <div>
-                  <label class="eyebrow text-muted-foreground">Country (ISO)</label>
-                  <input
-                    formControlName="country_of_residence"
-                    maxlength="2"
-                    placeholder="UG"
-                    class="mt-2 h-11 w-full border-b border-input bg-transparent outline-none focus:border-primary"
-                  />
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="eyebrow text-muted-foreground">Profile photo URL</label>
-                  <input
-                    formControlName="profile_photo_url"
-                    type="url"
-                    class="mt-2 h-11 w-full border-b border-input bg-transparent outline-none focus:border-primary"
-                  />
+                  <label class="eyebrow text-muted-foreground">Country</label>
+                  <div class="mt-2">
+                    <kn-country-selector
+                      label="Country"
+                      [value]="residenceCountry()"
+                      [allowEmpty]="true"
+                      emptyLabel="Select country"
+                      (changed)="onResidenceCountry($event)"
+                    />
+                  </div>
                 </div>
               </div>
               <button
@@ -153,13 +169,16 @@ import { UserApiService } from '../core/services/user-api.service';
                   <input formControlName="preferred_language" class="mt-2 h-11 w-full border-b border-input bg-transparent outline-none focus:border-primary" />
                 </div>
                 <div>
-                  <label class="eyebrow text-muted-foreground">Currency (ISO)</label>
-                  <input
+                  <label class="eyebrow text-muted-foreground">Currency</label>
+                  <select
                     formControlName="preferred_currency"
-                    maxlength="3"
-                    placeholder="UGX"
                     class="mt-2 h-11 w-full border-b border-input bg-transparent outline-none focus:border-primary"
-                  />
+                  >
+                    <option value="">Select currency</option>
+                    @for (currency of currencies(); track currency.code) {
+                      <option [value]="currency.code">{{ currency.name }}</option>
+                    }
+                  </select>
                 </div>
                 <div>
                   <label class="eyebrow text-muted-foreground">Distance</label>
@@ -187,7 +206,7 @@ import { UserApiService } from '../core/services/user-api.service';
                 @for (item of citizenships(); track item.id) {
                   <li class="flex flex-wrap items-center justify-between gap-3 py-3">
                     <div>
-                      <span class="font-medium">{{ item.country_code }}</span>
+                      <span class="font-medium">{{ citizenshipLabel(item.country_code) }}</span>
                       @if (item.is_primary) {
                         <span class="ml-2 eyebrow bg-primary px-2 py-0.5 text-primary-foreground"
                           >Primary</span
@@ -215,14 +234,16 @@ import { UserApiService } from '../core/services/user-api.service';
                 (ngSubmit)="addCitizenship()"
                 class="mt-4 flex flex-wrap items-end gap-3"
               >
-                <div>
-                  <label class="eyebrow text-muted-foreground">Country code</label>
-                  <input
-                    formControlName="country_code"
-                    maxlength="2"
-                    placeholder="UG"
-                    class="mt-2 h-11 w-full border-b border-input bg-transparent outline-none focus:border-primary w-24"
-                  />
+                <div class="min-w-[14rem] flex-1">
+                  <label class="eyebrow text-muted-foreground">Country</label>
+                  <div class="mt-2">
+                    <kn-country-selector
+                      label="Citizenship country"
+                      [value]="citizenshipCountry()"
+                      [invalid]="citizenshipForm.controls.country_code.touched && citizenshipForm.controls.country_code.invalid"
+                      (changed)="onCitizenshipCountry($event)"
+                    />
+                  </div>
                 </div>
                 <label class="flex items-center gap-2 text-sm text-muted-foreground">
                   <input type="checkbox" formControlName="is_primary" />
@@ -336,6 +357,7 @@ export class DashboardProfilePage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(TravellerAuthService);
   private readonly userApi = inject(UserApiService);
+  private readonly currencyApi = inject(CurrencyApiService);
 
   protected readonly loading = signal(true);
   protected readonly savingProfile = signal(false);
@@ -347,6 +369,9 @@ export class DashboardProfilePage implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly citizenships = signal<UserCitizenship[]>([]);
   protected readonly consents = signal<UserConsent[]>([]);
+  protected readonly currencies = signal<CurrencyOption[]>([]);
+  protected readonly residenceCountry = signal<Country | null>(null);
+  protected readonly citizenshipCountry = signal<Country | null>(null);
   protected readonly showPw = signal(false);
 
   protected readonly email = this.auth.user()?.email ?? '';
@@ -388,6 +413,11 @@ export class DashboardProfilePage implements OnInit {
     password_confirmation: ['', Validators.required],
   });
 
+  protected photoUrl(): string | null {
+    const url = this.profileForm.controls.profile_photo_url.value?.trim();
+    return url || null;
+  }
+
   ngOnInit(): void {
     forkJoin({
       profile: this.userApi.getProfile(),
@@ -395,8 +425,11 @@ export class DashboardProfilePage implements OnInit {
       notifications: this.userApi.getNotificationPreferences(),
       citizenships: this.userApi.listCitizenships(),
       consents: this.userApi.listConsents(),
+      currencies: this.currencyApi.listCurrencies(),
     }).subscribe({
-      next: ({ profile, preferences, notifications, citizenships, consents }) => {
+      next: ({ profile, preferences, notifications, citizenships, consents, currencies }) => {
+        this.currencies.set(currencies);
+
         if (profile) {
           this.profileForm.patchValue({
             title: profile.title ?? '',
@@ -410,6 +443,9 @@ export class DashboardProfilePage implements OnInit {
             country_of_residence: profile.country_of_residence ?? '',
             profile_photo_url: profile.profile_photo_url ?? '',
           });
+          this.residenceCountry.set(
+            profile.country_of_residence ? (findCountry(profile.country_of_residence) ?? null) : null,
+          );
         }
 
         if (preferences) {
@@ -434,6 +470,21 @@ export class DashboardProfilePage implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  protected onResidenceCountry(country: Country | null): void {
+    this.residenceCountry.set(country);
+    this.profileForm.patchValue({ country_of_residence: country?.code ?? '' });
+  }
+
+  protected onCitizenshipCountry(country: Country | null): void {
+    this.citizenshipCountry.set(country);
+    this.citizenshipForm.patchValue({ country_code: country?.code ?? '' });
+    this.citizenshipForm.controls.country_code.markAsTouched();
+  }
+
+  protected citizenshipLabel(code: string): string {
+    return findCountry(code)?.name ?? code;
   }
 
   protected saveProfile(): void {
@@ -534,6 +585,7 @@ export class DashboardProfilePage implements OnInit {
       .subscribe({
         next: () => {
           this.citizenshipForm.reset({ country_code: '', is_primary: false });
+          this.citizenshipCountry.set(null);
           this.reloadCitizenships();
           this.message.set('Citizenship added.');
           this.addingCitizenship.set(false);

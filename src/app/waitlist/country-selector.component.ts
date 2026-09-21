@@ -32,18 +32,26 @@ import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
       [class]="triggerClass()"
     >
       <span class="flex min-w-0 items-center gap-2">
-        <img
-          [src]="flag(value().code)"
-          alt=""
-          width="20"
-          height="15"
-          class="h-[0.95rem] w-5 shrink-0 rounded-[2px] object-cover"
-        />
-        <span
-          class="min-w-0 break-words whitespace-normal"
-          [class]="variant() === 'boxed' ? 'text-[0.92rem]' : ''"
-          >{{ value().name }}</span
-        >
+        @if (value(); as selected) {
+          <img
+            [src]="flag(selected.code)"
+            alt=""
+            width="20"
+            height="15"
+            class="h-[0.95rem] w-5 shrink-0 rounded-[2px] object-cover"
+          />
+          <span
+            class="min-w-0 break-words whitespace-normal"
+            [class]="variant() === 'boxed' ? 'text-[0.92rem]' : ''"
+            >{{ selected.name }}</span
+          >
+        } @else {
+          <span
+            class="min-w-0 text-muted-foreground break-words whitespace-normal"
+            [class]="variant() === 'boxed' ? 'text-[0.92rem]' : ''"
+            >{{ emptyLabel() }}</span
+          >
+        }
       </span>
       @if (variant() === 'boxed') {
         <svg lucideChevronDown class="ml-2 h-4 w-4 shrink-0 text-muted-foreground"></svg>
@@ -68,13 +76,30 @@ import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
           />
         </div>
         <ul class="max-h-64 overflow-y-auto py-1" role="listbox">
+          @if (allowEmpty()) {
+            <li>
+              <button
+                type="button"
+                role="option"
+                [attr.aria-selected]="value() === null"
+                (click)="select(null)"
+                class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-muted-foreground transition-colors"
+                [class]="optionClass(value() === null)"
+              >
+                <span>{{ emptyLabel() }}</span>
+                @if (value() === null) {
+                  <svg lucideCheck class="ml-3 h-3.5 w-3.5 shrink-0 text-primary"></svg>
+                }
+              </button>
+            </li>
+          }
           @if (results().length === 0) {
             <li class="px-4 py-6 text-center text-sm text-muted-foreground">
               No country matches &ldquo;{{ query() }}&rdquo;.
             </li>
           } @else {
             @for (country of results(); track country.code) {
-              @let selected = country.code === value().code;
+              @let selected = country.code === value()?.code;
               <li>
                 <button
                   type="button"
@@ -108,11 +133,13 @@ import { COUNTRIES, countryFlagUrl, type Country } from '../core/lib/countries';
   `,
 })
 export class CountrySelectorComponent {
-  readonly value = input.required<Country>();
+  readonly value = input<Country | null>(null);
   readonly invalid = input(false);
   readonly variant = input<'default' | 'boxed'>('default');
   readonly label = input('Country');
-  readonly changed = output<Country>();
+  readonly allowEmpty = input(false);
+  readonly emptyLabel = input('Select country');
+  readonly changed = output<Country | null>();
 
   protected readonly open = signal(false);
   protected readonly query = signal('');
@@ -177,7 +204,7 @@ export class CountrySelectorComponent {
     this.open() ? this.close() : this.open.set(true);
   }
 
-  protected select(country: Country): void {
+  protected select(country: Country | null): void {
     this.changed.emit(country);
     this.close();
   }

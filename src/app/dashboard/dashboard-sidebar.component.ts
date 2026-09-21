@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   LucideBookmark,
@@ -27,9 +27,13 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
     <div
       class="flex items-center justify-between border-b border-sidebar-border bg-sidebar px-4 py-3 lg:hidden"
     >
-      <p class="font-display text-sidebar-foreground">
-        Kampala<span class="text-primary">Nonstop</span>
-      </p>
+      <a routerLink="/" class="inline-flex items-center" aria-label="Kampala Nonstop home">
+        <img
+          src="/img/kampala_nonstop_logo_white.png"
+          alt="Kampala Nonstop"
+          class="h-7 w-auto"
+        />
+      </a>
       <button type="button" (click)="open.set(!open())" aria-label="Toggle navigation">
         @if (open()) {
           <svg lucideX class="h-5 w-5 text-sidebar-foreground"></svg>
@@ -44,14 +48,16 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
       [class]="open() ? 'block' : 'hidden lg:block'"
     >
       <div class="flex h-full flex-col p-5">
-        <a routerLink="/" class="font-display hidden text-lg lg:block">
-          Kampala<span class="text-primary">Nonstop</span>
+        <a routerLink="/" class="hidden lg:inline-flex" aria-label="Kampala Nonstop home">
+          <img
+            src="/img/kampala_nonstop_logo_white.png"
+            alt="Kampala Nonstop"
+            class="h-8 w-auto"
+          />
         </a>
-        <p class="eyebrow mt-1 hidden text-sidebar-foreground/40 lg:block">Traveller</p>
 
         <div class="mt-6 hidden lg:block">
-          <p class="text-sm text-sidebar-foreground/80">{{ displayName() || 'Traveller' }}</p>
-          <p class="mt-0.5 truncate text-xs text-sidebar-foreground/40">{{ email() }}</p>
+          <p class="text-sm text-sidebar-foreground/80">Hey, {{ firstName() }}</p>
         </div>
 
         <nav class="mt-6 space-y-1 lg:mt-8">
@@ -103,8 +109,7 @@ export class DashboardSidebarComponent {
   private readonly auth = inject(TravellerAuthService);
 
   protected readonly open = signal(false);
-  protected readonly displayName = this.auth.displayName;
-  protected readonly email = computed(() => this.auth.user()?.email ?? '');
+  protected readonly firstName = this.auth.firstName;
 
   protected logout(): void {
     this.auth.logoutAndRedirect('/?auth=login');

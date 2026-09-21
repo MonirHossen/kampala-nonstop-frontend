@@ -116,7 +116,7 @@ import { InterestSelectorComponent } from './interest-selector.component';
                 variant="boxed"
                 label="Country of residence"
                 [value]="country()"
-                (changed)="country.set($event)"
+                (changed)="onCountryChanged($event)"
               />
             </div>
           </div>
@@ -247,7 +247,7 @@ import { InterestSelectorComponent } from './interest-selector.component';
               <kn-country-selector
                 label="Country of residence"
                 [value]="country()"
-                (changed)="country.set($event)"
+                (changed)="onCountryChanged($event)"
               />
             </div>
           </div>
@@ -352,6 +352,12 @@ export class WaitlistFormComponent implements OnInit {
     this.interests.update((list) =>
       list.includes(code) ? list.filter((i) => i !== code) : [...list, code],
     );
+  }
+
+  protected onCountryChanged(country: Country | null): void {
+    if (country) {
+      this.country.set(country);
+    }
   }
 
   protected async onSubmit(): Promise<void> {

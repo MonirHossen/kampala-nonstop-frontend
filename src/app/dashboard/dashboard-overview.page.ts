@@ -10,12 +10,11 @@ import { UserApiService } from '../core/services/user-api.service';
   imports: [RouterLink],
   template: `
     <div>
-      <p class="eyebrow text-muted-foreground">Overview</p>
-      <h1 class="font-display mt-2 text-3xl text-foreground sm:text-4xl">
-        Hello, {{ displayName() || 'Traveller' }}
+      <h1 class="font-display text-3xl text-foreground sm:text-4xl">
+        Hey, {{ firstName() }}
       </h1>
       <p class="mt-2 max-w-xl text-sm text-muted-foreground">
-        Your account is active. Complete your profile to personalise trip planning.
+        A complete profile ensures a richer trip planning experience.
       </p>
 
       @if (error()) {
@@ -85,7 +84,7 @@ export class DashboardOverviewPage implements OnInit {
   private readonly userApi = inject(UserApiService);
 
   protected readonly user = this.auth.user;
-  protected readonly displayName = this.auth.displayName;
+  protected readonly firstName = this.auth.firstName;
   protected readonly favouritesCount = signal(0);
   protected readonly loadingFavourites = signal(true);
   protected readonly error = signal<string | null>(null);

@@ -42,6 +42,24 @@ export class TravellerAuthService {
     return user?.email ?? '';
   });
 
+  /** First name for greetings; falls back to display name / email local-part. */
+  readonly firstName = computed(() => {
+    const user = this.userSignal();
+    const first = user?.profile?.first_name?.trim();
+    if (first) {
+      return first;
+    }
+
+    const display = this.displayName().trim();
+    if (display && !display.includes('@')) {
+      return display.split(/\s+/)[0] ?? display;
+    }
+
+    const email = user?.email ?? '';
+    const local = email.includes('@') ? email.slice(0, email.indexOf('@')) : email;
+    return local || 'Traveller';
+  });
+
   register(payload: RegisterPayload): Observable<AuthTokenResponse> {
     return this.http
       .post<AuthTokenResponse>(`${this.baseUrl}/register`, payload)
