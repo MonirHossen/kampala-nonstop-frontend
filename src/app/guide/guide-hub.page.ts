@@ -62,7 +62,7 @@ import { guideSectionIcon } from './guide-topic-icons';
         <div class="mt-8 grid items-start gap-8 min-[1400px]:grid-cols-[56rem_minmax(0,1fr)]">
           <aside class="relative min-w-0 overflow-hidden rounded-2xl">
             <img
-              src="/img/uganda/uganda-city-sunset.jpg"
+              src="/img/guide/uganda-city-sunset.jpg"
               alt=""
               class="absolute inset-0 h-full w-full object-cover"
               aria-hidden="true"

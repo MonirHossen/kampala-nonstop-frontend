@@ -18,7 +18,7 @@ export const UGANDA_REGIONS: GuideRegion[] = [
       'Plan your first stop around your flight time. Allow flexibility for traffic when moving between Entebbe and Kampala.',
     actionLabel: 'Getting here and arrival',
     actionTopic: 'ARRIVAL',
-    mapSrc: '/img/uganda/regions/uganda-central.svg',
+    mapSrc: '/img/guide/regions/uganda-central.svg',
   },
   {
     code: 'WEST',
@@ -35,7 +35,7 @@ export const UGANDA_REGIONS: GuideRegion[] = [
       'Plan longer road journeys and activity requirements together. Check your itinerary with your operator before adding extra stops.',
     actionLabel: 'Plan your transport',
     actionTopic: 'GETTING_AROUND',
-    mapSrc: '/img/uganda/regions/uganda-western.svg',
+    mapSrc: '/img/guide/regions/uganda-western.svg',
   },
   {
     code: 'EAST',
@@ -51,7 +51,7 @@ export const UGANDA_REGIONS: GuideRegion[] = [
       'Allow time for the journey from Kampala and confirm the arrangements for any planned activities with your operator.',
     actionLabel: 'Prepare for your activities',
     actionTopic: 'WHAT_TO_PACK',
-    mapSrc: '/img/uganda/regions/uganda-eastern.svg',
+    mapSrc: '/img/guide/regions/uganda-eastern.svg',
   },
   {
     code: 'NORTH',
@@ -67,6 +67,6 @@ export const UGANDA_REGIONS: GuideRegion[] = [
       'Make room for longer travel distances and ask locally for guidance when planning visits beyond your main base.',
     actionLabel: 'Explore culture and etiquette',
     actionTopic: 'CULTURE_ETIQUETTE',
-    mapSrc: '/img/uganda/regions/uganda-northern.svg',
+    mapSrc: '/img/guide/regions/uganda-northern.svg',
   },
 ];

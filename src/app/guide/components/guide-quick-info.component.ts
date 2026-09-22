@@ -9,7 +9,7 @@ import { GuideEssential } from '../guide.models';
     <aside class="overflow-hidden rounded-2xl border border-hairline bg-paper">
       <header class="relative overflow-hidden">
         <img
-          src="/img/uganda/uganda-map.svg"
+          src="/img/guide/uganda-map.svg"
           alt=""
           class="absolute inset-0 h-full w-full object-cover"
           aria-hidden="true"

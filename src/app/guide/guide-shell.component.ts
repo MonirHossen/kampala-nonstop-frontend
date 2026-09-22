@@ -39,10 +39,13 @@ type GuideTab = {
       <kn-site-header [lightBackground]="true" />
 
       <kn-guide-hero
+        class="block"
+        [class.pt-14]="sectionSlug() === 'essentials'"
         [crumbs]="crumbs()"
         [title]="heroTitle()"
         [backgroundImage]="heroImage()"
         [showBreadcrumbs]="!content()"
+        [compact]="sectionSlug() === 'essentials'"
       >
 
       @if (content(); as guide) {

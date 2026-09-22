@@ -2,43 +2,43 @@
  * Guide art direction.
  *
  * Every hero, hub card, topic, narrative section and region detail gets its
- * own licence-clean, content-matched still from the local /img/uganda set
+ * own licence-clean, content-matched still from the local /img/guide/ set
  * so no two figures on the same page re-use a photograph.
  */
 
 const IMG = {
-  skyline: '/img/uganda/uganda-skyline.jpg',
-  market: '/img/uganda/uganda-market.jpg',
-  dance: '/img/uganda/uganda-dance.jpg',
-  savannah: '/img/uganda/uganda-savannah-elephants.jpg',
-  rafting: '/img/uganda/uganda-rafting.jpg',
-  citySunset: '/img/uganda/uganda-city-sunset.jpg',
-  mosque: '/img/uganda/uganda-mosque.jpg',
-  street: '/img/uganda/uganda-street.jpg',
-  gorilla: '/img/uganda/uganda-gorilla.jpg',
-  lake: '/img/uganda/uganda-lake.jpg',
-  giraffes: '/img/uganda/uganda-giraffes.jpg',
-  airport: '/img/uganda/uganda-airport.jpg',
-  boarding: '/img/uganda/uganda-boarding.jpg',
-  mountain: '/img/uganda/uganda-mountain.jpg',
-  countryside: '/img/uganda/uganda-countryside.jpg',
-  bananas: '/img/uganda/uganda-bananas.jpg',
-  vendor: '/img/uganda/uganda-vendor.jpg',
-  youth: '/img/uganda/uganda-youth.jpg',
-  safari: '/img/uganda/uganda-safari.jpg',
-  boda: '/img/uganda/uganda-boda.jpg',
-  tradition: '/img/uganda/uganda-tradition.jpg',
-  celebration: '/img/uganda/uganda-celebration.jpg',
-  passport: '/img/uganda/uganda-passport.jpg',
-  money: '/img/uganda/uganda-money.jpg',
-  exchanger: '/img/uganda/uganda-exchanger.jpg',
-  health: '/img/uganda/uganda-health.jpg',
-  phone: '/img/uganda/uganda-phone.jpg',
-  pack: '/img/uganda/uganda-pack.jpg',
-  sky: '/img/uganda/uganda-sky.jpg',
-  suitcase: '/img/uganda/uganda-suitcase.jpg',
-  essentials: '/img/uganda/uganda-map.svg',
-  flight: '/img/uganda/uganda-flight.jpg',
+  skyline: '/img/guide/uganda-skyline.jpg',
+  market: '/img/guide/uganda-market.jpg',
+  dance: '/img/guide/uganda-dance.jpg',
+  savannah: '/img/guide/uganda-savannah-elephants.jpg',
+  rafting: '/img/guide/uganda-rafting.jpg',
+  citySunset: '/img/guide/uganda-city-sunset.jpg',
+  mosque: '/img/guide/uganda-mosque.jpg',
+  street: '/img/guide/uganda-street.jpg',
+  gorilla: '/img/guide/uganda-gorilla.jpg',
+  lake: '/img/guide/uganda-lake.jpg',
+  giraffes: '/img/guide/uganda-giraffes.jpg',
+  airport: '/img/guide/uganda-airport.jpg',
+  boarding: '/img/guide/uganda-boarding.jpg',
+  mountain: '/img/guide/uganda-mountain.jpg',
+  countryside: '/img/guide/uganda-countryside.jpg',
+  bananas: '/img/guide/uganda-bananas.jpg',
+  vendor: '/img/guide/uganda-vendor.jpg',
+  youth: '/img/guide/uganda-youth.jpg',
+  safari: '/img/guide/uganda-safari.jpg',
+  boda: '/img/guide/uganda-boda.jpg',
+  tradition: '/img/guide/uganda-tradition.jpg',
+  celebration: '/img/guide/uganda-celebration.jpg',
+  passport: '/img/guide/uganda-passport.jpg',
+  money: '/img/guide/uganda-money.jpg',
+  exchanger: '/img/guide/uganda-exchanger.jpg',
+  health: '/img/guide/uganda-health.jpg',
+  phone: '/img/guide/uganda-phone.jpg',
+  pack: '/img/guide/uganda-pack.jpg',
+  sky: '/img/guide/uganda-sky.jpg',
+  suitcase: '/img/guide/uganda-suitcase.jpg',
+  essentials: '/img/guide/uganda-map.svg',
+  flight: '/img/guide/uganda-flight.jpg',
 } as const;
 
 export type GuideArtImgKey = keyof typeof IMG;
@@ -148,10 +148,10 @@ const REGION_IMAGE_BY_CODE: Readonly<Record<string, string>> = {
 
 /** Wikipedia locator maps (Wikimedia Commons: Uganda – Central/Western/Eastern/Northern). */
 const REGION_MAP_BY_CODE: Readonly<Record<string, string>> = {
-  CENTRAL: '/img/uganda/regions/uganda-central.svg',
-  WEST: '/img/uganda/regions/uganda-western.svg',
-  EAST: '/img/uganda/regions/uganda-eastern.svg',
-  NORTH: '/img/uganda/regions/uganda-northern.svg',
+  CENTRAL: '/img/guide/regions/uganda-central.svg',
+  WEST: '/img/guide/regions/uganda-western.svg',
+  EAST: '/img/guide/regions/uganda-eastern.svg',
+  NORTH: '/img/guide/regions/uganda-northern.svg',
 };
 
 export function guideRegionImage(code: string | null | undefined): string {
