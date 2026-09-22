@@ -29,7 +29,7 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
       <section class="relative isolate overflow-hidden bg-ink">
         <div class="absolute inset-0">
           <img
-            src="/img/hero-kampala.jpg"
+            src="/img/hero_adventure_mobile.jpg"
             alt="Kampala hills and skyline at golden hour"
             width="1920"
             height="1280"
@@ -40,7 +40,7 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
         </div>
 
         <div
-          class="relative mx-auto flex min-h-[min(62svh,34rem)] max-w-[1400px] flex-col justify-end px-5 pb-8 pt-28 sm:px-8 sm:pb-10 sm:pt-32"
+          class="relative mx-auto max-w-[1400px] px-5 pb-8 pt-20 sm:px-8 sm:pb-10 sm:pt-20"
         >
           <div knReveal class="max-w-4xl">
             <div class="flex items-center gap-3">
@@ -62,17 +62,17 @@ import { WaitlistFormComponent } from '../waitlist/waitlist-form.component';
       </section>
 
       <main id="waitlist" class="bg-ink">
-        <div class="mx-auto max-w-[1400px] px-5 pb-20 pt-4 sm:px-8 sm:pb-28 sm:pt-6">
-          <div knReveal class="w-full">
+        <div class="mx-auto grid max-w-[1400px] items-start gap-8 px-5 pb-20 pt-4 sm:px-8 sm:pb-28 sm:pt-6 min-[1400px]:grid-cols-[56rem_minmax(0,1fr)]">
+          <div knReveal class="min-w-0 w-full">
             <kn-waitlist-form
               [disabled]="settings.waitlistDisabled()"
               [sourceParam]="sourceParam()"
             />
           </div>
+          <kn-local-knowledge-section [inset]="true" [flush]="true" class="[&>section>p]:text-ink-foreground/80" />
         </div>
       </main>
 
-      <kn-local-knowledge-section />
       <kn-site-footer />
     </div>
   `,

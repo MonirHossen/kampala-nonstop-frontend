@@ -52,6 +52,7 @@ import { scrollToId } from '../shared/scroll-to';
             Guide
           </a>
 
+          <!-- NOT ACTIVE
           @if (traveller.isAuthenticated()) {
             <a
               routerLink="/dashboard"
@@ -70,7 +71,7 @@ import { scrollToId } from '../shared/scroll-to';
               Sign in
             </button>
           }
-
+        -->
           @if (showJoinCta()) {
             <button
               type="button"
@@ -115,7 +116,7 @@ import { scrollToId } from '../shared/scroll-to';
             >
               Guide
             </a>
-
+          <!-- NOT ACTIVE
             @if (traveller.isAuthenticated()) {
               <a
                 routerLink="/dashboard"
@@ -134,7 +135,7 @@ import { scrollToId } from '../shared/scroll-to';
                 Sign in
               </button>
             }
-
+            -->
             @if (showJoinCta()) {
               <button
                 type="button"
