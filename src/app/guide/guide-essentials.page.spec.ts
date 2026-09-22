@@ -2,7 +2,8 @@ import { Location } from '@angular/common';
 import { provideLocationMocks } from '@angular/common/testing';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
+import { GuideEssential } from './guide.models';
 import { GuideEssentialsPage } from './guide-essentials.page';
 import { GuideApiService } from './guide-api.service';
 import { UGANDA_ESSENTIALS_FALLBACK } from './content/uganda-essentials-fallback';
@@ -16,6 +17,24 @@ const originalIds = [
 ];
 
 describe('Essentials page content inventory', () => {
+  it('renders all sections before the API responds, then refreshes live text', () => {
+    const response = new Subject<GuideEssential[]>();
+    TestBed.configureTestingModule({
+      imports: [GuideEssentialsPage],
+      providers: [provideRouter([]), provideLocationMocks(),
+        { provide: GuideApiService, useValue: { getEssentials: () => response } }],
+    });
+    const fixture = TestBed.createComponent(GuideEssentialsPage);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('[data-section-id]').length).toBe(14);
+    response.next([{ ...UGANDA_ESSENTIALS_FALLBACK[0], value_data: { heading: 'Updated Uganda introduction' } }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Updated Uganda introduction');
+    expect(fixture.nativeElement.querySelectorAll('[data-section-id]').length).toBe(14);
+    response.complete();
+    fixture.destroy();
+  });
+
   for (const response of ['complete', 'partial', 'empty', 'unavailable']) {
     for (const suffix of ['?section=about', '?section=culture-traditions', '#local-etiquette']) {
       it(`keeps every original topic with ${response} API and ${suffix}`, fakeAsync(() => {

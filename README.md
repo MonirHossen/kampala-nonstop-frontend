@@ -271,3 +271,5 @@ src/app/
   broker, Drizzle config and the Vite/Nitro server entrypoints.
 - **The story section was removed** and the waitlist form now sits directly below the hero,
   ahead of the category tiles. `public/img/story-*.jpg` are currently unreferenced.
+
+## COMMENT "NOT ACTIVE" to disable features

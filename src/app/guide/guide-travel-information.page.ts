@@ -4,6 +4,7 @@ import { RevealDirective } from '../shared/reveal.directive';
 import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowledge-section.component';
 import { GuideNarrativeBlocksComponent } from './components/guide-narrative-blocks.component';
 import { EssentialsIndexComponent } from './components/essentials-index.component';
+import { GuideProgressiveImageDirective } from './components/guide-progressive-image.directive';
 import { GuideTextLinkComponent } from './components/guide-text-link.component';
 import { GuideNarrativeBlock } from './guide-content-format';
 import { guideContentFor } from './content/guide-content.registry';
@@ -18,6 +19,7 @@ import { guideCountryCode } from './guide-route';
     LocalKnowledgeSectionComponent,
     RouterLink,
     EssentialsIndexComponent,
+    GuideProgressiveImageDirective,
     GuideTextLinkComponent,
     GuideNarrativeBlocksComponent,
   ],
@@ -39,9 +41,10 @@ import { guideCountryCode } from './guide-route';
             <section id="visa-information" data-section-id="visa-information" tabindex="-1" [attr.aria-label]="sectionLabel('visa-information')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('visa-information')"
+                  [knProgressiveImage]="infoImage('visa-information')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -134,9 +137,10 @@ import { guideCountryCode } from './guide-route';
             <section id="flights-to-uganda" data-section-id="flights-to-uganda" tabindex="-1" [attr.aria-label]="sectionLabel('flights-to-uganda')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('flights-to-uganda')"
+                  [knProgressiveImage]="infoImage('flights-to-uganda')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -187,9 +191,10 @@ import { guideCountryCode } from './guide-route';
             <section id="arrival-getting-around" data-section-id="arrival-getting-around" tabindex="-1" [attr.aria-label]="sectionLabel('arrival-getting-around')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('arrival-getting-around')"
+                  [knProgressiveImage]="infoImage('arrival-getting-around')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -223,9 +228,10 @@ import { guideCountryCode } from './guide-route';
             <section id="money-payments" data-section-id="money-payments" tabindex="-1" [attr.aria-label]="sectionLabel('money-payments')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('money-payments')"
+                  [knProgressiveImage]="infoImage('money-payments')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -263,9 +269,10 @@ import { guideCountryCode } from './guide-route';
             <section id="health-safety" data-section-id="health-safety" tabindex="-1" [attr.aria-label]="sectionLabel('health-safety')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('health-safety')"
+                  [knProgressiveImage]="infoImage('health-safety')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -339,9 +346,10 @@ import { guideCountryCode } from './guide-route';
             <section id="connectivity-power" data-section-id="connectivity-power" tabindex="-1" [attr.aria-label]="sectionLabel('connectivity-power')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('connectivity-power')"
+                  [knProgressiveImage]="infoImage('connectivity-power')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -414,9 +422,10 @@ import { guideCountryCode } from './guide-route';
             <section id="what-to-pack" data-section-id="what-to-pack" tabindex="-1" [attr.aria-label]="sectionLabel('what-to-pack')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('what-to-pack')"
+                  [knProgressiveImage]="infoImage('what-to-pack')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -461,9 +470,10 @@ import { guideCountryCode } from './guide-route';
             <section id="cultural-etiquette" data-section-id="cultural-etiquette" tabindex="-1" [attr.aria-label]="sectionLabel('cultural-etiquette')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('cultural-etiquette')"
+                  [knProgressiveImage]="infoImage('cultural-etiquette')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -510,9 +520,10 @@ import { guideCountryCode } from './guide-route';
             <section id="when-to-travel" data-section-id="when-to-travel" tabindex="-1" [attr.aria-label]="sectionLabel('when-to-travel')" class="scroll-mt-[9.5rem] outline-none md:scroll-mt-[5.5rem]">
               <figure class="relative mb-10 overflow-hidden rounded-2xl">
                 <img
-                  [src]="infoImage('when-to-travel')"
+                  [knProgressiveImage]="infoImage('when-to-travel')"
                   alt=""
                   class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]"
+                  width="1600" height="700"
                   loading="lazy"
                 />
                 <span
@@ -533,7 +544,7 @@ import { guideCountryCode } from './guide-route';
 
         <div knReveal class="relative mt-16 overflow-hidden rounded-2xl">
           <img
-            src="/img/guide/uganda-mosque.jpg"
+            knProgressiveImage="/img/guide/uganda-mosque.jpg"
             alt=""
             class="absolute inset-0 h-full w-full object-cover"
             aria-hidden="true"

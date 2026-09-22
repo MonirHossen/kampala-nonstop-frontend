@@ -2,7 +2,7 @@ import { Location } from '@angular/common';
 import { afterRenderEffect, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, Scroll } from '@angular/router';
-import { LucideDynamicIcon } from '@lucide/angular';
+import { LucideArrowUp, LucideDynamicIcon } from '@lucide/angular';
 import { guideNavIcon } from '../guide-topic-icons';
 import { guideScrollBehavior } from './guide-picker-reveal';
 
@@ -47,6 +47,13 @@ export type EssentialsIndexItem = { id: string; code: string; label: string };
         }
       </nav>
     </dialog>
+    @if (showBackToTop()) {
+      <button type="button" aria-label="Back to first section" title="Back to top"
+        (click)="select($event, items()[0].id)"
+        class="fixed right-5 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 flex h-12 w-12 items-center justify-center rounded-full border border-clay bg-background text-clay shadow-lg transition-colors hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 md:right-8">
+        <svg lucideIcon [lucideIcon]="arrowUp" class="h-6 w-6" aria-hidden="true"></svg>
+      </button>
+    }
   `,
   styles: `
     .index-link { display:flex; align-items:center; gap:.6rem; padding:.65rem .75rem; border-left:3px solid transparent; font-size:.875rem; line-height:1.45; }
@@ -65,6 +72,8 @@ export class EssentialsIndexComponent {
   protected readonly active = signal('');
   protected readonly open = signal(false);
   protected readonly icon = guideNavIcon;
+  protected readonly arrowUp = LucideArrowUp;
+  protected readonly showBackToTop = signal(false);
   private initialised = false;
   private frame = 0;
 
@@ -74,14 +83,21 @@ export class EssentialsIndexComponent {
       const sections = items.map(item => document.getElementById(item.id)).filter((el): el is HTMLElement => !!el);
       if (!sections.length) return;
       let observer: IntersectionObserver | undefined;
+      let returnObserver: IntersectionObserver | undefined;
       const observe = () => {
         observer?.disconnect();
+        returnObserver?.disconnect();
         const top = window.matchMedia('(min-width: 768px)').matches ? 88 : 152;
         observer = new IntersectionObserver(() => {
           const current = sections.filter(el => el.getBoundingClientRect().top <= top + 1).at(-1) ?? sections[0];
           this.active.set(current.id);
         }, { rootMargin: `-${top}px 0px -${Math.max(0, window.innerHeight - top - 1)}px 0px`, threshold: 0 });
         sections.forEach(section => observer!.observe(section));
+        // Observe normal-flow content, not the sticky index, which stays on screen.
+        returnObserver = new IntersectionObserver(([entry]) => {
+          this.showBackToTop.set(!entry.isIntersecting && entry.boundingClientRect.bottom <= top);
+        }, { rootMargin: `-${top}px 0px 0px 0px`, threshold: 0 });
+        returnObserver.observe(sections[0].querySelector('h2') ?? sections[0]);
         if (window.matchMedia('(min-width: 768px)').matches && this.sheet()?.nativeElement.open) this.closeMenu();
       };
       observe();
@@ -91,7 +107,11 @@ export class EssentialsIndexComponent {
         this.active.set(items[0].id);
         this.restore();
       }
-      cleanup(() => { observer?.disconnect(); window.removeEventListener('resize', observe); });
+      cleanup(() => {
+        observer?.disconnect();
+        returnObserver?.disconnect();
+        window.removeEventListener('resize', observe);
+      });
     });
     // Run after the router's global scroll restoration, including Back/Forward.
     this.router.events.pipe(takeUntilDestroyed()).subscribe(event => {

@@ -5,6 +5,7 @@ import { extractApiError } from '../core/lib/api-error';
 import { GuideNarrativeBlocksComponent } from './components/guide-narrative-blocks.component';
 import { GuideQuickInfoComponent } from './components/guide-quick-info.component';
 import { EssentialsIndexComponent } from './components/essentials-index.component';
+import { GuideProgressiveImageDirective } from './components/guide-progressive-image.directive';
 import { GuideStateComponent } from './components/guide-state.component';
 import { GuideNarrativeBlock } from './guide-content-format';
 import { guideContentFor } from './content/guide-content.registry';
@@ -48,6 +49,7 @@ type NarrativeBlock = GuideNarrativeBlock;
   imports: [
     GuideQuickInfoComponent,
     EssentialsIndexComponent,
+    GuideProgressiveImageDirective,
     GuideStateComponent,
     GuideNarrativeBlocksComponent,
   ],
@@ -74,7 +76,7 @@ type NarrativeBlock = GuideNarrativeBlock;
                 } @else {
                 <h2 [id]="anchor(panel.code) + '-heading'" class="font-display text-3xl text-foreground sm:text-4xl">{{ panel.heading }}</h2>
                 <figure class="relative mb-10 mt-6 overflow-hidden rounded-2xl">
-                  <img [src]="sectionImage(panel.code)" alt="" width="1600" height="700"
+                  <img [knProgressiveImage]="sectionImage(panel.code)" alt="" width="1600" height="700"
                     class="aspect-[16/7] w-full object-cover sm:aspect-[16/6]" loading="lazy" />
                   <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/35 via-transparent to-transparent" aria-hidden="true"></span>
                 </figure>
@@ -122,6 +124,8 @@ export class GuideEssentialsPage implements OnInit {
   ngOnInit(): void {
     const code = this.countryCode();
     const fallback = fallbackEssentials(code);
+    // Render the published snapshot while live content refreshes in the background.
+    if (fallback.length > 0) this.state.set({ status: 'ready', essentials: fallback });
 
     this.guideApi.getEssentials(code).subscribe({
       next: (essentials) => {
