@@ -110,10 +110,18 @@ import { CountrySelectorComponent } from '../waitlist/country-selector.component
                 </div>
                 <div>
                   <label class="eyebrow text-muted-foreground">Gender</label>
-                  <input
+                  <select
                     formControlName="gender"
                     class="mt-2 h-11 w-full border-b border-input bg-transparent outline-none focus:border-primary"
-                  />
+                  >
+                    <option value="">Select gender</option>
+                    @if (customGenderValue(); as custom) {
+                      <option [value]="custom">{{ custom }}</option>
+                    }
+                    @for (option of genderOptions; track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
                 </div>
                 <div>
                   <label class="eyebrow text-muted-foreground">Date of birth</label>
@@ -373,6 +381,12 @@ export class DashboardProfilePage implements OnInit {
   protected readonly residenceCountry = signal<Country | null>(null);
   protected readonly citizenshipCountry = signal<Country | null>(null);
   protected readonly showPw = signal(false);
+  protected readonly customGenderValue = signal<string | null>(null);
+
+  protected readonly genderOptions = [
+    { value: 'male', label: 'Male' },
+    { value: 'female', label: 'Female' },
+  ] as const;
 
   protected readonly email = this.auth.user()?.email ?? '';
 
@@ -431,12 +445,16 @@ export class DashboardProfilePage implements OnInit {
         this.currencies.set(currencies);
 
         if (profile) {
+          const gender = profile.gender ?? '';
+          const genderKnown = this.genderOptions.some((option) => option.value === gender);
+          this.customGenderValue.set(gender && !genderKnown ? gender : null);
+
           this.profileForm.patchValue({
             title: profile.title ?? '',
             first_name: profile.first_name,
             middle_name: profile.middle_name ?? '',
             last_name: profile.last_name,
-            gender: profile.gender ?? '',
+            gender,
             date_of_birth: profile.date_of_birth ?? '',
             phone_number: profile.phone_number ?? '',
             city_of_residence: profile.city_of_residence ?? '',
