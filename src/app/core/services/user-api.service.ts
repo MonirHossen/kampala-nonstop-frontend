@@ -32,6 +32,23 @@ export class UserApiService {
     );
   }
 
+  uploadProfilePhoto(file: File): Observable<UserProfile> {
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    return this.http.post<{ profile: UserProfile }>(`${this.baseUrl}/profile/photo`, formData).pipe(
+      map((response) => response.profile),
+      tap((profile) => this.patchCurrentUser({ profile })),
+    );
+  }
+
+  deleteProfilePhoto(): Observable<UserProfile> {
+    return this.http.delete<{ profile: UserProfile }>(`${this.baseUrl}/profile/photo`).pipe(
+      map((response) => response.profile),
+      tap((profile) => this.patchCurrentUser({ profile })),
+    );
+  }
+
   getPreferences(): Observable<UserPreferences | null> {
     return this.http
       .get<{ preferences: UserPreferences | null }>(`${this.baseUrl}/preferences`)

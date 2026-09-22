@@ -53,15 +53,56 @@ import { CountrySelectorComponent } from '../waitlist/country-selector.component
               <div class="mt-5 grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
                   <label class="eyebrow text-muted-foreground">Profile photo</label>
-                  @if (photoUrl()) {
-                    <img
-                      [src]="photoUrl()!"
-                      alt="Profile photo"
-                      class="mt-3 h-20 w-20 rounded-full object-cover"
-                    />
-                  } @else {
-                    <p class="mt-3 text-sm text-muted-foreground">No photo yet.</p>
-                  }
+                  <div class="mt-3 flex flex-wrap items-center gap-4">
+                    @if (photoDisplayUrl() && !photoLoadError()) {
+                      <img
+                        [src]="photoDisplayUrl()!"
+                        alt="Profile photo"
+                        class="h-20 w-20 rounded-full object-cover"
+                        (error)="photoLoadError.set(true)"
+                      />
+                    } @else {
+                      <div
+                        class="flex h-20 w-20 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground"
+                        aria-hidden="true"
+                      >
+                        {{ photoInitials() }}
+                      </div>
+                    }
+                    <div class="flex flex-col gap-2">
+                      <input
+                        #photoInput
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        class="hidden"
+                        (change)="onPhotoSelected($event)"
+                      />
+                      <button
+                        type="button"
+                        class="eyebrow inline-flex items-center justify-center gap-2 border border-hairline bg-paper px-3 py-2 text-foreground hover:border-primary disabled:opacity-70"
+                        [disabled]="uploadingPhoto()"
+                        (click)="photoInput.click()"
+                      >
+                        @if (uploadingPhoto()) {
+                          <svg lucideLoaderCircle class="h-4 w-4 animate-spin"></svg>
+                          Uploading&hellip;
+                        } @else {
+                          {{ photoDisplayUrl() && !photoLoadError() ? 'Change photo' : 'Upload photo' }}
+                        }
+                      </button>
+                      @if (photoDisplayUrl() && !photoLoadError()) {
+                        <button
+                          type="button"
+                          class="text-left text-xs text-muted-foreground transition-colors hover:text-destructive disabled:opacity-70"
+                          [disabled]="uploadingPhoto()"
+                          (click)="removePhoto()"
+                        >
+                          Remove photo
+                        </button>
+                      }
+                      <p class="text-xs text-muted-foreground">JPG, PNG, WebP or GIF. Max 5&nbsp;MB.</p>
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label class="eyebrow text-muted-foreground">First name</label>
@@ -369,6 +410,9 @@ export class DashboardProfilePage implements OnInit {
 
   protected readonly loading = signal(true);
   protected readonly savingProfile = signal(false);
+  protected readonly uploadingPhoto = signal(false);
+  protected readonly photoLoadError = signal(false);
+  protected readonly photoPreview = signal<string | null>(null);
   protected readonly savingPrefs = signal(false);
   protected readonly savingNotif = signal(false);
   protected readonly savingPassword = signal(false);
@@ -432,6 +476,78 @@ export class DashboardProfilePage implements OnInit {
     return url || null;
   }
 
+  protected photoDisplayUrl(): string | null {
+    return this.photoPreview() ?? this.photoUrl();
+  }
+
+  protected photoInitials(): string {
+    const first = this.profileForm.controls.first_name.value?.trim().charAt(0) ?? '';
+    const last = this.profileForm.controls.last_name.value?.trim().charAt(0) ?? '';
+    const initials = `${first}${last}`.toUpperCase();
+    return initials || '?';
+  }
+
+  protected onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      this.error.set('Please choose a JPG, PNG, WebP, or GIF image.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.error.set('Profile photo must be 5 MB or smaller.');
+      return;
+    }
+
+    this.clearFlash();
+    this.revokePhotoPreview();
+    this.photoPreview.set(URL.createObjectURL(file));
+    this.photoLoadError.set(false);
+    this.uploadingPhoto.set(true);
+
+    this.userApi.uploadProfilePhoto(file).subscribe({
+      next: (profile) => {
+        this.profileForm.patchValue({ profile_photo_url: profile.profile_photo_url ?? '' });
+        this.revokePhotoPreview();
+        this.photoLoadError.set(false);
+        this.message.set('Profile photo updated.');
+        this.uploadingPhoto.set(false);
+      },
+      error: (err: unknown) => {
+        this.revokePhotoPreview();
+        this.error.set(extractApiError(err));
+        this.uploadingPhoto.set(false);
+      },
+    });
+  }
+
+  protected removePhoto(): void {
+    this.clearFlash();
+    this.uploadingPhoto.set(true);
+
+    this.userApi.deleteProfilePhoto().subscribe({
+      next: () => {
+        this.profileForm.patchValue({ profile_photo_url: '' });
+        this.revokePhotoPreview();
+        this.photoLoadError.set(false);
+        this.message.set('Profile photo removed.');
+        this.uploadingPhoto.set(false);
+      },
+      error: (err: unknown) => {
+        this.error.set(extractApiError(err));
+        this.uploadingPhoto.set(false);
+      },
+    });
+  }
+
   ngOnInit(): void {
     forkJoin({
       profile: this.userApi.getProfile(),
@@ -461,6 +577,7 @@ export class DashboardProfilePage implements OnInit {
             country_of_residence: profile.country_of_residence ?? '',
             profile_photo_url: profile.profile_photo_url ?? '',
           });
+          this.photoLoadError.set(false);
           this.residenceCountry.set(
             profile.country_of_residence ? (findCountry(profile.country_of_residence) ?? null) : null,
           );
@@ -711,5 +828,13 @@ export class DashboardProfilePage implements OnInit {
   private clearFlash(): void {
     this.message.set(null);
     this.error.set(null);
+  }
+
+  private revokePhotoPreview(): void {
+    const preview = this.photoPreview();
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+    this.photoPreview.set(null);
   }
 }
