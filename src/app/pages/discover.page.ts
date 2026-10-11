@@ -1,14 +1,17 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { LucideDynamicIcon, LucideArrowRight } from '@lucide/angular';
 import { RouterLink } from '@angular/router';
 import { DISCOVER_THEMES, DISCOVER_TYPES } from './discover-options';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
+import { ListingsApiService } from '../core/services/listings-api.service';
+import { ListingCard } from '../core/models/listing.model';
+import { DiscoverListingCardComponent } from './discover-listing-card.component';
 
 @Component({
   selector: 'kn-discover-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SiteHeaderComponent, SiteFooterComponent, LucideDynamicIcon, RouterLink],
+  imports: [SiteHeaderComponent, SiteFooterComponent, LucideDynamicIcon, RouterLink, DiscoverListingCardComponent],
   template: `
     <div class="flex min-h-screen flex-col bg-background">
       <kn-site-header [lightBackground]="true" />
@@ -80,6 +83,22 @@ import { SiteFooterComponent } from '../site/site-footer.component';
               }
             </div>
           </section>
+
+          @if (hotPicks().length) {
+            <section class="mt-10" aria-labelledby="discover-hot-picks-heading">
+              <div class="flex flex-wrap items-end justify-between gap-3">
+                <h2 id="discover-hot-picks-heading" class="font-display text-2xl text-foreground sm:text-3xl">Hot Picks</h2>
+                <a routerLink="/discover/catalogue" class="text-sm font-bold text-primary underline underline-offset-4">See the catalogue</a>
+              </div>
+              <ul class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+                @for (listing of hotPicks(); track listing.id) {
+                  <li class="min-w-0">
+                    <kn-discover-listing-card [listing]="listing" />
+                  </li>
+                }
+              </ul>
+            </section>
+          }
         </div>
       </main>
       <kn-site-footer />
@@ -87,8 +106,18 @@ import { SiteFooterComponent } from '../site/site-footer.component';
   `,
 })
 export class DiscoverPage {
+  private readonly api = inject(ListingsApiService);
   // Editorial discovery themes, independent of the internal catalogue taxonomy.
   protected readonly themes = DISCOVER_THEMES;
   protected readonly arrowIcon = LucideArrowRight.icon;
   protected readonly listingTypes = DISCOVER_TYPES;
+  protected readonly hotPicks = signal<ListingCard[]>([]);
+
+  constructor() {
+    const subscription = this.api.list({ hot_pick: true, per_page: 6 }).subscribe({
+      next: (page) => this.hotPicks.set(page.data),
+      error: () => this.hotPicks.set([]),
+    });
+    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+  }
 }

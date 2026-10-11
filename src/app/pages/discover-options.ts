@@ -19,9 +19,9 @@ export const DISCOVER_THEMES = [
     { label: 'Community & Impact', image: 'discover_community_and_impact', icon: LucideHandshake.icon },
   ];
 export const DISCOVER_TYPES = [
-    { label: 'Experiences', icon: LucideStar.icon },
-    { label: 'Activities', icon: LucideFootprints.icon },
-    { label: 'Events', icon: LucideCalendarDays.icon },
-    { label: 'Tours', icon: LucideMap.icon },
-    { label: 'Services', icon: LucideConciergeBell.icon },
+    { label: 'Experiences', code: 'EXPERIENCE', icon: LucideStar.icon },
+    { label: 'Activities', code: 'ACTIVITY', icon: LucideFootprints.icon },
+    { label: 'Events', code: 'EVENT', icon: LucideCalendarDays.icon },
+    { label: 'Tours', code: 'TOUR', icon: LucideMap.icon },
+    { label: 'Services', code: 'SERVICE', icon: LucideConciergeBell.icon },
   ];

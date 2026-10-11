@@ -176,8 +176,6 @@ export class SiteHeaderComponent {
 
   protected readonly serviceLinks = [
     { path: '/discover', label: 'Discover' },
-    { path: '/services', label: 'Services' },
-    { path: '/concierge', label: 'Concierge' },
   ];
 
   private readonly router = inject(Router);

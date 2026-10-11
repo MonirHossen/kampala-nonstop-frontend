@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Params, RouterLink } from '@angular/router';
 
 export type GuideCrumb = {
   label: string;
   link?: string | string[];
+  queryParams?: Params;
 };
 
 @Component({
@@ -17,7 +18,7 @@ export type GuideCrumb = {
     >
       @for (crumb of crumbs(); track $index; let last = $last) {
         @if (!last && crumb.link) {
-          <a [routerLink]="crumb.link" [class]="linkClass()">
+          <a [routerLink]="crumb.link" [queryParams]="crumb.queryParams" [class]="linkClass()">
             {{ crumb.label }}
           </a>
           <span [class]="sepClass()" aria-hidden="true">/</span>
@@ -39,15 +40,15 @@ export class GuideBreadcrumbComponent {
 
   protected linkClass(): string {
     return this.tone() === 'light'
-      ? 'text-ink-foreground underline decoration-ink-foreground/45 underline-offset-4 transition-colors hover:text-primary'
+      ? 'text-white underline decoration-white/45 underline-offset-4 transition-colors hover:text-primary'
       : 'text-muted-foreground transition-colors hover:text-primary';
   }
 
   protected currentClass(): string {
-    return this.tone() === 'light' ? 'text-ink-foreground' : 'text-foreground';
+    return this.tone() === 'light' ? 'text-white' : 'text-foreground';
   }
 
   protected sepClass(): string {
-    return this.tone() === 'light' ? 'text-ink-foreground/45' : 'text-hairline';
+    return this.tone() === 'light' ? 'text-white/45' : 'text-hairline';
   }
 }

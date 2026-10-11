@@ -6,6 +6,11 @@ import { knownCountryMatch } from './guide/known-country.guard';
 
 export const routes: Routes = [
   {
+    path: 'discover/listings/:slug',
+    title: 'Listing — Kampala Nonstop',
+    loadComponent: () => import('./pages/discover-listing.page').then((m) => m.DiscoverListingPage),
+  },
+  {
     path: 'discover/catalogue',
     title: 'Discover Catalogue — Kampala Nonstop',
     loadComponent: () => import('./pages/discover-catalogue.page').then((m) => m.DiscoverCataloguePage),

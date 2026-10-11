@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,13 +6,23 @@ import { SiteHeaderComponent } from '../site/site-header.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { GuideBreadcrumbComponent, GuideCrumb } from '../guide/components/guide-breadcrumb.component';
 import { DISCOVER_THEMES, DISCOVER_TYPES } from './discover-options';
+import { ListingsApiService } from '../core/services/listings-api.service';
+import { ListingCard } from '../core/models/listing.model';
+import { DiscoverListingCardComponent } from './discover-listing-card.component';
 
 type FilterKey = 'interest' | 'location' | 'type';
 
 @Component({
   selector: 'kn-discover-catalogue-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SiteHeaderComponent, SiteFooterComponent, GuideBreadcrumbComponent, RouterLink, FormsModule],
+  imports: [
+    SiteHeaderComponent,
+    SiteFooterComponent,
+    GuideBreadcrumbComponent,
+    RouterLink,
+    FormsModule,
+    DiscoverListingCardComponent,
+  ],
   template: `
     <div class="flex min-h-screen flex-col bg-background">
       <kn-site-header [lightBackground]="true" />
@@ -76,14 +86,54 @@ type FilterKey = 'interest' | 'location' | 'type';
             </div>
           }
           <p class="mt-6 text-sm text-muted-foreground" role="status">{{ resultContext() }}</p>
-          <section class="mt-5 rounded-xl border border-hairline bg-paper p-6 sm:p-8" aria-labelledby="catalogue-empty-heading">
-            <h2 id="catalogue-empty-heading" class="font-display text-2xl text-foreground">The catalogue is coming soon</h2>
-            <p class="mt-3 max-w-2xl leading-relaxed text-muted-foreground">
-              Listings are not available here yet. You can choose your interests, location and type;
-              your selections stay in this page’s link for your next visit.
-            </p>
-            <a routerLink="/discover" class="mt-6 inline-flex min-h-11 items-center font-bold text-primary underline underline-offset-4">Back to Discover</a>
-          </section>
+
+          @if (loadError()) {
+            <section class="mt-8 max-w-2xl" aria-labelledby="catalogue-error-heading">
+              <h2 id="catalogue-error-heading" class="font-display text-2xl text-foreground">Listings could not be loaded</h2>
+              <p class="mt-3 leading-relaxed text-muted-foreground">
+                The catalogue is unavailable right now. Your filters stay in this page’s link.
+              </p>
+              <button type="button" (click)="retry()" class="mt-6 inline-flex min-h-11 items-center font-bold text-primary underline underline-offset-4">Try again</button>
+            </section>
+          } @else if (listings() === null) {
+            <ul class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4" aria-hidden="true">
+              @for (slot of skeletons; track slot) {
+                <li class="min-h-56 animate-pulse rounded-lg bg-muted sm:min-h-64"></li>
+              }
+            </ul>
+          } @else if (listings()!.length === 0) {
+            <section class="mt-8 max-w-2xl" aria-labelledby="catalogue-empty-heading">
+              <h2 id="catalogue-empty-heading" class="font-display text-2xl text-foreground">Nothing matches these filters</h2>
+              <p class="mt-3 leading-relaxed text-muted-foreground">
+                Try another type or interest, or clear the filters to see everything currently published.
+              </p>
+              <div class="mt-6 flex flex-wrap gap-4">
+                <button type="button" (click)="clearAll()" class="inline-flex min-h-11 items-center font-bold text-primary underline underline-offset-4">Clear filters</button>
+                <a routerLink="/discover" class="inline-flex min-h-11 items-center font-bold text-primary underline underline-offset-4">Back to Discover</a>
+              </div>
+            </section>
+          } @else {
+            <ul class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+              @for (listing of listings(); track listing.id) {
+                <li class="min-w-0">
+                  <kn-discover-listing-card [listing]="listing" [queryParams]="catalogueQuery()" />
+                </li>
+              }
+            </ul>
+            @if (lastPage() > 1) {
+              <nav class="mt-10 flex items-center justify-between gap-4" aria-label="Catalogue pages">
+                <button type="button" (click)="setPage(page() - 1)" [disabled]="page() <= 1"
+                  class="min-h-11 text-sm font-bold text-primary underline underline-offset-4 disabled:no-underline disabled:opacity-40">
+                  Previous
+                </button>
+                <p class="text-sm text-muted-foreground">Page {{ page() }} of {{ lastPage() }}</p>
+                <button type="button" (click)="setPage(page() + 1)" [disabled]="page() >= lastPage()"
+                  class="min-h-11 text-sm font-bold text-primary underline underline-offset-4 disabled:no-underline disabled:opacity-40">
+                  Next
+                </button>
+              </nav>
+            }
+          }
         </div>
       </main>
       <kn-site-footer />
@@ -93,9 +143,16 @@ type FilterKey = 'interest' | 'location' | 'type';
 export class DiscoverCataloguePage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly api = inject(ListingsApiService);
   private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
+  private readonly retryTick = signal(0);
   protected readonly themes = DISCOVER_THEMES;
   protected readonly types = DISCOVER_TYPES;
+  protected readonly skeletons = [1, 2, 3, 4, 5, 6];
+  protected readonly listings = signal<ListingCard[] | null>(null);
+  protected readonly total = signal(0);
+  protected readonly lastPage = signal(1);
+  protected readonly loadError = signal(false);
   protected readonly interest = computed(() => {
     const value = this.params().get('interest');
     return this.themes.find((theme) => theme.label === value)?.label ?? '';
@@ -108,24 +165,92 @@ export class DiscoverCataloguePage {
     const value = this.params().get('location');
     return value === null || value === 'Kampala' ? 'Kampala' : '';
   });
+  protected readonly page = computed(() => {
+    const value = Number(this.params().get('page'));
+    return Number.isInteger(value) && value > 1 ? value : 1;
+  });
   protected readonly crumbs = computed<GuideCrumb[]>(() => [
     { label: 'Discover', link: '/discover' },
-    { label: this.interest() || 'Catalogue' },
+    { label: this.interest() || this.listingType() || 'Catalogue' },
   ]);
   protected readonly activeFilters = computed(() => [
     { key: 'interest' as const, label: this.interest() },
     { key: 'location' as const, label: this.location() },
     { key: 'type' as const, label: this.listingType() },
   ].filter((filter) => filter.label));
-  protected readonly resultContext = computed(() =>
-    [this.listingType() || 'All Types', this.location() || 'All locations', this.interest()]
-      .filter(Boolean).join(' · ') + ' — listings not yet available',
-  );
+  protected readonly catalogueQuery = computed(() => ({
+    interest: this.interest() || null,
+    type: this.listingType() || null,
+    location: this.location() || null,
+    page: this.page() > 1 ? this.page() : null,
+  }));
+  protected readonly resultContext = computed(() => {
+    const filters = [this.listingType() || 'All types', this.location() || 'All locations', this.interest()]
+      .filter(Boolean)
+      .join(' · ');
+    if (this.loadError()) {
+      return `${filters} — listings could not be loaded`;
+    }
+    if (this.listings() === null) {
+      return `${filters} — loading`;
+    }
+    const count = this.total();
+    return `${filters} — ${count} ${count === 1 ? 'listing' : 'listings'}`;
+  });
+
+  constructor() {
+    effect((onCleanup) => {
+      const interest = this.interest();
+      const type = this.listingType();
+      const location = this.location();
+      const page = this.page();
+      this.retryTick();
+      this.listings.set(null);
+      this.loadError.set(false);
+
+      const subscription = this.api.list({
+        interest: interest || undefined,
+        type: type || undefined,
+        location: location || undefined,
+        page,
+        per_page: 12,
+      }).subscribe({
+        next: (result) => {
+          this.listings.set(result.data);
+          this.total.set(result.meta.total);
+          this.lastPage.set(result.meta.last_page);
+        },
+        error: () => this.loadError.set(true),
+      });
+
+      onCleanup(() => subscription.unsubscribe());
+    });
+  }
+
+  protected retry(): void {
+    this.retryTick.update((value) => value + 1);
+  }
 
   protected setFilter(key: FilterKey, value: string): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { interest: this.interest() || null, type: this.listingType() || null, location: this.location(), [key]: value || (key === 'location' ? '' : null) },
+      queryParams: {
+        interest: this.interest() || null,
+        type: this.listingType() || null,
+        location: this.location(),
+        page: null,
+        [key]: value || (key === 'location' ? '' : null),
+      },
+    });
+  }
+
+  protected setPage(page: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        ...this.catalogueQuery(),
+        page: page > 1 ? page : null,
+      },
     });
   }
 
