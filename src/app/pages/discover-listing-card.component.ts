@@ -43,7 +43,12 @@ import { ListingCard } from '../core/models/listing.model';
         @if (placeLine()) {
           <p class="text-sm text-white/70">{{ placeLine() }}</p>
         }
-        <svg lucideIcon [lucideIcon]="arrowIcon" class="absolute bottom-4 right-4 h-5 w-5 text-white sm:bottom-5 sm:right-5" aria-hidden="true"></svg>
+        <span
+          class="mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-primary via-primary to-clay px-4 py-2 text-sm font-bold text-primary-foreground shadow-md transition duration-300 group-hover:brightness-110"
+        >
+          View listing
+          <svg lucideIcon [lucideIcon]="arrowIcon" class="h-4 w-4" aria-hidden="true"></svg>
+        </span>
       </div>
     </a>
   `,
