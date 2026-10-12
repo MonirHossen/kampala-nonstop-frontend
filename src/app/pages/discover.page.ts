@@ -2,13 +2,12 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
-  ElementRef,
   inject,
   signal,
-  viewChild,
 } from '@angular/core';
-import { LucideDynamicIcon, LucideArrowRight, LucideLeaf } from '@lucide/angular';
+import { LucideDynamicIcon, LucideArrowRight } from '@lucide/angular';
 import { RouterLink } from '@angular/router';
 import { DISCOVER_THEMES, DISCOVER_TYPES } from './discover-options';
 import { SiteHeaderComponent } from '../site/site-header.component';
@@ -47,22 +46,26 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
           </header>
 
           <section class="mt-8" aria-labelledby="discover-themes-heading">
-            <h2 id="discover-themes-heading" class="font-display text-2xl text-foreground sm:text-3xl">
-              Explore by interests
-            </h2>
+            <div class="flex items-center gap-4">
+              <h2 id="discover-themes-heading" class="shrink-0 font-display text-2xl text-foreground sm:text-3xl">
+                Explore by <span class="text-primary">Interests</span>
+              </h2>
+              <span class="h-px min-w-8 flex-1 bg-primary" aria-hidden="true"></span>
+            </div>
             <ul class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
               @for (theme of themes; track theme.label) {
-                <li class="relative isolate flex min-h-36 min-w-0 overflow-hidden rounded-lg bg-ink text-white sm:min-h-40">
+                <li class="group relative isolate flex min-h-36 min-w-0 overflow-hidden rounded-lg bg-ink text-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_28px_-16px_rgba(40,28,16,0.55)] sm:min-h-40">
                   <img
                     [src]="'/img/originals/' + theme.image + '.png'"
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    class="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+                    class="absolute inset-0 -z-20 h-full w-full object-cover object-center transition duration-700 ease-out group-hover:scale-110"
                   />
-                  <div class="absolute inset-0 -z-10 bg-black/55" aria-hidden="true"></div>
+                  <div class="absolute inset-0 -z-10 bg-black/55 transition duration-300 group-hover:bg-black/40" aria-hidden="true"></div>
+                  <div class="absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-gradient-to-t from-primary/35 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" aria-hidden="true"></div>
                   <a routerLink="/discover/catalogue" [queryParams]="{ interest: theme.label }" class="relative flex w-full focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white items-center justify-center gap-1 px-1 py-9 text-center sm:gap-3 sm:px-4">
-                    <svg lucideIcon [lucideIcon]="theme.icon" class="h-5 w-5 shrink-0 sm:h-9 sm:w-9" aria-hidden="true"></svg>
+                    <svg lucideIcon [lucideIcon]="theme.icon" class="h-5 w-5 shrink-0 transition duration-300 group-hover:scale-110 sm:h-9 sm:w-9" aria-hidden="true"></svg>
                     <h3 class="min-w-0 flex-1 whitespace-normal text-base font-normal leading-snug">
                       @if (theme.label === 'Music, Nightlife & Entertainment') {
                         <span class="whitespace-nowrap">Music, Nightlife &amp;</span><br />Entertainment
@@ -70,7 +73,7 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
                         {{ theme.label }}
                       }
                     </h3>
-                    <svg lucideIcon [lucideIcon]="arrowIcon" class="absolute bottom-3 right-3 h-5 w-5 text-white sm:right-4" aria-hidden="true"></svg>
+                    <svg lucideIcon [lucideIcon]="arrowIcon" class="absolute bottom-3 right-3 h-5 w-5 text-white transition duration-300 group-hover:translate-x-1 group-hover:text-primary sm:right-4" aria-hidden="true"></svg>
                   </a>
                 </li>
               }
@@ -78,9 +81,12 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
           </section>
 
           <section class="mt-8" aria-labelledby="discover-types-heading">
-            <h2 id="discover-types-heading" class="font-display text-2xl text-foreground sm:text-3xl">
-              Browse by type
-            </h2>
+            <div class="flex items-center gap-4">
+              <h2 id="discover-types-heading" class="shrink-0 font-display text-2xl text-foreground sm:text-3xl">
+                Browse by <span class="text-primary">Type</span>
+              </h2>
+              <span class="h-px min-w-8 flex-1 bg-primary" aria-hidden="true"></span>
+            </div>
             <p class="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
               Looking for something specific? Explore our bookable options
             </p>
@@ -89,11 +95,28 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
                 <a
                   routerLink="/discover/catalogue"
                   [queryParams]="{ type: type.label }"
-                  class="relative flex min-h-36 min-w-0 items-center justify-center gap-1 rounded-xl bg-muted px-2 py-9 text-center text-base font-normal leading-relaxed text-foreground sm:px-4"
+                  [class]="
+                    'group relative flex min-h-44 min-w-0 flex-col justify-end gap-2 rounded-lg px-3 py-5 transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-52 sm:px-4 sm:py-6 ' +
+                    type.tileClass
+                  "
                 >
-                  <svg lucideIcon [lucideIcon]="type.icon" class="h-5 w-5 shrink-0 text-emerald-950 sm:h-9 sm:w-9" aria-hidden="true"></svg>
-                  <span class="min-w-0 flex-1 whitespace-normal">{{ type.label }}</span>
-                  <svg lucideIcon [lucideIcon]="arrowIcon" class="absolute bottom-3 right-3 h-5 w-5 text-foreground sm:right-4" aria-hidden="true"></svg>
+                  <svg
+                    lucideIcon
+                    [lucideIcon]="type.icon"
+                    [class]="'h-7 w-7 shrink-0 sm:h-8 sm:w-8 ' + type.iconClass"
+                    aria-hidden="true"
+                  ></svg>
+                  <span class="font-display text-lg font-normal leading-snug sm:text-xl">{{ type.label }}</span>
+                  <span [class]="'text-sm leading-snug ' + type.blurbClass">{{ type.blurb }}</span>
+                  <svg
+                    lucideIcon
+                    [lucideIcon]="arrowIcon"
+                    [class]="
+                      'absolute bottom-3 right-3 h-5 w-5 opacity-80 transition group-hover:translate-x-0.5 sm:bottom-4 sm:right-4 ' +
+                      type.iconClass
+                    "
+                    aria-hidden="true"
+                  ></svg>
                 </a>
               }
             </div>
@@ -101,50 +124,54 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
 
           @if (hotPicks().length) {
             <section class="mt-10" aria-labelledby="discover-hot-picks-heading">
-              <div class="flex flex-wrap items-end justify-between gap-3">
-                <h2 id="discover-hot-picks-heading" class="font-display text-2xl text-foreground sm:text-3xl">
-                  Hot Picks In
-                  <span class="text-primary">Kampala</span>
-                  <svg
-                    lucideIcon
-                    [lucideIcon]="leafIcon"
-                    class="ml-1 inline-block h-5 w-5 align-[-0.15em] text-primary sm:h-6 sm:w-6"
-                    aria-hidden="true"
-                  ></svg>
+              <div class="flex flex-wrap items-center gap-4">
+                <h2 id="discover-hot-picks-heading" class="shrink-0 font-display text-2xl text-foreground sm:text-3xl">
+                  Hot Picks In <span class="text-primary">Kampala</span>
                 </h2>
-                <a routerLink="/discover/catalogue" class="text-sm font-bold text-primary underline underline-offset-4">
+                <span class="h-px min-w-8 flex-1 bg-primary" aria-hidden="true"></span>
+                <a routerLink="/discover/catalogue" class="shrink-0 text-sm font-bold text-primary underline underline-offset-4">
                   See the catalogue
                 </a>
               </div>
 
-              <div class="relative mt-6">
-                <div
-                  #hotPicksTrack
-                  class="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                  (scroll)="onHotPicksScroll()"
-                >
-                  @for (listing of hotPicks(); track listing.id) {
-                    <div class="w-[85%] shrink-0 snap-start sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.7rem)] xl:w-[calc(25%-0.75rem)]">
-                      <kn-discover-hot-pick-card [listing]="listing" />
-                    </div>
-                  }
+              <div
+                class="relative mt-6"
+                (mouseenter)="pauseAutoplay()"
+                (mouseleave)="resumeAutoplay()"
+              >
+                <div class="overflow-hidden">
+                  <div
+                    class="flex transition-transform duration-700 ease-out motion-reduce:transition-none"
+                    [style.transform]="trackTransform()"
+                  >
+                    @for (page of hotPickPages(); track $index) {
+                      <div
+                        class="grid w-full shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        [attr.aria-hidden]="$index === activePage() ? null : true"
+                      >
+                        @for (listing of page; track listing.id) {
+                          <kn-discover-hot-pick-card [listing]="listing" />
+                        }
+                      </div>
+                    }
+                  </div>
                 </div>
 
-                @if (hotPickDots().length > 1) {
+                @if (hotPickPages().length > 1) {
                   <div class="mt-5 flex items-center justify-center gap-2" role="tablist" aria-label="Hot Picks slides">
-                    @for (dot of hotPickDots(); track $index) {
+                    @for (page of hotPickPages(); track $index) {
                       <button
                         type="button"
                         role="tab"
                         class="h-2.5 rounded-full transition-all duration-300"
                         [class]="
-                          $index === activeHotPickDot()
+                          $index === activePage()
                             ? 'w-6 bg-primary'
                             : 'w-2.5 bg-primary/25 hover:bg-primary/45'
                         "
-                        [attr.aria-selected]="$index === activeHotPickDot()"
-                        [attr.aria-label]="'Go to slide ' + ($index + 1)"
-                        (click)="scrollHotPicksTo($index)"
+                        [attr.aria-selected]="$index === activePage()"
+                        [attr.aria-label]="'Go to Hot Picks slide ' + ($index + 1)"
+                        (click)="goToPage($index)"
                       ></button>
                     }
                   </div>
@@ -160,73 +187,123 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
 })
 export class DiscoverPage {
   private readonly api = inject(ListingsApiService);
-  private readonly hotPicksTrack = viewChild<ElementRef<HTMLElement>>('hotPicksTrack');
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly autoplayMs = 4000;
+  private autoplayTimer: ReturnType<typeof setInterval> | null = null;
+  private paused = false;
 
   // Editorial discovery themes, independent of the internal catalogue taxonomy.
   protected readonly themes = DISCOVER_THEMES;
   protected readonly arrowIcon = LucideArrowRight.icon;
-  protected readonly leafIcon = LucideLeaf.icon;
   protected readonly listingTypes = DISCOVER_TYPES;
   protected readonly hotPicks = signal<ListingCard[]>([]);
-  protected readonly activeHotPickDot = signal(0);
-  protected readonly hotPickDots = signal<number[]>([]);
+  protected readonly activePage = signal(0);
+  protected readonly viewportWidth = signal(typeof window !== 'undefined' ? window.innerWidth : 1280);
+
+  protected readonly perPage = computed(() => {
+    const width = this.viewportWidth();
+    if (width >= 1280) {
+      return 4;
+    }
+    if (width >= 1024) {
+      return 3;
+    }
+    if (width >= 640) {
+      return 2;
+    }
+    return 1;
+  });
+
+  protected readonly hotPickPages = computed(() => {
+    const items = this.hotPicks();
+    const size = this.perPage();
+    const pages: ListingCard[][] = [];
+    for (let i = 0; i < items.length; i += size) {
+      pages.push(items.slice(i, i + size));
+    }
+    return pages;
+  });
+
+  protected readonly trackTransform = computed(
+    () => `translateX(-${this.activePage() * 100}%)`,
+  );
 
   constructor() {
-    const subscription = this.api.list({ hot_pick: true, per_page: 8 }).subscribe({
+    const subscription = this.api.list({ hot_pick: true, per_page: 12 }).subscribe({
       next: (page) => {
         this.hotPicks.set(page.data);
-        queueMicrotask(() => this.syncHotPickDots());
+        this.activePage.set(0);
+        this.startAutoplay();
       },
-      error: () => this.hotPicks.set([]),
+      error: () => {
+        this.hotPicks.set([]);
+        this.stopAutoplay();
+      },
     });
-    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
 
     afterNextRender(() => {
-      this.syncHotPickDots();
+      this.viewportWidth.set(window.innerWidth);
       window.addEventListener('resize', this.onResize, { passive: true });
+      this.startAutoplay();
     });
 
-    inject(DestroyRef).onDestroy(() => {
+    this.destroyRef.onDestroy(() => {
+      this.stopAutoplay();
       window.removeEventListener('resize', this.onResize);
     });
   }
 
   private readonly onResize = (): void => {
-    this.syncHotPickDots();
-    this.onHotPicksScroll();
+    const previous = this.perPage();
+    this.viewportWidth.set(window.innerWidth);
+    if (this.perPage() !== previous) {
+      this.activePage.set(0);
+    }
+    const max = Math.max(0, this.hotPickPages().length - 1);
+    if (this.activePage() > max) {
+      this.activePage.set(max);
+    }
   };
 
-  protected onHotPicksScroll(): void {
-    const el = this.hotPicksTrack()?.nativeElement;
-    if (!el || !this.hotPicks().length) {
-      return;
-    }
-    const card = el.querySelector<HTMLElement>(':scope > div');
-    if (!card) {
-      return;
-    }
-    const step = card.offsetWidth + 16;
-    const index = Math.round(el.scrollLeft / step);
-    this.activeHotPickDot.set(Math.max(0, Math.min(index, this.hotPickDots().length - 1)));
+  protected goToPage(page: number): void {
+    const max = Math.max(0, this.hotPickPages().length - 1);
+    this.activePage.set(Math.max(0, Math.min(page, max)));
+    this.pauseAutoplay();
+    this.resumeAutoplay();
   }
 
-  protected scrollHotPicksTo(index: number): void {
-    const el = this.hotPicksTrack()?.nativeElement;
-    if (!el) {
-      return;
-    }
-    const card = el.querySelector<HTMLElement>(':scope > div');
-    if (!card) {
-      return;
-    }
-    const step = card.offsetWidth + 16;
-    el.scrollTo({ left: step * index, behavior: 'smooth' });
-    this.activeHotPickDot.set(index);
+  protected pauseAutoplay(): void {
+    this.paused = true;
+    this.stopAutoplay();
   }
 
-  private syncHotPickDots(): void {
-    const count = this.hotPicks().length;
-    this.hotPickDots.set(Array.from({ length: count }, (_, i) => i));
-    this.onHotPicksScroll();
+  protected resumeAutoplay(): void {
+    this.paused = false;
+    this.startAutoplay();
+  }
+
+  private startAutoplay(): void {
+    this.stopAutoplay();
+    if (this.paused || this.hotPickPages().length <= 1) {
+      return;
+    }
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    this.autoplayTimer = setInterval(() => {
+      const pages = this.hotPickPages().length;
+      if (pages <= 1) {
+        return;
+      }
+      this.activePage.set((this.activePage() + 1) % pages);
+    }, this.autoplayMs);
+  }
+
+  private stopAutoplay(): void {
+    if (this.autoplayTimer) {
+      clearInterval(this.autoplayTimer);
+      this.autoplayTimer = null;
+    }
   }
 }

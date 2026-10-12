@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   LucideArrowRight,
-  LucideBadgeCheck,
   LucideDynamicIcon,
   LucideHeart,
   LucideMapPin,
@@ -48,28 +47,6 @@ const TYPE_ICONS: Record<string, typeof LucideStar.icon> = {
           }
         </a>
 
-        <div class="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap gap-1.5 p-3">
-          @if (listing().is_hot_pick) {
-            <span
-              class="inline-flex items-center rounded-md bg-gradient-to-r from-primary to-clay px-2 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-primary-foreground shadow-sm"
-            >
-              Hot Pick
-            </span>
-          }
-          @if (listing().is_local_gem) {
-            <span
-              class="inline-flex items-center rounded-md bg-forest px-2 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-ink-foreground shadow-sm"
-            >
-              Local Gem
-            </span>
-          }
-          <span
-            class="inline-flex items-center rounded-md bg-ink/70 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-foreground backdrop-blur-sm"
-          >
-            {{ listing().listing_type_name }}
-          </span>
-        </div>
-
         <button
           type="button"
           class="absolute bottom-3 right-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink/55 text-ink-foreground backdrop-blur-sm transition hover:bg-primary hover:text-primary-foreground"
@@ -78,34 +55,17 @@ const TYPE_ICONS: Record<string, typeof LucideStar.icon> = {
         >
           <svg lucideIcon [lucideIcon]="heartIcon" class="h-4 w-4" aria-hidden="true"></svg>
         </button>
-
-        <div
-          class="absolute -bottom-5 left-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border-[3px] border-paper bg-gradient-to-br from-primary to-clay text-primary-foreground shadow-md"
-          aria-hidden="true"
-        >
-          <svg lucideIcon [lucideIcon]="typeIcon()" class="h-5 w-5"></svg>
-        </div>
       </div>
 
-      <div class="flex flex-1 flex-col px-4 pb-4 pt-7">
-        <div class="flex items-start gap-2">
-          <h3 class="min-w-0 flex-1 font-display text-lg font-semibold leading-snug text-foreground">
-            <a
-              [routerLink]="['/discover/listings', listing().slug]"
-              class="transition hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            >
-              {{ listing().name }}
-            </a>
-          </h3>
-          @if (listing().is_local_gem) {
-            <span
-              class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-forest text-ink-foreground"
-              title="Local Gem"
-            >
-              <svg lucideIcon [lucideIcon]="checkIcon" class="h-3.5 w-3.5" aria-hidden="true"></svg>
-            </span>
-          }
-        </div>
+      <div class="flex flex-1 flex-col px-4 pb-4 pt-4">
+        <h3 class="font-display text-lg font-semibold leading-snug text-foreground">
+          <a
+            [routerLink]="['/discover/listings', listing().slug]"
+            class="transition hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {{ listing().name }}
+          </a>
+        </h3>
 
         @if (listing().summary) {
           <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
@@ -150,7 +110,6 @@ export class DiscoverHotPickCardComponent {
   protected readonly arrowIcon = LucideArrowRight.icon;
   protected readonly heartIcon = LucideHeart.icon;
   protected readonly pinIcon = LucideMapPin.icon;
-  protected readonly checkIcon = LucideBadgeCheck.icon;
 
   protected typeIcon() {
     return TYPE_ICONS[this.listing().listing_type_code] ?? LucideStar.icon;

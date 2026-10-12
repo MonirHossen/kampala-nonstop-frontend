@@ -5,6 +5,38 @@ export interface ListingCover {
 
 export interface ListingGalleryImage extends ListingCover {
   caption: string | null;
+  is_cover?: boolean;
+}
+
+export interface ListingTag {
+  code: string;
+  name: string;
+}
+
+export interface ListingOption {
+  name: string;
+  description: string | null;
+  duration_minutes: number | null;
+  min_participants: number | null;
+  max_participants: number | null;
+  is_default: boolean;
+}
+
+export interface ListingBookingHour {
+  day_of_week: number;
+  day_name: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  end_day_offset: number;
+}
+
+export interface ListingBookingRule {
+  minimum_notice_minutes: number | null;
+  maximum_advance_days: number | null;
+  buffer_before_minutes: number | null;
+  buffer_after_minutes: number | null;
+  earliest_arrival_time: string | null;
+  latest_arrival_time: string | null;
 }
 
 export interface ListingCard {
@@ -30,6 +62,10 @@ export interface ListingDetail extends ListingCard {
   important_information: string | null;
   booking_instructions: string | null;
   gallery: ListingGalleryImage[];
+  tags: ListingTag[];
+  options: ListingOption[];
+  booking_hours: ListingBookingHour[];
+  booking_rule: ListingBookingRule | null;
 }
 
 export interface ListingPageMeta {
