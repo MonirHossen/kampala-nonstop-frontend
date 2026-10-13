@@ -84,6 +84,7 @@ export interface ListingFilters {
   type?: string;
   interest?: string;
   location?: string;
+  tag?: string;
   hot_pick?: boolean;
   page?: number;
   per_page?: number;

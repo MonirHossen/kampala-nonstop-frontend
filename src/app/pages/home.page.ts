@@ -12,6 +12,7 @@ import { LocalKnowledgeSectionComponent } from '../local-knowledge/local-knowled
 import { HeroComponent } from '../site/hero.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { SiteHeaderComponent } from '../site/site-header.component';
+import { HomeNyengePanelComponent } from './home-nyenge-panel.component';
 
 @Component({
   selector: 'kn-home-page',
@@ -22,6 +23,7 @@ import { SiteHeaderComponent } from '../site/site-header.component';
     HeroComponent,
     AuthModalComponent,
     LocalKnowledgeSectionComponent,
+    HomeNyengePanelComponent,
   ],
   template: `
     <div class="bg-background">
@@ -41,6 +43,7 @@ import { SiteHeaderComponent } from '../site/site-header.component';
           </section>
           <kn-local-knowledge-section [inset]="true" [flush]="true" />
         </div>
+        <kn-home-nyenge-panel />
       </main>
       <kn-site-footer />
       <kn-auth-modal />

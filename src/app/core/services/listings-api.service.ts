@@ -21,6 +21,9 @@ export class ListingsApiService {
     if (filters.location) {
       params = params.set('location', filters.location);
     }
+    if (filters.tag) {
+      params = params.set('tag', filters.tag);
+    }
     if (filters.hot_pick) {
       params = params.set('hot_pick', '1');
     }

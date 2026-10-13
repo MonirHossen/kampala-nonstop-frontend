@@ -349,21 +349,24 @@ import { UserApiService } from '../core/services/user-api.service';
                       </div>
                       <ul class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-4">
                         @for (image of galleryImages(); track image.url; let i = $index) {
-                          <li
-                            class="listing-gallery-item overflow-hidden bg-ink"
-                            [class]="i === 0 && galleryImages().length > 2 ? 'sm:col-span-2' : ''"
-                          >
-                            <img
-                              [src]="image.url"
-                              [alt]="image.alt_text || listing()!.name"
-                              loading="lazy"
-                              class="w-full object-cover"
-                              [class]="i === 0 && galleryImages().length > 2 ? 'aspect-[16/10] sm:aspect-[21/9]' : 'aspect-[16/10]'"
-                            />
-                            @if (image.caption) {
-                              <p class="bg-background px-1 py-2 text-sm text-muted-foreground">{{ image.caption }}</p>
-                            }
-                          </li>
+                          @if (!brokenImageUrls().has(image.url)) {
+                            <li
+                              class="listing-gallery-item overflow-hidden bg-ink"
+                              [class]="i === 0 && galleryImages().length > 2 ? 'sm:col-span-2' : ''"
+                            >
+                              <img
+                                [src]="image.url"
+                                [alt]="image.alt_text || listing()!.name"
+                                loading="lazy"
+                                class="w-full object-cover"
+                                [class]="i === 0 && galleryImages().length > 2 ? 'aspect-[16/10] sm:aspect-[21/9]' : 'aspect-[16/10]'"
+                                (error)="markImageBroken(image.url)"
+                              />
+                              @if (image.caption) {
+                                <p class="bg-background px-1 py-2 text-sm text-muted-foreground">{{ image.caption }}</p>
+                              }
+                            </li>
+                          }
                         }
                       </ul>
                     </section>
@@ -447,6 +450,7 @@ export class DiscoverListingPage {
   private readonly query = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
   protected readonly listing = signal<ListingDetail | null>(null);
   protected readonly loadError = signal(false);
+  protected readonly brokenImageUrls = signal(new Set<string>());
   private readonly favouriteId = signal<string | null>(null);
   protected readonly bookmarkBusy = signal(false);
   protected readonly isBookmarked = computed(() => !!this.favouriteId());
@@ -513,6 +517,7 @@ export class DiscoverListingPage {
       this.listing.set(null);
       this.loadError.set(false);
       this.favouriteId.set(null);
+      this.brokenImageUrls.set(new Set());
       if (!slug) {
         this.loadError.set(true);
         return;
@@ -546,6 +551,17 @@ export class DiscoverListingPage {
       });
 
       onCleanup(() => subscription.unsubscribe());
+    });
+  }
+
+  protected markImageBroken(url: string): void {
+    this.brokenImageUrls.update((urls) => {
+      if (urls.has(url)) {
+        return urls;
+      }
+      const next = new Set(urls);
+      next.add(url);
+      return next;
     });
   }
 
