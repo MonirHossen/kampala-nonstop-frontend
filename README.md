@@ -38,14 +38,17 @@ make up
 
 The dev container installs npm dependencies on first run, then starts `ng serve` with live reload.
 
-Open **http://localhost:4200** (or the port set in `.env.docker`).
+Open **http://localhost:4201** (or `FRONTEND_DEV_PORT` in `.env.docker`).
 
 ### Services and URLs
 
 | Mode        | URL                         | Command        |
 | ----------- | --------------------------- | -------------- |
-| Development | http://localhost:4200       | `make up`      |
+| Development | http://localhost:4201       | `make up`      |
 | Production  | http://localhost:8080       | `make prod-up` |
+| Local API   | http://localhost:8010/api/v1 | (kampala-nonstop-api) |
+
+Discover / catalogue calls use `src/environments/environment.ts` → `apiUrl` (default `http://localhost:8010/api/v1`). That port **must** match `APP_PORT` in `kampala-nonstop-api/.env.docker`. From the Kampala monorepo root run `make check-config` after changing ports.
 
 ### Environment file
 
@@ -63,7 +66,7 @@ cp .env.docker.example .env.docker
 Default ports in `.env.docker`:
 
 ```dotenv
-FRONTEND_DEV_PORT=4200   # ng serve (development)
+FRONTEND_DEV_PORT=4201   # ng serve (development)
 FRONTEND_PORT=8080       # nginx (production build)
 ```
 
@@ -72,6 +75,8 @@ Change these if a port is already in use on your machine, then restart:
 ```bash
 make down && make up
 ```
+
+If you also change the API port, update `environment.ts` `apiUrl` to the same host/port.
 
 Supabase credentials are **not** in `.env.docker`. They live in:
 

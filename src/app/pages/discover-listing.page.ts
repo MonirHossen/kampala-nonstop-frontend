@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   LucideArrowRight,
+  LucideBookmark,
   LucideCalendarClock,
   LucideCheck,
   LucideClock3,
@@ -14,8 +15,12 @@ import {
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { GuideBreadcrumbComponent, GuideCrumb } from '../guide/components/guide-breadcrumb.component';
+import { AuthModalComponent } from '../auth/auth-modal.component';
 import { ListingsApiService } from '../core/services/listings-api.service';
 import { ListingDetail, ListingGalleryImage, ListingOption } from '../core/models/listing.model';
+import { AuthModalService } from '../core/services/auth-modal.service';
+import { TravellerAuthService } from '../core/services/traveller-auth.service';
+import { UserApiService } from '../core/services/user-api.service';
 
 @Component({
   selector: 'kn-discover-listing-page',
@@ -24,6 +29,7 @@ import { ListingDetail, ListingGalleryImage, ListingOption } from '../core/model
     SiteHeaderComponent,
     SiteFooterComponent,
     GuideBreadcrumbComponent,
+    AuthModalComponent,
     RouterLink,
     LucideCheck,
     LucideX,
@@ -33,6 +39,7 @@ import { ListingDetail, ListingGalleryImage, ListingOption } from '../core/model
     LucideCalendarClock,
     LucideSparkles,
     LucideArrowRight,
+    LucideBookmark,
   ],
   styles: `
     @keyframes listing-hero-in {
@@ -158,6 +165,22 @@ import { ListingDetail, ListingGalleryImage, ListingOption } from '../core/model
                     Plan My Trip
                     <svg lucideArrowRight class="h-4 w-4" aria-hidden="true"></svg>
                   </a>
+                  <button
+                    type="button"
+                    (click)="toggleBookmark()"
+                    [disabled]="bookmarkBusy()"
+                    [attr.aria-pressed]="isBookmarked()"
+                    [attr.aria-label]="isBookmarked() ? 'Remove bookmark' : 'Bookmark'"
+                    class="inline-flex min-h-12 items-center gap-2 border border-white/35 px-6 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:border-white hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
+                  >
+                    <svg
+                      lucideBookmark
+                      class="h-4 w-4"
+                      [class.fill-current]="isBookmarked()"
+                      aria-hidden="true"
+                    ></svg>
+                    {{ isBookmarked() ? 'Bookmarked' : 'Bookmark' }}
+                  </button>
                   <a
                     routerLink="/discover/catalogue"
                     [queryParams]="backQuery()"
@@ -409,16 +432,24 @@ import { ListingDetail, ListingGalleryImage, ListingOption } from '../core/model
         }
       </main>
       <kn-site-footer />
+      <kn-auth-modal />
     </div>
   `,
 })
 export class DiscoverListingPage {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly api = inject(ListingsApiService);
+  private readonly auth = inject(TravellerAuthService);
+  private readonly authModal = inject(AuthModalService);
+  private readonly userApi = inject(UserApiService);
   private readonly params = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
   private readonly query = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
   protected readonly listing = signal<ListingDetail | null>(null);
   protected readonly loadError = signal(false);
+  private readonly favouriteId = signal<string | null>(null);
+  protected readonly bookmarkBusy = signal(false);
+  protected readonly isBookmarked = computed(() => !!this.favouriteId());
   protected readonly slug = computed(() => this.params().get('slug') ?? '');
   protected readonly backQuery = computed(() => ({
     interest: this.query().get('interest'),
@@ -481,6 +512,7 @@ export class DiscoverListingPage {
       const slug = this.slug();
       this.listing.set(null);
       this.loadError.set(false);
+      this.favouriteId.set(null);
       if (!slug) {
         this.loadError.set(true);
         return;
@@ -493,6 +525,67 @@ export class DiscoverListingPage {
 
       onCleanup(() => subscription.unsubscribe());
     });
+
+    effect((onCleanup) => {
+      const listing = this.listing();
+      const authenticated = this.auth.isAuthenticated();
+      this.favouriteId.set(null);
+      if (!listing || !authenticated) {
+        return;
+      }
+
+      const subscription = this.userApi.listFavourites().subscribe({
+        next: (items) => {
+          const match = items.find(
+            (favourite) =>
+              favourite.favouritable_type === 'listing' && favourite.favouritable_id === listing.id,
+          );
+          this.favouriteId.set(match?.id ?? null);
+        },
+        error: () => this.favouriteId.set(null),
+      });
+
+      onCleanup(() => subscription.unsubscribe());
+    });
+  }
+
+  protected toggleBookmark(): void {
+    const listing = this.listing();
+    if (!listing || this.bookmarkBusy()) {
+      return;
+    }
+
+    if (!this.auth.isAuthenticated()) {
+      this.authModal.open('login', { returnUrl: this.router.url });
+      return;
+    }
+
+    this.bookmarkBusy.set(true);
+    const existingId = this.favouriteId();
+
+    if (existingId) {
+      this.userApi.deleteFavourite(existingId).subscribe({
+        next: () => {
+          this.favouriteId.set(null);
+          this.bookmarkBusy.set(false);
+        },
+        error: () => this.bookmarkBusy.set(false),
+      });
+      return;
+    }
+
+    this.userApi
+      .addFavourite({
+        favouritable_type: 'listing',
+        favouritable_id: listing.id,
+      })
+      .subscribe({
+        next: (favourite) => {
+          this.favouriteId.set(favourite.id);
+          this.bookmarkBusy.set(false);
+        },
+        error: () => this.bookmarkBusy.set(false),
+      });
   }
 
   protected durationLabel(option: ListingOption): string | null {

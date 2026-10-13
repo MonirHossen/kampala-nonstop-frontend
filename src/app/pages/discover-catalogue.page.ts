@@ -163,7 +163,7 @@ export class DiscoverCataloguePage {
   });
   protected readonly location = computed(() => {
     const value = this.params().get('location');
-    return value === null || value === 'Kampala' ? 'Kampala' : '';
+    return value === 'Kampala' ? 'Kampala' : '';
   });
   protected readonly page = computed(() => {
     const value = Number(this.params().get('page'));
@@ -237,9 +237,9 @@ export class DiscoverCataloguePage {
       queryParams: {
         interest: this.interest() || null,
         type: this.listingType() || null,
-        location: this.location(),
+        location: this.location() || null,
         page: null,
-        [key]: value || (key === 'location' ? '' : null),
+        [key]: value || null,
       },
     });
   }
@@ -255,6 +255,6 @@ export class DiscoverCataloguePage {
   }
 
   protected clearAll(): void {
-    void this.router.navigate([], { relativeTo: this.route, queryParams: { location: '' } });
+    void this.router.navigate([], { relativeTo: this.route, queryParams: {} });
   }
 }

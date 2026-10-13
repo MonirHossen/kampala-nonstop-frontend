@@ -467,7 +467,7 @@ export class AuthModalComponent {
     this.formError.set(null);
     this.forgotSuccess.set(null);
     this.authModal.switchTo(mode);
-    void this.router.navigate(['/'], {
+    void this.router.navigate([], {
       queryParams: { auth: mode },
       queryParamsHandling: 'merge',
       replaceUrl: true,
@@ -476,7 +476,7 @@ export class AuthModalComponent {
 
   protected close(): void {
     this.authModal.close();
-    void this.router.navigate(['/'], {
+    void this.router.navigate([], {
       queryParams: { auth: null, returnUrl: null, social_error: null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
