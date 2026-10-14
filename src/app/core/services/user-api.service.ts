@@ -155,8 +155,7 @@ export class UserApiService {
   }
 
   addFavourite(payload: {
-    favouritable_type: string;
-    favouritable_id: string;
+    listing_id: string;
     notes?: string | null;
   }): Observable<UserFavourite> {
     return this.http

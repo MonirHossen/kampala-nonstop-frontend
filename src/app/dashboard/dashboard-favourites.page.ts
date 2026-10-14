@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { extractApiError } from '../core/lib/api-error';
 import { UserFavourite } from '../core/models/traveller.models';
 import { UserApiService } from '../core/services/user-api.service';
@@ -6,6 +7,7 @@ import { UserApiService } from '../core/services/user-api.service';
 @Component({
   selector: 'kn-dashboard-favourites-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   template: `
     <div>
       <p class="eyebrow text-muted-foreground">Saved</p>
@@ -27,24 +29,39 @@ import { UserApiService } from '../core/services/user-api.service';
 
       <div class="mt-8 border border-hairline bg-paper">
         <div class="border-b border-hairline px-5 py-4">
-          <h2 class="font-display text-xl text-foreground">Saved items</h2>
+          <h2 class="font-display text-xl text-foreground">Saved listings</h2>
         </div>
 
         @if (loading()) {
           <p class="px-5 py-8 text-sm text-muted-foreground">Loading favourites&hellip;</p>
         } @else if (favourites().length === 0) {
           <p class="px-5 py-8 text-sm text-muted-foreground">
-            No favourites yet. Save places while browsing to see them here.
+            No favourites yet. Save listings while browsing to see them here.
           </p>
         } @else {
           <ul class="divide-y divide-hairline">
             @for (item of favourites(); track item.id) {
               <li class="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
                 <div>
-                  <p class="text-sm font-medium capitalize text-foreground">
-                    {{ item.favouritable_type }}
-                  </p>
-                  <p class="mt-1 text-xs text-muted-foreground">ID: {{ item.favouritable_id }}</p>
+                  @if (item.listing; as listing) {
+                    @if (listing.slug) {
+                      <a
+                        [routerLink]="['/discover/listings', listing.slug]"
+                        class="text-sm font-medium text-foreground transition-colors hover:text-forest"
+                      >
+                        {{ listing.name || 'Saved listing' }}
+                      </a>
+                    } @else {
+                      <p class="text-sm font-medium text-foreground">
+                        {{ listing.name || 'Saved listing' }}
+                      </p>
+                    }
+                    @if (listing.summary) {
+                      <p class="mt-1 text-xs text-muted-foreground">{{ listing.summary }}</p>
+                    }
+                  } @else {
+                    <p class="text-sm font-medium text-foreground">Saved listing</p>
+                  }
                   @if (item.notes) {
                     <p class="mt-1 text-sm text-muted-foreground">{{ item.notes }}</p>
                   }

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthModalComponent } from '../auth/auth-modal.component';
 import {
   DEFAULT_WAITLIST_SOURCE,
   readRememberedSource,
@@ -21,7 +20,6 @@ import { HomeNyengePanelComponent } from './home-nyenge-panel.component';
     SiteHeaderComponent,
     SiteFooterComponent,
     HeroComponent,
-    AuthModalComponent,
     LocalKnowledgeSectionComponent,
     HomeNyengePanelComponent,
   ],
@@ -46,7 +44,6 @@ import { HomeNyengePanelComponent } from './home-nyenge-panel.component';
         <kn-home-nyenge-panel />
       </main>
       <kn-site-footer />
-      <kn-auth-modal />
     </div>
   `,
 })

@@ -145,6 +145,18 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./dashboard/dashboard-favourites.page').then((m) => m.DashboardFavouritesPage),
       },
+      {
+        path: 'trips',
+        title: 'My Trips — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/dashboard-trips.page').then((m) => m.DashboardTripsPage),
+      },
+      {
+        path: 'trips/:tripId',
+        title: 'Trip — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/dashboard-trip-detail.page').then((m) => m.DashboardTripDetailPage),
+      },
     ],
   },
   {

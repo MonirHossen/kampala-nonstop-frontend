@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
+  LucideArrowLeft,
   LucideBookmark,
   LucideLayoutDashboard,
   LucideLogOut,
+  LucideMap,
   LucideMenu,
   LucideUser,
   LucideX,
@@ -16,9 +18,11 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
   imports: [
     RouterLink,
     RouterLinkActive,
+    LucideArrowLeft,
     LucideLayoutDashboard,
     LucideUser,
     LucideBookmark,
+    LucideMap,
     LucideLogOut,
     LucideMenu,
     LucideX,
@@ -89,9 +93,26 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
             <svg lucideBookmark class="h-4 w-4"></svg>
             Favourites
           </a>
+          <a
+            routerLink="/dashboard/trips"
+            routerLinkActive="bg-sidebar-accent text-sidebar-foreground"
+            (click)="open.set(false)"
+            class="flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          >
+            <svg lucideMap class="h-4 w-4"></svg>
+            My Trips
+          </a>
         </nav>
 
-        <div class="mt-8 border-t border-sidebar-border pt-4 lg:mt-auto">
+        <div class="mt-8 space-y-3 border-t border-sidebar-border pt-4 lg:mt-auto">
+          <a
+            routerLink="/"
+            (click)="open.set(false)"
+            class="flex items-center gap-2 text-sm text-sidebar-foreground/70 transition-colors hover:text-sidebar-foreground"
+          >
+            <svg lucideArrowLeft class="h-4 w-4" aria-hidden="true"></svg>
+            Back to website
+          </a>
           <button
             type="button"
             (click)="logout()"

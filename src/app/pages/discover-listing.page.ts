@@ -8,6 +8,7 @@ import {
   LucideCheck,
   LucideClock3,
   LucideMapPin,
+  LucidePlus,
   LucideSparkles,
   LucideUsers,
   LucideX,
@@ -15,11 +16,11 @@ import {
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { GuideBreadcrumbComponent, GuideCrumb } from '../guide/components/guide-breadcrumb.component';
-import { AuthModalComponent } from '../auth/auth-modal.component';
 import { ListingsApiService } from '../core/services/listings-api.service';
 import { ListingDetail, ListingGalleryImage, ListingOption } from '../core/models/listing.model';
 import { AuthModalService } from '../core/services/auth-modal.service';
 import { TravellerAuthService } from '../core/services/traveller-auth.service';
+import { TripApiService } from '../core/services/trip-api.service';
 import { UserApiService } from '../core/services/user-api.service';
 
 @Component({
@@ -29,7 +30,6 @@ import { UserApiService } from '../core/services/user-api.service';
     SiteHeaderComponent,
     SiteFooterComponent,
     GuideBreadcrumbComponent,
-    AuthModalComponent,
     RouterLink,
     LucideCheck,
     LucideX,
@@ -40,6 +40,7 @@ import { UserApiService } from '../core/services/user-api.service';
     LucideSparkles,
     LucideArrowRight,
     LucideBookmark,
+    LucidePlus,
   ],
   styles: `
     @keyframes listing-hero-in {
@@ -158,13 +159,15 @@ import { UserApiService } from '../core/services/user-api.service';
                   </p>
                 }
                 <div class="mt-8 flex flex-wrap gap-3">
-                  <a
-                    routerLink="/waitlist/join"
-                    class="inline-flex min-h-12 items-center gap-2 bg-primary px-6 text-sm font-bold uppercase tracking-[0.08em] text-primary-foreground transition hover:bg-primary/90"
+                  <button
+                    type="button"
+                    (click)="addToTrip(true)"
+                    [disabled]="tripBusy()"
+                    class="inline-flex min-h-12 items-center gap-2 bg-primary px-6 text-sm font-bold uppercase tracking-[0.08em] text-primary-foreground transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-60"
                   >
-                    Plan My Trip
-                    <svg lucideArrowRight class="h-4 w-4" aria-hidden="true"></svg>
-                  </a>
+                    <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+                    {{ tripBusy() ? 'Adding…' : 'Add to Trip' }}
+                  </button>
                   <button
                     type="button"
                     (click)="toggleBookmark()"
@@ -180,6 +183,15 @@ import { UserApiService } from '../core/services/user-api.service';
                       aria-hidden="true"
                     ></svg>
                     {{ isBookmarked() ? 'Bookmarked' : 'Bookmark' }}
+                  </button>
+                  <button
+                    type="button"
+                    (click)="planMyTrip()"
+                    [disabled]="tripBusy()"
+                    class="inline-flex min-h-12 items-center gap-2 border border-white/35 px-6 text-sm font-bold uppercase tracking-[0.08em] text-white transition hover:border-white hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
+                  >
+                    Plan My Trip
+                    <svg lucideArrowRight class="h-4 w-4" aria-hidden="true"></svg>
                   </button>
                   <a
                     routerLink="/discover/catalogue"
@@ -420,13 +432,24 @@ import { UserApiService } from '../core/services/user-api.service';
                       </div>
                     }
 
-                    <a
-                      routerLink="/waitlist/join"
-                      class="mt-8 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-primary px-5 text-sm font-bold uppercase tracking-[0.08em] text-primary-foreground transition hover:bg-primary/90"
+                    <button
+                      type="button"
+                      (click)="addToTrip(true)"
+                      [disabled]="tripBusy()"
+                      class="mt-8 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-primary px-5 text-sm font-bold uppercase tracking-[0.08em] text-primary-foreground transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      <svg lucidePlus class="h-4 w-4" aria-hidden="true"></svg>
+                      {{ tripBusy() ? 'Adding…' : 'Add to Trip' }}
+                    </button>
+                    <button
+                      type="button"
+                      (click)="planMyTrip()"
+                      [disabled]="tripBusy()"
+                      class="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 border border-white/20 px-5 text-sm font-bold uppercase tracking-[0.08em] text-ink-foreground transition hover:border-white/40 disabled:cursor-wait disabled:opacity-60"
                     >
                       Plan My Trip
                       <svg lucideArrowRight class="h-4 w-4" aria-hidden="true"></svg>
-                    </a>
+                    </button>
                   </div>
                 </aside>
               </div>
@@ -435,7 +458,6 @@ import { UserApiService } from '../core/services/user-api.service';
         }
       </main>
       <kn-site-footer />
-      <kn-auth-modal />
     </div>
   `,
 })
@@ -446,6 +468,7 @@ export class DiscoverListingPage {
   private readonly auth = inject(TravellerAuthService);
   private readonly authModal = inject(AuthModalService);
   private readonly userApi = inject(UserApiService);
+  private readonly tripApi = inject(TripApiService);
   private readonly params = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
   private readonly query = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
   protected readonly listing = signal<ListingDetail | null>(null);
@@ -453,6 +476,7 @@ export class DiscoverListingPage {
   protected readonly brokenImageUrls = signal(new Set<string>());
   private readonly favouriteId = signal<string | null>(null);
   protected readonly bookmarkBusy = signal(false);
+  protected readonly tripBusy = signal(false);
   protected readonly isBookmarked = computed(() => !!this.favouriteId());
   protected readonly slug = computed(() => this.params().get('slug') ?? '');
   protected readonly backQuery = computed(() => ({
@@ -541,10 +565,7 @@ export class DiscoverListingPage {
 
       const subscription = this.userApi.listFavourites().subscribe({
         next: (items) => {
-          const match = items.find(
-            (favourite) =>
-              favourite.favouritable_type === 'listing' && favourite.favouritable_id === listing.id,
-          );
+          const match = items.find((favourite) => favourite.listing_id === listing.id);
           this.favouriteId.set(match?.id ?? null);
         },
         error: () => this.favouriteId.set(null),
@@ -592,8 +613,7 @@ export class DiscoverListingPage {
 
     this.userApi
       .addFavourite({
-        favouritable_type: 'listing',
-        favouritable_id: listing.id,
+        listing_id: listing.id,
       })
       .subscribe({
         next: (favourite) => {
@@ -602,6 +622,43 @@ export class DiscoverListingPage {
         },
         error: () => this.bookmarkBusy.set(false),
       });
+  }
+
+  protected addToTrip(navigateToTrip = false): void {
+    const listing = this.listing();
+    if (!listing || this.tripBusy()) {
+      return;
+    }
+
+    if (!this.auth.isAuthenticated()) {
+      this.authModal.open('login', { returnUrl: this.router.url });
+      return;
+    }
+
+    this.tripBusy.set(true);
+    this.tripApi.addListing({ listing_id: listing.id }).subscribe({
+      next: (response) => {
+        this.tripBusy.set(false);
+        if (navigateToTrip) {
+          void this.router.navigate(['/dashboard/trips', response.trip.id]);
+        }
+      },
+      error: () => this.tripBusy.set(false),
+    });
+  }
+
+  protected planMyTrip(): void {
+    const listing = this.listing();
+    if (!listing || this.tripBusy()) {
+      return;
+    }
+
+    if (!this.auth.isAuthenticated()) {
+      this.authModal.open('login', { returnUrl: '/dashboard/trips' });
+      return;
+    }
+
+    this.addToTrip(true);
   }
 
   protected durationLabel(option: ListingOption): string | null {

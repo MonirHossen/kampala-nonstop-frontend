@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LucideArrowRight, LucidePlus } from '@lucide/angular';
 import { ListingCard } from '../core/models/listing.model';
+import { AuthModalService } from '../core/services/auth-modal.service';
 import { ListingsApiService } from '../core/services/listings-api.service';
+import { TravellerAuthService } from '../core/services/traveller-auth.service';
+import { TripApiService } from '../core/services/trip-api.service';
 
 @Component({
   selector: 'kn-home-nyenge-panel',
@@ -102,15 +105,15 @@ import { ListingsApiService } from '../core/services/listings-api.service';
                       View experience
                       <svg lucideArrowRight class="h-3.5 w-3.5" aria-hidden="true"></svg>
                     </a>
-                    <a
-                      routerLink="/waitlist/join"
-                      [queryParams]="{ source: 'nyenge_nyege', listing: listing.slug }"
-                      class="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 bg-ink px-4 py-2.5 text-xs font-bold uppercase tracking-[0.08em] text-ink-foreground transition hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                      (click)="$event.stopPropagation()"
+                    <button
+                      type="button"
+                      (click)="onAddToTripClick($event, listing)"
+                      [disabled]="busyListingId() === listing.id"
+                      class="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 bg-ink px-4 py-2.5 text-xs font-bold uppercase tracking-[0.08em] text-ink-foreground transition hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-60"
                     >
                       <svg lucidePlus class="h-3.5 w-3.5" aria-hidden="true"></svg>
-                      Add to Trip
-                    </a>
+                      {{ busyListingId() === listing.id ? 'Adding…' : 'Add to Trip' }}
+                    </button>
                   </div>
                 </div>
               </article>
@@ -123,13 +126,45 @@ import { ListingsApiService } from '../core/services/listings-api.service';
 })
 export class HomeNyengePanelComponent implements OnInit {
   private readonly api = inject(ListingsApiService);
+  private readonly tripApi = inject(TripApiService);
+  private readonly auth = inject(TravellerAuthService);
+  private readonly authModal = inject(AuthModalService);
+  private readonly router = inject(Router);
 
   protected readonly listings = signal<ListingCard[]>([]);
+  protected readonly busyListingId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.api.list({ tag: 'NYENGE_NYEGE', per_page: 4 }).subscribe({
       next: (page) => this.listings.set(page.data),
       error: () => this.listings.set([]),
+    });
+  }
+
+  protected onAddToTripClick(event: Event, listing: ListingCard): void {
+    event.stopPropagation();
+    this.addToTrip(listing);
+  }
+
+  protected addToTrip(listing: ListingCard): void {
+    if (this.busyListingId()) {
+      return;
+    }
+
+    if (!this.auth.isAuthenticated()) {
+      this.authModal.open('login', {
+        returnUrl: this.router.url || '/',
+      });
+      return;
+    }
+
+    this.busyListingId.set(listing.id);
+    this.tripApi.addListing({ listing_id: listing.id }).subscribe({
+      next: (response) => {
+        this.busyListingId.set(null);
+        void this.router.navigate(['/dashboard/trips', response.trip.id]);
+      },
+      error: () => this.busyListingId.set(null),
     });
   }
 }

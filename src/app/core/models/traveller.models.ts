@@ -46,13 +46,20 @@ export interface UserCitizenship {
   updated_at?: string;
 }
 
+export interface FavouriteListingSummary {
+  id: string;
+  name: string;
+  slug: string;
+  summary?: string | null;
+  is_live?: boolean;
+}
+
 export interface UserFavourite {
   id: string;
-  favouritable_type: string;
-  favouritable_id: string;
+  listing_id: string;
   notes: string | null;
   created_at?: string;
-  updated_at?: string;
+  listing?: FavouriteListingSummary | null;
 }
 
 export interface TravellerUser {

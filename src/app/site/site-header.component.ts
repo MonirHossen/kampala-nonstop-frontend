@@ -10,14 +10,16 @@ import {
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideMenu, LucideX } from '@lucide/angular';
 import { filter } from 'rxjs';
+import { AuthModalComponent } from '../auth/auth-modal.component';
 import { resolveWaitlistSource } from '../core/lib/tracking';
+import { AuthModalService } from '../core/services/auth-modal.service';
 import { TravellerAuthService } from '../core/services/traveller-auth.service';
 import { scrollToId } from '../shared/scroll-to';
 
 @Component({
   selector: 'kn-site-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive, LucideMenu, LucideX],
+  imports: [RouterLink, RouterLinkActive, LucideMenu, LucideX, AuthModalComponent],
   template: `
     <header
       class="fixed inset-x-0 top-0 z-50 h-14 transition-colors duration-500"
@@ -61,7 +63,6 @@ import { scrollToId } from '../shared/scroll-to';
               [class]="accountNavClass()"
             >{{ item.label }}</a>
           }
-          <!-- NOT ACTIVE
           @if (traveller.isAuthenticated()) {
             <a
               routerLink="/dashboard"
@@ -80,7 +81,6 @@ import { scrollToId } from '../shared/scroll-to';
               Sign in
             </button>
           }
-        -->
           @if (showJoinCta()) {
             <button
               type="button"
@@ -135,12 +135,12 @@ import { scrollToId } from '../shared/scroll-to';
                 (click)="menuOpen.set(false)"
               >{{ item.label }}</a>
             }
-            <!-- NOT ACTIVE
             @if (traveller.isAuthenticated()) {
               <a
                 routerLink="/dashboard"
                 class="eyebrow px-1 py-3 transition-colors"
                 [class]="accountNavClass()"
+                (click)="menuOpen.set(false)"
               >
                 Dashboard
               </a>
@@ -154,7 +154,6 @@ import { scrollToId } from '../shared/scroll-to';
                 Sign in
               </button>
             }
-            -->
             @if (showJoinCta()) {
               <button
                 type="button"
@@ -168,6 +167,7 @@ import { scrollToId } from '../shared/scroll-to';
         </nav>
       }
     </header>
+    <kn-auth-modal />
   `,
 })
 export class SiteHeaderComponent {
@@ -179,6 +179,7 @@ export class SiteHeaderComponent {
   ];
 
   private readonly router = inject(Router);
+  private readonly authModal = inject(AuthModalService);
   protected readonly traveller = inject(TravellerAuthService);
 
   protected readonly scrolled = signal(false);
@@ -241,19 +242,10 @@ export class SiteHeaderComponent {
     this.menuOpen.update((open) => !open);
   }
 
-  /** Opens the home-page auth modal (navigates home when needed). */
+  /** Opens the auth modal on the current page. */
   protected openSignIn(): void {
     this.menuOpen.set(false);
-
-    if (this.isHomePath(this.router.url)) {
-      void this.router.navigate(['/'], {
-        queryParams: { auth: 'login' },
-        queryParamsHandling: 'merge',
-      });
-      return;
-    }
-
-    void this.router.navigate(['/'], { queryParams: { auth: 'login' } });
+    this.authModal.open('login', { returnUrl: '/dashboard' });
   }
 
   /** On the join page this scrolls to the form; anywhere else it navigates there. */
@@ -268,11 +260,6 @@ export class SiteHeaderComponent {
     void this.router.navigate(['/waitlist/join'], {
       queryParams: { source: resolveWaitlistSource() },
     });
-  }
-
-  private isHomePath(url: string): boolean {
-    const path = url.split('?')[0].split('#')[0];
-    return path === '/' || path === '';
   }
 
   private isJoinPath(url: string): boolean {
