@@ -2,12 +2,21 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ListingDetail, ListingFilters, ListingPage } from '../models/listing.model';
+import {
+  CatalogueFilters,
+  ListingDetail,
+  ListingFilters,
+  ListingPage,
+} from '../models/listing.model';
 
 @Injectable({ providedIn: 'root' })
 export class ListingsApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl.replace(/\/$/, '')}/listings`;
+
+  filters(): Observable<{ data: CatalogueFilters }> {
+    return this.http.get<{ data: CatalogueFilters }>(`${this.baseUrl}/filters`);
+  }
 
   list(filters: ListingFilters = {}): Observable<ListingPage> {
     let params = new HttpParams();

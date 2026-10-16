@@ -89,3 +89,23 @@ export interface ListingFilters {
   page?: number;
   per_page?: number;
 }
+
+export interface CatalogueFilterLocation {
+  name: string;
+  code: string;
+}
+
+export interface CatalogueFilterType {
+  label: string;
+  code: string;
+}
+
+export interface CatalogueFilterInterest {
+  label: string;
+}
+
+export interface CatalogueFilters {
+  locations: CatalogueFilterLocation[];
+  types: CatalogueFilterType[];
+  interests: CatalogueFilterInterest[];
+}

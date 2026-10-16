@@ -5,12 +5,22 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SiteHeaderComponent } from '../site/site-header.component';
 import { SiteFooterComponent } from '../site/site-footer.component';
 import { GuideBreadcrumbComponent, GuideCrumb } from '../guide/components/guide-breadcrumb.component';
-import { DISCOVER_THEMES, DISCOVER_TYPES } from './discover-options';
 import { ListingsApiService } from '../core/services/listings-api.service';
-import { ListingCard } from '../core/models/listing.model';
+import {
+  CatalogueFilterInterest,
+  CatalogueFilterLocation,
+  CatalogueFilterType,
+  ListingCard,
+} from '../core/models/listing.model';
 import { DiscoverListingCardComponent } from './discover-listing-card.component';
 
 type FilterKey = 'interest' | 'location' | 'type';
+
+type ListingGroup = {
+  code: string;
+  label: string;
+  listings: ListingCard[];
+};
 
 @Component({
   selector: 'kn-discover-catalogue-page',
@@ -44,7 +54,9 @@ type FilterKey = 'interest' | 'location' | 'type';
               <select id="catalogue-location" [ngModel]="location()" (ngModelChange)="setFilter('location', $event)"
                 class="mt-2 block max-w-48 rounded-lg border border-hairline bg-paper px-3 py-3 text-sm text-foreground focus:border-primary">
                 <option value="">All locations</option>
-                <option value="Kampala">Kampala</option>
+                @for (area of locations(); track area.code) {
+                  <option [value]="area.name">{{ area.name }}</option>
+                }
               </select>
             </div>
             <div class="shrink-0">
@@ -52,7 +64,7 @@ type FilterKey = 'interest' | 'location' | 'type';
               <select id="catalogue-type" [ngModel]="listingType()" (ngModelChange)="setFilter('type', $event)"
                 class="mt-2 block max-w-48 rounded-lg border border-hairline bg-paper px-3 py-3 text-sm text-foreground focus:border-primary">
                 <option value="">All Types</option>
-                @for (type of types; track type.label) {
+                @for (type of types(); track type.code) {
                   <option [value]="type.label">{{ type.label }}</option>
                 }
               </select>
@@ -62,7 +74,7 @@ type FilterKey = 'interest' | 'location' | 'type';
               <select id="catalogue-interest" [ngModel]="interest()" (ngModelChange)="setFilter('interest', $event)"
                 class="mt-2 block max-w-56 rounded-lg border border-hairline bg-paper px-3 py-3 text-sm text-foreground focus:border-primary">
                 <option value="">All interests</option>
-                @for (theme of themes; track theme.label) {
+                @for (theme of interests(); track theme.label) {
                   <option [value]="theme.label">{{ theme.label }}</option>
                 }
               </select>
@@ -113,13 +125,26 @@ type FilterKey = 'interest' | 'location' | 'type';
               </div>
             </section>
           } @else {
-            <ul class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-              @for (listing of listings(); track listing.id) {
-                <li class="min-w-0">
-                  <kn-discover-listing-card [listing]="listing" [queryParams]="catalogueQuery()" />
-                </li>
+            <div class="mt-2">
+              @for (group of listingGroups(); track group.code) {
+                <section class="mt-8" [attr.aria-labelledby]="'catalogue-type-' + group.code">
+                  <div class="flex items-center gap-4">
+                    <h2 [id]="'catalogue-type-' + group.code"
+                      class="shrink-0 font-display text-2xl text-foreground sm:text-3xl">
+                      {{ group.label }}
+                    </h2>
+                    <span class="h-px min-w-8 flex-1 bg-primary" aria-hidden="true"></span>
+                  </div>
+                  <ul class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+                    @for (listing of group.listings; track listing.id) {
+                      <li class="min-w-0">
+                        <kn-discover-listing-card [listing]="listing" [queryParams]="catalogueQuery()" />
+                      </li>
+                    }
+                  </ul>
+                </section>
               }
-            </ul>
+            </div>
             @if (lastPage() > 1) {
               <nav class="mt-10 flex items-center justify-between gap-4" aria-label="Catalogue pages">
                 <button type="button" (click)="setPage(page() - 1)" [disabled]="page() <= 1"
@@ -146,24 +171,43 @@ export class DiscoverCataloguePage {
   private readonly api = inject(ListingsApiService);
   private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
   private readonly retryTick = signal(0);
-  protected readonly themes = DISCOVER_THEMES;
-  protected readonly types = DISCOVER_TYPES;
+  protected readonly locations = signal<CatalogueFilterLocation[]>([]);
+  protected readonly types = signal<CatalogueFilterType[]>([]);
+  protected readonly interests = signal<CatalogueFilterInterest[]>([]);
   protected readonly skeletons = [1, 2, 3, 4, 5, 6];
   protected readonly listings = signal<ListingCard[] | null>(null);
   protected readonly total = signal(0);
   protected readonly lastPage = signal(1);
   protected readonly loadError = signal(false);
   protected readonly interest = computed(() => {
-    const value = this.params().get('interest');
-    return this.themes.find((theme) => theme.label === value)?.label ?? '';
+    const value = this.params().get('interest') ?? '';
+    if (!value) {
+      return '';
+    }
+    if (this.interests().length === 0) {
+      return value;
+    }
+    return this.interests().find((theme) => theme.label === value)?.label ?? '';
   });
   protected readonly listingType = computed(() => {
-    const value = this.params().get('type');
-    return this.types.find((type) => type.label === value)?.label ?? '';
+    const value = this.params().get('type') ?? '';
+    if (!value) {
+      return '';
+    }
+    if (this.types().length === 0) {
+      return value;
+    }
+    return this.types().find((type) => type.label === value)?.label ?? '';
   });
   protected readonly location = computed(() => {
-    const value = this.params().get('location');
-    return value === 'Kampala' ? 'Kampala' : '';
+    const value = this.params().get('location') ?? '';
+    if (!value) {
+      return '';
+    }
+    if (this.locations().length === 0) {
+      return value;
+    }
+    return this.locations().find((area) => area.name === value)?.name ?? '';
   });
   protected readonly page = computed(() => {
     const value = Number(this.params().get('page'));
@@ -197,8 +241,63 @@ export class DiscoverCataloguePage {
     const count = this.total();
     return `${filters} — ${count} ${count === 1 ? 'listing' : 'listings'}`;
   });
+  protected readonly listingGroups = computed((): ListingGroup[] => {
+    const listings = this.listings();
+    if (!listings?.length) {
+      return [];
+    }
+
+    const buckets = new Map<string, ListingCard[]>();
+    for (const listing of listings) {
+      const code = listing.listing_type_code || 'OTHER';
+      const existing = buckets.get(code);
+      if (existing) {
+        existing.push(listing);
+      } else {
+        buckets.set(code, [listing]);
+      }
+    }
+
+    const groups: ListingGroup[] = [];
+    const knownTypes = this.types();
+    for (const type of knownTypes) {
+      const items = buckets.get(type.code);
+      if (!items?.length) {
+        continue;
+      }
+      groups.push({ code: type.code, label: type.label, listings: items });
+      buckets.delete(type.code);
+    }
+
+    for (const [code, items] of buckets) {
+      groups.push({
+        code,
+        label: items[0]?.listing_type_name || code,
+        listings: items,
+      });
+    }
+
+    return groups;
+  });
 
   constructor() {
+    effect((onCleanup) => {
+      this.retryTick();
+      const subscription = this.api.filters().subscribe({
+        next: (result) => {
+          this.locations.set(result.data.locations);
+          this.types.set(result.data.types);
+          this.interests.set(result.data.interests);
+        },
+        error: () => {
+          this.locations.set([]);
+          this.types.set([]);
+          this.interests.set([]);
+        },
+      });
+      onCleanup(() => subscription.unsubscribe());
+    });
+
     effect((onCleanup) => {
       const interest = this.interest();
       const type = this.listingType();
@@ -213,7 +312,7 @@ export class DiscoverCataloguePage {
         type: type || undefined,
         location: location || undefined,
         page,
-        per_page: 12,
+        per_page: 48,
       }).subscribe({
         next: (result) => {
           this.listings.set(result.data);
