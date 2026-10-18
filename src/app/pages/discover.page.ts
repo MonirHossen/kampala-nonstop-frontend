@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -45,6 +46,7 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
             </p>
           </header>
 
+          @if (visibleThemes().length) {
           <section class="mt-8" aria-labelledby="discover-themes-heading">
             <div class="flex items-center gap-4">
               <h2 id="discover-themes-heading" class="shrink-0 font-display text-2xl text-foreground sm:text-3xl">
@@ -53,7 +55,7 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
               <span class="h-px min-w-8 flex-1 bg-primary" aria-hidden="true"></span>
             </div>
             <ul class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-              @for (theme of themes; track theme.label) {
+              @for (theme of visibleThemes(); track theme.label) {
                 <li class="group relative isolate flex min-h-36 min-w-0 overflow-hidden rounded-lg bg-ink text-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_28px_-16px_rgba(40,28,16,0.55)] sm:min-h-40">
                   <img
                     [src]="'/img/originals/' + theme.image + '.png'"
@@ -79,7 +81,9 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
               }
             </ul>
           </section>
+          }
 
+          @if (visibleTypes().length) {
           <section class="mt-8" aria-labelledby="discover-types-heading">
             <div class="flex items-center gap-4">
               <h2 id="discover-types-heading" class="shrink-0 font-display text-2xl text-foreground sm:text-3xl">
@@ -91,7 +95,7 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
               Looking for something specific? Explore our bookable options
             </p>
             <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4">
-              @for (type of listingTypes; track type.label) {
+              @for (type of visibleTypes(); track type.label) {
                 <a
                   routerLink="/discover/catalogue"
                   [queryParams]="{ type: type.label }"
@@ -121,6 +125,7 @@ import { DiscoverHotPickCardComponent } from './discover-hot-pick-card.component
               }
             </div>
           </section>
+          }
 
           @if (hotPicks().length) {
             <section class="mt-10" aria-labelledby="discover-hot-picks-heading">
@@ -192,10 +197,23 @@ export class DiscoverPage {
   private autoplayTimer: ReturnType<typeof setInterval> | null = null;
   private paused = false;
 
-  // Editorial discovery themes, independent of the internal catalogue taxonomy.
-  protected readonly themes = DISCOVER_THEMES;
   protected readonly arrowIcon = LucideArrowRight.icon;
-  protected readonly listingTypes = DISCOVER_TYPES;
+  private readonly interestLabels = signal<Set<string>>(new Set());
+  private readonly typeCodes = signal<Set<string>>(new Set());
+  protected readonly visibleThemes = computed(() => {
+    const labels = this.interestLabels();
+    if (labels.size === 0) {
+      return [];
+    }
+    return DISCOVER_THEMES.filter((theme) => labels.has(theme.label));
+  });
+  protected readonly visibleTypes = computed(() => {
+    const codes = this.typeCodes();
+    if (codes.size === 0) {
+      return [];
+    }
+    return DISCOVER_TYPES.filter((type) => codes.has(type.code));
+  });
   protected readonly hotPicks = signal<ListingCard[]>([]);
   protected readonly activePage = signal(0);
   protected readonly viewportWidth = signal(typeof window !== 'undefined' ? window.innerWidth : 1280);
@@ -229,6 +247,20 @@ export class DiscoverPage {
   );
 
   constructor() {
+    effect((onCleanup) => {
+      const subscription = this.api.filters().subscribe({
+        next: (result) => {
+          this.interestLabels.set(new Set(result.data.interests.map((row) => row.label)));
+          this.typeCodes.set(new Set(result.data.types.map((row) => row.code)));
+        },
+        error: () => {
+          this.interestLabels.set(new Set());
+          this.typeCodes.set(new Set());
+        },
+      });
+      onCleanup(() => subscription.unsubscribe());
+    });
+
     const subscription = this.api.list({ hot_pick: true, per_page: 12 }).subscribe({
       next: (page) => {
         this.hotPicks.set(page.data);
