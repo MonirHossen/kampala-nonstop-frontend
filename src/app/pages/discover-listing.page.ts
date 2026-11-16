@@ -640,7 +640,9 @@ export class DiscoverListingPage {
       next: (response) => {
         this.tripBusy.set(false);
         if (navigateToTrip) {
-          void this.router.navigate(['/dashboard/trips', response.trip.id]);
+          void this.router.navigate(['/dashboard/plan-my-trip'], {
+            queryParams: { tripId: response.trip.id, step: 2 },
+          });
         }
       },
       error: () => this.tripBusy.set(false),
@@ -654,7 +656,7 @@ export class DiscoverListingPage {
     }
 
     if (!this.auth.isAuthenticated()) {
-      this.authModal.open('login', { returnUrl: '/dashboard/trips' });
+      this.authModal.open('login', { returnUrl: '/dashboard/plan-my-trip' });
       return;
     }
 

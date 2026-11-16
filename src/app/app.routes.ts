@@ -152,6 +152,24 @@ export const routes: Routes = [
           import('./dashboard/dashboard-trips.page').then((m) => m.DashboardTripsPage),
       },
       {
+        path: 'plan-my-trip',
+        title: 'Plan My Trip — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/plan-my-trip.page').then((m) => m.PlanMyTripPage),
+      },
+      {
+        path: 'inbox',
+        title: 'Inbox — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/dashboard-inbox.page').then((m) => m.DashboardInboxPage),
+      },
+      {
+        path: 'inbox/:threadId',
+        title: 'Message — Kampala Nonstop',
+        loadComponent: () =>
+          import('./dashboard/dashboard-inbox-thread.page').then((m) => m.DashboardInboxThreadPage),
+      },
+      {
         path: 'trips/:tripId',
         title: 'Trip — Kampala Nonstop',
         loadComponent: () =>

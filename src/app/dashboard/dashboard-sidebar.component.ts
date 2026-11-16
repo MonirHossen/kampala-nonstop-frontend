@@ -7,6 +7,7 @@ import {
   LucideLogOut,
   LucideMap,
   LucideMenu,
+  LucideMessageSquare,
   LucideUser,
   LucideX,
 } from '@lucide/angular';
@@ -23,6 +24,7 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
     LucideUser,
     LucideBookmark,
     LucideMap,
+    LucideMessageSquare,
     LucideLogOut,
     LucideMenu,
     LucideX,
@@ -96,11 +98,30 @@ import { TravellerAuthService } from '../core/services/traveller-auth.service';
           <a
             routerLink="/dashboard/trips"
             routerLinkActive="bg-sidebar-accent text-sidebar-foreground"
+            [routerLinkActiveOptions]="{ exact: true }"
             (click)="open.set(false)"
             class="flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
           >
             <svg lucideMap class="h-4 w-4"></svg>
             My Trips
+          </a>
+          <a
+            routerLink="/dashboard/plan-my-trip"
+            routerLinkActive="bg-sidebar-accent text-sidebar-foreground"
+            (click)="open.set(false)"
+            class="flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          >
+            <svg lucideMap class="h-4 w-4"></svg>
+            Plan My Trip
+          </a>
+          <a
+            routerLink="/dashboard/inbox"
+            routerLinkActive="bg-sidebar-accent text-sidebar-foreground"
+            (click)="open.set(false)"
+            class="flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          >
+            <svg lucideMessageSquare class="h-4 w-4"></svg>
+            Inbox
           </a>
         </nav>
 

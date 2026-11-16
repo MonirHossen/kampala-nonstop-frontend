@@ -20,15 +20,23 @@ import { TripApiService } from '../core/services/trip-api.service';
             Collect listings into a trip, set dates, then submit when you want help planning.
           </p>
         </div>
-        <button
-          type="button"
-          (click)="createTrip()"
-          [disabled]="creating()"
-          class="inline-flex min-h-11 items-center gap-2 bg-primary px-4 text-xs font-bold uppercase tracking-[0.08em] text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
-        >
-          <svg lucidePlus class="h-3.5 w-3.5" aria-hidden="true"></svg>
-          New trip
-        </button>
+        <div class="flex flex-wrap gap-2">
+          <a
+            routerLink="/dashboard/plan-my-trip"
+            class="inline-flex min-h-11 items-center gap-2 bg-primary px-4 text-xs font-bold uppercase tracking-[0.08em] text-primary-foreground transition hover:bg-primary/90"
+          >
+            Plan My Trip
+          </a>
+          <button
+            type="button"
+            (click)="createTrip()"
+            [disabled]="creating()"
+            class="inline-flex min-h-11 items-center gap-2 border border-hairline px-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground transition hover:border-forest hover:text-forest disabled:opacity-60"
+          >
+            <svg lucidePlus class="h-3.5 w-3.5" aria-hidden="true"></svg>
+            New trip
+          </button>
+        </div>
       </div>
 
       @if (message()) {

@@ -30,14 +30,36 @@ import { TripApiService } from '../core/services/trip-api.service';
               {{ current.name || 'Untitled trip' }}
             </h1>
           </div>
-          <button
-            type="button"
-            (click)="deleteTrip()"
-            class="inline-flex min-h-10 items-center gap-2 border border-hairline px-3 text-xs font-bold uppercase tracking-[0.08em] text-destructive transition hover:border-destructive"
-          >
-            <svg lucideTrash2 class="h-3.5 w-3.5" aria-hidden="true"></svg>
-            Delete
-          </button>
+          <div class="flex flex-wrap gap-2">
+            <a
+              [routerLink]="['/dashboard/plan-my-trip']"
+              [queryParams]="{ tripId: current.id, step: 9 }"
+              class="inline-flex min-h-10 items-center border border-hairline px-3 text-xs font-bold uppercase tracking-[0.08em] text-foreground transition hover:border-forest hover:text-forest"
+            >
+              Request booking
+            </a>
+            <a
+              [routerLink]="['/dashboard/plan-my-trip']"
+              [queryParams]="{ tripId: current.id, step: 2 }"
+              class="inline-flex min-h-10 items-center border border-hairline px-3 text-xs font-bold uppercase tracking-[0.08em] text-foreground transition hover:border-forest hover:text-forest"
+            >
+              Continue planning
+            </a>
+            <a
+              routerLink="/dashboard/inbox"
+              class="inline-flex min-h-10 items-center border border-hairline px-3 text-xs font-bold uppercase tracking-[0.08em] text-foreground transition hover:border-forest hover:text-forest"
+            >
+              Inbox
+            </a>
+            <button
+              type="button"
+              (click)="deleteTrip()"
+              class="inline-flex min-h-10 items-center gap-2 border border-hairline px-3 text-xs font-bold uppercase tracking-[0.08em] text-destructive transition hover:border-destructive"
+            >
+              <svg lucideTrash2 class="h-3.5 w-3.5" aria-hidden="true"></svg>
+              Delete
+            </button>
+          </div>
         </div>
 
         @if (message()) {

@@ -59,6 +59,14 @@ export interface TripItinerary {
   items?: ItineraryItem[];
 }
 
+export interface TripRequirement {
+  id: string;
+  trip_customer_id: string | null;
+  requirement_code: string;
+  value_json: Record<string, unknown> | null;
+  notes: string | null;
+}
+
 export interface Trip {
   id: string;
   owner_user_id: string;
@@ -68,11 +76,13 @@ export interface Trip {
   end_date: string | null;
   status_code: TripStatusCode;
   notes: string | null;
+  planning_location?: string | null;
   listings_count?: number;
   created_at?: string;
   updated_at?: string;
   listings?: TripListing[];
   customers?: TripCustomer[];
+  requirements?: TripRequirement[];
   current_itinerary?: TripItinerary | null;
 }
 
@@ -81,4 +91,46 @@ export interface AddListingToTripResponse {
   trip_listing: TripListing;
   created: boolean;
   message: string;
+}
+
+export interface TripValidationIssue {
+  code: string;
+  message: string;
+  listing_id?: string | null;
+}
+
+export interface TripValidationResult {
+  valid: boolean;
+  errors: TripValidationIssue[];
+  warnings: TripValidationIssue[];
+}
+
+export interface OrchestrationSequenceItem {
+  listing_id: string;
+  trip_listing_id: string | null;
+  name: string | null;
+  slug: string | null;
+  listing_type_code?: string | null;
+  scheduled_date: string | null;
+  sort_order: number;
+  stage_code: string;
+}
+
+export interface OrchestrationStage {
+  stage_code: string;
+  stage_label: string;
+  items: OrchestrationSequenceItem[];
+}
+
+export interface TripOrchestrationResult {
+  trip: Trip;
+  validation: TripValidationResult;
+  sequence: OrchestrationStage[];
+  itinerary: TripItinerary | null;
+}
+
+export interface TripSummaryResult {
+  trip: Trip;
+  validation: TripValidationResult;
+  sequence: OrchestrationStage[];
 }

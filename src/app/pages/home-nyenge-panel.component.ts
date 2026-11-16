@@ -162,7 +162,9 @@ export class HomeNyengePanelComponent implements OnInit {
     this.tripApi.addListing({ listing_id: listing.id }).subscribe({
       next: (response) => {
         this.busyListingId.set(null);
-        void this.router.navigate(['/dashboard/trips', response.trip.id]);
+        void this.router.navigate(['/dashboard/plan-my-trip'], {
+          queryParams: { tripId: response.trip.id, step: 2 },
+        });
       },
       error: () => this.busyListingId.set(null),
     });

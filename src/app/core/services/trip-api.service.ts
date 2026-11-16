@@ -6,8 +6,13 @@ import {
   AddListingToTripResponse,
   Trip,
   TripCustomer,
+  TripOrchestrationResult,
   TripStatusCode,
+  TripSummaryResult,
+  TripValidationResult,
 } from '../models/trip.models';
+import { SupportThread } from '../models/inbox.models';
+import { ListingCard } from '../models/listing.model';
 import { ApiMessageResponse } from '../models/traveller.models';
 
 export interface UpsertTripPayload {
@@ -17,6 +22,7 @@ export interface UpsertTripPayload {
   end_date?: string | null;
   status_code?: TripStatusCode;
   notes?: string | null;
+  planning_location?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -73,5 +79,42 @@ export class TripApiService {
     return this.http.delete<ApiMessageResponse>(
       `${this.baseUrl}/${tripId}/customers/${customerId}`,
     );
+  }
+
+  suggestions(tripId: string, limit = 12): Observable<ListingCard[]> {
+    return this.http
+      .get<{ data: ListingCard[] }>(`${this.baseUrl}/${tripId}/suggestions`, {
+        params: { limit: String(limit) },
+      })
+      .pipe(map((response) => response.data));
+  }
+
+  validateTrip(tripId: string): Observable<TripValidationResult> {
+    return this.http.post<TripValidationResult>(`${this.baseUrl}/${tripId}/validate`, {});
+  }
+
+  orchestrate(tripId: string): Observable<TripOrchestrationResult> {
+    return this.http.post<TripOrchestrationResult>(`${this.baseUrl}/${tripId}/orchestrate`, {});
+  }
+
+  summary(tripId: string): Observable<TripSummaryResult> {
+    return this.http.get<TripSummaryResult>(`${this.baseUrl}/${tripId}/summary`);
+  }
+
+  requestBooking(
+    tripId: string,
+    notes?: string | null,
+  ): Observable<{
+    trip: Trip;
+    thread: SupportThread;
+    validation: TripValidationResult;
+    message: string;
+  }> {
+    return this.http.post<{
+      trip: Trip;
+      thread: SupportThread;
+      validation: TripValidationResult;
+      message: string;
+    }>(`${this.baseUrl}/${tripId}/request-booking`, { notes: notes ?? null });
   }
 }
